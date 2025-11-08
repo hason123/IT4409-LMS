@@ -3,6 +3,8 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
+import MyCourses from './pages/MyCourses';
+import CourseDetail from './pages/CourseDetail';
 
 // Tạo theme cho ứng dụng
 const theme = createTheme({
@@ -36,6 +38,8 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/my-courses" element={<MyCourses />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
         </Routes>
       </Router>
     </ThemeProvider>
