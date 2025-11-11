@@ -1,10 +1,7 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import java.util.List;
@@ -13,10 +10,11 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name= "user")
 @SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE user_id = ?")
-@SQLRestriction(value = "is_deleted = false") //mac dinh chi lay nhung ban gi ko bi soft delete
+@SQLRestriction(value = "is_deleted = false") //mac dinh chi lay nhung ban ghi ko bi soft delete
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,13 +24,13 @@ public class User extends BaseEntity {
     private String userName;
     @Column(name = "pass_word")
     private String password;
-    @Column(name = "full_name", unique = true)
+    @Column(name = "full_name")
     private String fullName;
-    @Column(name = "phone_number", unique = true)
+    @Column(name = "phone_number")
     private String phoneNumber;
     @Column(name = "birthday")
-    private String bỉrthday;
-    @Column(name = "student_number", unique = true)
+    private String birthday;
+    @Column(name = "student_number")
     private String studentNumber;
     @Column(name = "address")
     private String address;
@@ -43,9 +41,13 @@ public class User extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
+    @ManyToMany
+    @JoinTable(
+            name = "student_course",
+            joinColumns = @JoinColumn(name ="student_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private List<Course> courses;
     @OneToMany(mappedBy = "teacher")
     private List<Course> taughtCourses;
 
