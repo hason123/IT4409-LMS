@@ -22,7 +22,7 @@ public class Course {
     private String description;
     @OneToMany(mappedBy = "course")
     private List<Chapter> chapters;
-    @OneToMany(mappedBy = "course")
+    @ManyToMany(mappedBy = "courses")
     private List<User> students;
     @ManyToOne
     @JoinColumn(name = "teacher_id")
