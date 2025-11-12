@@ -5,30 +5,25 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Entity
-@Table(name= "student_progress")
-@SQLDelete(sql = "UPDATE student_progress SET is_deleted = true WHERE id = ?")
+@Table(name= "meeting")
+@SQLDelete(sql = "UPDATE meeting SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
-public class StudentProgress extends BaseEntity{
+public class Meeting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "student_id")
-    private User student;
+    private String roomCode;
+    private String title;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
-    @Column(name = "lesson_progress")
-    private Integer lessonProgress;
-    @Column(name = "quiz_progress")
-    private Integer quizProgress;
-
-
-
 }

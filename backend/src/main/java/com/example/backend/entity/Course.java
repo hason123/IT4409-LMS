@@ -12,9 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name= "course")
-@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE user_id = ?")
+@SQLDelete(sql = "UPDATE course SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
-public class Course {
+public class Course extends  BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,11 +22,13 @@ public class Course {
     private String description;
     @OneToMany(mappedBy = "course")
     private List<Chapter> chapters;
-    @ManyToMany(mappedBy = "courses")
-    private List<User> students;
+    @OneToMany(mappedBy = "course")
+    private List<StudentProgress> studentProgress;
     @ManyToOne
     @JoinColumn(name = "teacher_id")
     private User teacher;
+    @OneToMany(mappedBy = "course")
+    private List<Meeting> meetings;
 
 
 }

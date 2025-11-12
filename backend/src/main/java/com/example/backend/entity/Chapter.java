@@ -12,13 +12,14 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name= "chapter")
-@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE user_id = ?")
+@SQLDelete(sql = "UPDATE chapter SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
-public class Chapter {
+public class Chapter extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+    @Column(name = "order_index")
     private String orderIndex;
     @ManyToOne
     @JoinColumn(name = "course_id")

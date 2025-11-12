@@ -12,9 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name= "lesson")
-@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE user_id = ?")
+@SQLDelete(sql = "UPDATE lesson SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
-public class Lesson {
+public class Lesson extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +27,8 @@ public class Lesson {
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
+    @Column(name = "is_finished")
+    private Boolean isFinished;
 
 
 }

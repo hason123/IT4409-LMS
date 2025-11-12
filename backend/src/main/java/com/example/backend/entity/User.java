@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name= "user")
-@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE user_id = ?")
+@SQLDelete(sql = "UPDATE user SET is_deleted = true WHERE user_id = ?")
 @SQLRestriction(value = "is_deleted = false") //mac dinh chi lay nhung ban ghi ko bi soft delete
 public class User extends BaseEntity {
     @Id
@@ -41,13 +41,8 @@ public class User extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
-    @ManyToMany
-    @JoinTable(
-            name = "student_course",
-            joinColumns = @JoinColumn(name ="student_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
-    private List<Course> courses;
+    @OneToMany(mappedBy = "student")
+    private List<StudentProgress> studentProgress;
     @OneToMany(mappedBy = "teacher")
     private List<Course> taughtCourses;
 
