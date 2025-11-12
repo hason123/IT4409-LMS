@@ -30,5 +30,4 @@ public class Lesson extends BaseEntity{
     @Column(name = "is_finished")
     private Boolean isFinished;
 
-
 }
