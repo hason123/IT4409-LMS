@@ -1,12 +1,10 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import java.util.List;
 
 @Entity
 @Getter
@@ -19,13 +17,24 @@ import org.hibernate.annotations.SQLRestriction;
 public class Quiz extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String title;
     private String description;
-    private Integer orderIndex;
+    private Short orderIndex;
+    @Column(name = "min_pass_score")
+    private String minPassScore;
+
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
-    private Integer minPassScore;
+
+    @OneToMany(mappedBy = "quiz")
+    private List<QuizQuestion> questions;
+
+    @OneToMany(mappedBy = "quiz")
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "quiz")
+    private List<QuizAttempt> attempts;
 }
 
