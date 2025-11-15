@@ -30,5 +30,4 @@ public class Course extends  BaseEntity{
     @OneToMany(mappedBy = "course")
     private List<Meeting> meetings;
 
-
 }

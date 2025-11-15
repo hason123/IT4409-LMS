@@ -17,7 +17,7 @@ import java.util.List;
 public class Chapter extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String title;
     @Column(name = "order_index")
     private String orderIndex;
@@ -26,6 +26,6 @@ public class Chapter extends BaseEntity{
     private Course course;
     @OneToMany(mappedBy = "chapter")
     private List<Lesson> lessons;
-
-
+    @OneToMany(mappedBy = "chapter")
+    private List<Quiz> quizs;
 }

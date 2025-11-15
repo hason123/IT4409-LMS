@@ -17,16 +17,24 @@ import java.util.List;
 public class Lesson extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @Column(name = "title")
     private String title;
     @Column(name = "content", columnDefinition = "MEDIUMTEXT")
     private String content;
     @Column(name = "orderIndex")
     private Integer orderIndex;
+
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
+
+    @OneToMany(mappedBy = "lesson")
+    private List<Resource> resources;
+
+    @OneToMany(mappedBy = "lesson")
+    private List<Comment> comments;
+
     @Column(name = "is_finished")
     private Boolean isFinished;
 
