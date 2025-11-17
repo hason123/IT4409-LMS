@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import java.util.List;
 
 @Setter
 @Getter
@@ -23,4 +24,7 @@ public class Category extends BaseEntity {
     private String title;
 
     private String description;
+
+    @OneToMany(mappedBy = "category")
+    private List<Course> courses;
 }
