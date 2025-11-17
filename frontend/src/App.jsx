@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import MyCourses from './pages/MyCourses';
 import CourseDetail from './pages/CourseDetail';
+import CoursesPage from './pages/CoursesPage';
 
 // Tạo theme cho ứng dụng
 const theme = createTheme({
@@ -40,6 +41,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/my-courses" element={<MyCourses />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
+          <Route path="/courses" element={<CoursesPage />} />
         </Routes>
       </Router>
     </ThemeProvider>
