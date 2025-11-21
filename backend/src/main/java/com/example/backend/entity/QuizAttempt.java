@@ -27,9 +27,11 @@ public class QuizAttempt extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
-    private Quiz quiz_id;
+    private Quiz quiz;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
-    private User student_id;
+    private User student;
+
+    private String answerText;
 }

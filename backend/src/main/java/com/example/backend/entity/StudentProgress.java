@@ -25,10 +25,8 @@ public class StudentProgress extends BaseEntity{
     @JoinColumn(name = "course_id")
     private Course course;
     @Column(name = "lesson_progress")
-    private Integer lessonProgress;
+    private String lessonProgress;
     @Column(name = "quiz_progress")
-    private Integer quizProgress;
-
-
+    private String quizProgress;
 
 }

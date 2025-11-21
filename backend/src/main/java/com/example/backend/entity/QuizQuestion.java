@@ -1,10 +1,10 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.QuestionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-
 import java.util.List;
 
 @Getter
@@ -23,7 +23,10 @@ public class QuizQuestion extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
-    private Quiz quiz_id;
+    private Quiz quiz;
+
+    @Enumerated(EnumType.STRING)
+    private QuestionType type;
 
     @OneToMany(mappedBy = "quizQuestion")
     private List<QuizAnswer> answers;

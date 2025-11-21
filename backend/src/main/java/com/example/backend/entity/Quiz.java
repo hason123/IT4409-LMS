@@ -22,18 +22,15 @@ public class Quiz extends BaseEntity {
     private String description;
     private Short orderIndex;
     @Column(name = "min_pass_score")
-    private String minPassScore;
-
+    private Integer minPassScore;
+    private Integer maxPassScore;
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
-
     @OneToMany(mappedBy = "quiz")
     private List<QuizQuestion> questions;
-
     @OneToMany(mappedBy = "quiz")
     private List<Comment> comments;
-
     @OneToMany(mappedBy = "quiz")
     private List<QuizAttempt> attempts;
 }

@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name= "course")
 @SQLDelete(sql = "UPDATE course SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
-public class Course extends  BaseEntity{
+public class Course extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
