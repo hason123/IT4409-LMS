@@ -1,10 +1,13 @@
 
 import React from 'react'
+import Avatar from './Avatar'
 import { Link, useNavigate } from 'react-router-dom'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 export default function Header() {
   const navigate = useNavigate();
+  // Kiểm tra trạng thái đăng nhập qua accessToken
+  const isLoggedIn = Boolean(localStorage.getItem('accessToken'));
   return (
     <header className="sticky top-0 z-50 flex justify-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-solid border-slate-200 dark:border-slate-800">
       <div className="flex items-center justify-between whitespace-nowrap px-4 sm:px-6 lg:px-8 py-3 w-full max-w-7xl">
@@ -35,10 +38,14 @@ export default function Header() {
                 <input className="form-input flex w-full min-w-0 flex-1" style={{height: "40px"}} placeholder="Tìm kiếm..." />
             </div>
           </label>
-          <div className="flex gap-2">
-            <Link to="/login" className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-slate-100 dark:bg-slate-800 text-[#111418] dark:text-white text-sm font-bold transition-colors duration-150 hover:bg-slate-200 dark:hover:bg-slate-700">Đăng nhập</Link>
-            <Link to="/register" className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold transition-colors duration-150 hover:bg-primary/90">Đăng ký</Link>
-          </div>
+          {isLoggedIn ? (
+            <Avatar />
+          ) : (
+            <div className="flex gap-2">
+              <Link to="/login" className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-slate-100 dark:bg-slate-800 text-[#111418] dark:text-white text-sm font-bold transition-colors duration-150 hover:bg-slate-200 dark:hover:bg-slate-700">Đăng nhập</Link>
+              <Link to="/register" className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold transition-colors duration-150 hover:bg-primary/90">Đăng ký</Link>
+            </div>
+          )}
         </div>
       </div>
     </header>
