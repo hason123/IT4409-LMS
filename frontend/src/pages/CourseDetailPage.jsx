@@ -1,5 +1,8 @@
 import React from 'react';
 import Header from '../components/Header';
+import CourseTabs from '../components/CourseTabs';
+import DescriptionCourse from '../components/DescriptionCourse';
+import CourseContent from '../components/CourseContent';
 
 export default function CourseDetailPage() {
   return (
@@ -44,75 +47,16 @@ export default function CourseDetailPage() {
               </div>
               {/* Tabs */}
               <div className="w-full">
-                <div className="border-b border-gray-200 dark:border-gray-700">
-                  <nav aria-label="Tabs" className="flex space-x-6 -mb-px">
-                    <a className="shrink-0 border-b-2 border-primary px-1 py-4 text-base font-semibold text-primary cursor-pointer">Mô tả</a>
-                    <a className="shrink-0 border-b-2 border-transparent px-1 py-4 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer">Chương trình học</a>
-                    <a className="shrink-0 border-b-2 border-transparent px-1 py-4 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer">Giảng viên</a>
-                    <a className="shrink-0 border-b-2 border-transparent px-1 py-4 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer">Đánh giá</a>
-                  </nav>
-                </div>
-                <div className="py-6 space-y-8">
-                  {/* Description Panel */}
-                  <div className="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                    <h3 className="text-xl font-bold text-[#111418] dark:text-white">Bạn sẽ học được gì</h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 list-none p-0">
-                      <li className="flex items-start gap-3"><span className="material-symbols-outlined text-green-500 mt-1">check_circle</span><span>Xây dựng các trang web và ứng dụng web hoạt động hiệu quả</span></li>
-                      <li className="flex items-start gap-3"><span className="material-symbols-outlined text-green-500 mt-1">check_circle</span><span>Sử dụng HTML5, CSS3, Javascript, và jQuery</span></li>
-                      <li className="flex items-start gap-3"><span className="material-symbols-outlined text-green-500 mt-1">check_circle</span><span>Tích hợp API để kết nối với các trang của bên thứ ba</span></li>
-                      <li className="flex items-start gap-3"><span className="material-symbols-outlined text-green-500 mt-1">check_circle</span><span>Làm chủ Python và các framework web phổ biến</span></li>
-                      <li className="flex items-start gap-3"><span className="material-symbols-outlined text-green-500 mt-1">check_circle</span><span>Sử dụng MySQL để quản lý cơ sở dữ liệu</span></li>
-                      <li className="flex items-start gap-3"><span className="material-symbols-outlined text-green-500 mt-1">check_circle</span><span>Trở thành một lập trình viên full-stack chuyên nghiệp</span></li>
-                    </ul>
-                    <h3 className="text-xl font-bold text-[#111418] dark:text-white pt-4">Yêu cầu</h3>
-                    <ul className="space-y-2 list-none p-0">
-                      <li className="flex items-start gap-3"><span className="material-symbols-outlined text-gray-500 mt-1">info</span><span>Không yêu cầu kiến thức lập trình trước.</span></li>
-                      <li className="flex items-start gap-3"><span className="material-symbols-outlined text-gray-500 mt-1">info</span><span>Máy tính cá nhân với kết nối internet.</span></li>
-                    </ul>
-                  </div>
-                  {/* Syllabus Panel (Accordion) */}
-                  <div className="space-y-4">
-                    <h2 className="text-[22px] font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">Nội dung khóa học</h2>
-                    <div className="space-y-3">
-                      {/* Accordion Item 1 */}
-                      <details className="group bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <summary className="flex cursor-pointer items-center justify-between list-none">
-                          <span className="font-semibold text-[#111418] dark:text-white">Chương 1: Giới thiệu và Bắt đầu</span>
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-500 dark:text-gray-400">4 bài giảng • 15 phút</span>
-                            <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                          </div>
-                        </summary>
-                        <div className="mt-4 space-y-3 border-t border-gray-200 dark:border-gray-700 pt-3">
-                          <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
-                            <div className="flex items-center gap-2"> <span className="material-symbols-outlined text-base">play_circle</span><span>Chào mừng đến với khóa học</span></div>
-                            <span>02:30</span>
-                          </div>
-                          <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
-                            <div className="flex items-center gap-2"> <span className="material-symbols-outlined text-base">play_circle</span><span>Cài đặt môi trường</span></div>
-                            <span>08:15</span>
-                          </div>
-                        </div>
-                      </details>
-                      {/* Accordion Item 2 */}
-                      <details className="group bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <summary className="flex cursor-pointer items-center justify-between list-none">
-                          <span className="font-semibold text-[#111418] dark:text-white">Chương 2: HTML5 Nâng cao</span>
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-500 dark:text-gray-400">8 bài giảng • 1 giờ 25 phút</span>
-                            <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                          </div>
-                        </summary>
-                        <div className="mt-4 space-y-3 border-t border-gray-200 dark:border-gray-700 pt-3">
-                          <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
-                            <div className="flex items-center gap-2 text-primary"> <span className="material-symbols-outlined text-base">play_circle</span><span><u>Xem trước: Thẻ Form và Input</u></span></div>
-                            <span>15:00</span>
-                          </div>
-                        </div>
-                      </details>
-                    </div>
-                  </div>
-                </div>
+                {/* Tabs */}
+                <CourseTabs
+                    tabs={[
+                        { label: 'Mô tả', content: <DescriptionCourse/> },
+                        { label: 'Nội dung khóa học', content: <CourseContent/> },
+                        { label: 'Giảng viên', content: <div>...</div> },
+                        { label: 'Đánh giá', content: <div>...</div> }
+                    ]}
+                    defaultIndex={0}
+                />
               </div>
             </div>
             {/* Sidebar (Right Column) */}
