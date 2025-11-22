@@ -33,5 +33,4 @@ public class QuizAttempt extends BaseEntity {
     @JoinColumn(name = "student_id")
     private User student;
 
-    private String answerText;
 }
