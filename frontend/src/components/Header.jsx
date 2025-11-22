@@ -1,8 +1,10 @@
+
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { UserIcon, LockClosedIcon, EyeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { Link, useNavigate } from 'react-router-dom'
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 export default function Header() {
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-50 flex justify-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-solid border-slate-200 dark:border-slate-800">
       <div className="flex items-center justify-between whitespace-nowrap px-4 sm:px-6 lg:px-8 py-3 w-full max-w-7xl">
@@ -16,7 +18,7 @@ export default function Header() {
             <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">LearnOnline</h2>
           </div>
           <nav className="hidden lg:flex items-center gap-8">
-            <Link className="text-sm font-medium leading-normal text-[#111418] dark:text-white/90 hover:text-primary" to="#">Khóa học</Link>
+            <button type="button" className="text-sm font-medium leading-normal text-[#111418] dark:text-white/90 hover:text-primary bg-transparent" onClick={() => navigate('/courses')}>Khóa học</button>
             <Link className="text-sm font-medium leading-normal text-[#111418] dark:text-white/90 hover:text-primary" to="#">Lộ trình học</Link>
             <Link className="text-sm font-medium leading-normal text-[#111418] dark:text-white/90 hover:text-primary" to="#">Giới thiệu</Link>
             <Link className="text-sm font-medium leading-normal text-[#111418] dark:text-white/90 hover:text-primary" to="#">Blog</Link>
