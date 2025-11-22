@@ -2,8 +2,10 @@ import React from 'react'
 import Header from '../components/Header'
 import CourseCard from '../components/CourseCard'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
       <Header />
@@ -17,7 +19,8 @@ export default function Home() {
                     <h1 className="text-4xl font-black leading-tight lg:text-5xl text-[#111418] dark:text-white">Nâng tầm kỹ năng của bạn ngay hôm nay</h1>
                     <h2 className="text-base text-slate-600 dark:text-slate-300">Tham gia cùng hàng ngàn học viên và bắt đầu hành trình chinh phục kiến thức với các khóa học chất lượng cao từ những chuyên gia hàng đầu.</h2>
                   </div>
-                  <button className="group flex min-w-[84px] max-w-[480px] w-fit cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold gap-2">
+                  <button className="group flex min-w-[84px] max-w-[480px] w-fit cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold gap-2"
+                    onClick={() => navigate('/courses')}>
                     <span>Khám phá các khóa học</span>
                     <ArrowRightIcon className="h-4 w-4 transform transition-transform duration-200 group-hover:translate-x-2" />
                   </button>
