@@ -1,11 +1,16 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.constant.RoleType;
+import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +18,12 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -68,7 +75,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUserById(Long id) {
         User user = userRepository.findById(id).orElse(null);
         if(user == null){
-
+            throw new ResourceNotFoundException("User not found");
         }
         if(isCurrentUser(id) || getCurrentUser().getRole().getRoleName().equals(RoleType.ADMIN)) {
             userRepository.deleteById(id);
@@ -76,15 +83,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createGoogleUser(String email, String username) {
+    public UserInfoResponse createGoogleUser(String email, String username) {
         User googleUser = User.builder().userName(username).password("123").gmail(email).role(roleRepository.findByRoleName(RoleType.USER)).build();
         userRepository.save(googleUser);
-        return googleUser;
+        return convertUserInfoToDTO(googleUser);
     }
-    /*
+
+
     @Override
-    public UserInfoResponse updateUser(Long id, UserRequest request) throws UnauthorizedException {
+    public UserInfoResponse updateUser(Long id, UserRequest request) {
         User updatedUser = userRepository.findById(id).orElse(null);
+
         if(!isCurrentUser(id) ){
             throw new UnauthorizedException("You have no permission");
         }
@@ -97,10 +106,12 @@ public class UserServiceImpl implements UserService {
         else{
             updatedUser.setUserName(updatedUser.getUserName());
         }
+        /*
         if (request.getPassword() != null) {
             updatedUser.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         else updatedUser.setPassword(updatedUser.getPassword());
+        */
         if (request.getBirthday() != null) {
             updatedUser.setBirthday(request.getBirthday());
         }
@@ -111,43 +122,46 @@ public class UserServiceImpl implements UserService {
             updatedUser.setPhoneNumber(request.getPhoneNumber());
         }
         else updatedUser.setPhoneNumber(updatedUser.getPhoneNumber());
-        if (request.getStudentNumber() != null) {
-            updatedUser.setStudentNumber(request.getStudentNumber());
-        }
-        else updatedUser.setStudentNumber(updatedUser.getStudentNumber());
         userRepository.save(updatedUser);
         return convertUserInfoToDTO(updatedUser);
     }
 
-     */
-
-    /*
     @Override
     public Object getUserById(Long id){
         User user = userRepository.findById(id).orElse(null);
         if(user == null){
-
+            throw new ResourceNotFoundException("User not found");
         }
         return convertUserInfoToDTO(user);
     }
 
-     */
+    @Override
+    public UserInfoResponse createUser(UserRequest request){
+        User user = new User();
+        user.setUserName(request.getUserName());
+        user.setRole(roleRepository.findByRoleName(RoleType.valueOf(request.getRoleName())));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setAddress(request.getAddress());
+        user.setGmail(request.getGmail());
+        user.setStudentNumber(request.getStudentNumber());
+        user.setFullName(request.getFullName());
+        userRepository.save(user);
+        return convertUserInfoToDTO(user);
+    }
 
-    /*
     public UserInfoResponse convertUserInfoToDTO(User user){
         UserInfoResponse userDTO = new UserInfoResponse();
-        userDTO.setUserId(user.getId());
         userDTO.setUserName(user.getUserName());
         userDTO.setBirthday(user.getBirthday());
         userDTO.setStudentNumber(user.getStudentNumber());
         userDTO.setAddress(user.getAddress());
         userDTO.setPhoneNumber(user.getPhoneNumber());
         userDTO.setFullName(user.getFullName());
-        userDTO.setPassword("HIDDEN");
         userDTO.setRoleName(user.getRole().getRoleName().toString());
         return userDTO;
     }
 
-     */
+
 
 }
