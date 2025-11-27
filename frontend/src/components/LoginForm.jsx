@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import ModalNotification from "./ModalNotification";
 import { EyeIcon, LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
 import { login, googleLogin } from "../api/auth";
@@ -13,6 +14,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const { loginUser } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ export default function LoginForm() {
     try {
       const data = await login(username, password);
       if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
+        loginUser(data.accessToken);
       }
       setLoading(false);
       navigate('/'); // chuyển hướng về Home
@@ -39,7 +41,7 @@ export default function LoginForm() {
     try {
       const data = await googleLogin(credentialResponse);
       if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
+        loginUser(data.accessToken);
       }
       setLoading(false);
       navigate('/'); // chuyển hướng về Home
