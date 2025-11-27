@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ModalNotification from "./ModalNotification";
 import { EyeIcon, LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
-import { login } from "../api/auth";
+import { login, googleLogin } from "../api/auth";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
@@ -30,6 +31,28 @@ export default function LoginForm() {
       setLoading(false);
       setShowModal(true);
     }
+  };
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    setError('');
+    setLoading(true);
+    try {
+      const data = await googleLogin(credentialResponse);
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
+      setLoading(false);
+      navigate('/'); // chuyển hướng về Home
+    } catch (err) {
+      setError('Đăng nhập bằng Google thất bại. Vui lòng thử lại.');
+      setLoading(false);
+      setShowModal(true);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Đã xảy ra lỗi với Google Login. Vui lòng thử lại.');
+    setShowModal(true);
   };
 
   return (
@@ -91,7 +114,7 @@ export default function LoginForm() {
           type="submit"
           disabled={loading}
         >
-          {loading ? 'Đang đăng nhập...' : 'Sign In'}
+          {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
 
         <div className="flex items-center gap-4">
@@ -100,10 +123,15 @@ export default function LoginForm() {
           <hr className="flex-grow border-t border-[#dbe0e6] dark:border-gray-700" />
         </div>
 
-        <button className="btn btn-outline text-sm font-medium" type="button">
-          <img className="h-5 w-5" src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" />
-          <span>Google</span>
-        </button>
+        <div className="w-full flex justify-center google-login-button">
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={handleGoogleError}
+            locale="vi_VN"
+            theme="outline"
+            size="large"
+          />
+        </div>
 
         <p className="text-center text-sm text-[#617589] dark:text-gray-400">By signing in, you agree to our <a className="font-medium text-primary hover:underline" href="#">Terms of Service</a> and <a className="font-medium text-primary hover:underline" href="#">Privacy Policy</a>.</p>
       </form>
