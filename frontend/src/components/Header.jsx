@@ -1,6 +1,7 @@
 
-import React from 'react'
+import React, { useState } from 'react'
 import Avatar from './Avatar'
+import ConfirmModal from './ConfirmModal'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
@@ -8,7 +9,23 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 export default function Header() {
   const navigate = useNavigate();
   const { isLoggedIn, logout } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true);
+    try {
+      logout();
+      setShowLogoutConfirm(false);
+      navigate('/home');
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
   return (
+    <>
     <header className="sticky top-0 z-50 flex justify-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-solid border-slate-200 dark:border-slate-800">
       <div className="flex items-center justify-between whitespace-nowrap px-4 sm:px-6 lg:px-8 py-3 w-full max-w-7xl">
         <div className="flex items-center gap-8">
@@ -38,10 +55,7 @@ export default function Header() {
             <div className="flex gap-2 items-center">
               <Avatar />
               <button
-                onClick={() => {
-                  logout();
-                  navigate('/home');
-                }}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-slate-100 dark:bg-slate-800 text-[#111418] dark:text-white text-sm font-bold transition-colors duration-150 hover:bg-slate-200 dark:hover:bg-slate-700"
               >
                 Đăng xuất
@@ -56,5 +70,18 @@ export default function Header() {
         </div>
       </div>
     </header>
-  )
+
+      {/* Modal Xác nhận Đăng xuất */}
+      <ConfirmModal
+        open={showLogoutConfirm}
+        title="Xác nhận đăng xuất"
+        message="Bạn có chắc chắn muốn đăng xuất không?"
+        actionName="Đăng xuất"
+        color="red"
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        isLoading={isLoggingOut}
+      />
+    </>
+)
 }
