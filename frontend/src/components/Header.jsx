@@ -13,11 +13,7 @@ export default function Header() {
       <div className="flex items-center justify-between whitespace-nowrap px-4 sm:px-6 lg:px-8 py-3 w-full max-w-7xl">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3 text-primary">
-            <div className="size-6">
-              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w.org/2000/svg" className="w-8 h-8">
-                <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path>
-              </svg>
-            </div>
+            <span className="material-symbols-outlined text-primary text-3xl">school</span>
             <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">LearnOnline</h2>
           </div>
           <nav className="hidden lg:flex items-center gap-8">

@@ -21,7 +21,7 @@ export default function AuthPage({ defaultTab = 'login' }) {
         <div className="flex flex-col gap-8 w-full max-w-md">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-3xl">school</span>
-            <p className="text-xl font-bold text-[#111418] dark:text-white">Learnify</p>
+            <p className="text-xl font-bold text-[#111418] dark:text-white">LearnOnline</p>
           </div>
 
           <div className="flex flex-col gap-2 text-left">
