@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
 
 public interface UserService {
@@ -17,7 +19,13 @@ public interface UserService {
 
     void deleteUserById(Long id);
 
-    User createGoogleUser(String email, String name);
+    UserInfoResponse createGoogleUser(String email, String name);
+
+    UserInfoResponse updateUser(Long id, UserRequest request);
+
+    Object getUserById(Long id);
+
+    UserInfoResponse createUser(UserRequest request);
 
     // Object getUserById(Long id);
 
