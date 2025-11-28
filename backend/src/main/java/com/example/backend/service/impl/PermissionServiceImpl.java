@@ -30,7 +30,7 @@ public class PermissionServiceImpl implements PermissionService {
         Permission savedPermission = permissionRepository.save(permission);
         return convertPermissionToDTO(savedPermission);
     }
-
+    // update permission
     @Override
     public PermissionInfoResponse updatePermission(Integer id, PermissionRequest request) {
         Permission permission = permissionRepository.findById(id).orElse(null);
