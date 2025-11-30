@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.permission;
+package com.example.backend.dto.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionInfoResponse {
+public class PermissionResponse {
     private Long id;
     private String name;
     private String apiPath;

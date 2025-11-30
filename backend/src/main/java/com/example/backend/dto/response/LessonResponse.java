@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.lesson;
+package com.example.backend.dto.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LessonInfoResponse {
+public class LessonResponse {
     private Long id;
     private String title;
     private String content;

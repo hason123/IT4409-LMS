@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 public class CourseRequest {
     private String title;
-    private String descripstion;
+    private String description;
     private Long teacherId;
     private Long categoryId;
 }

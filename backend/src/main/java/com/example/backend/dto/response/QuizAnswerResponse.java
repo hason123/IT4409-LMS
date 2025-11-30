@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.quizanswer;
+package com.example.backend.dto.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuizAnswerInfoResponse {
+public class QuizAnswerResponse {
     private Long id;
     private Boolean isCorrect;
     private String description;

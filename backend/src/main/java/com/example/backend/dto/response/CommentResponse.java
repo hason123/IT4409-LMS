@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.comment;
+package com.example.backend.dto.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentInfoResponse {
+public class CommentResponse {
     private Integer id;
     private String content;
     private String createdAt;

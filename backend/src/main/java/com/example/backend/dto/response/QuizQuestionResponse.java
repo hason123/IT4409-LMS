@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.quizquestion;
+package com.example.backend.dto.response;
 
 import com.example.backend.constant.QuestionType;
 import lombok.*;
@@ -8,7 +8,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuizQuestionInfoResponse {
+public class QuizQuestionResponse {
     private Long id;
     private String title;
     private QuestionType type;

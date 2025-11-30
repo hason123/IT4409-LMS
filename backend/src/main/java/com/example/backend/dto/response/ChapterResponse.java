@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.chapter;
+package com.example.backend.dto.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChapterInfoResponse {
+public class ChapterResponse {
     private Integer id;
     private String title;
     private String orderIndex;

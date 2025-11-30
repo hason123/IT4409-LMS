@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.role;
+package com.example.backend.dto.response;
 
 import com.example.backend.constant.RoleType;
 import lombok.*;
@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleInfoResponse {
+public class RoleResponse {
     private Long roleID;
     private RoleType roleName;
     private String roleDesc;

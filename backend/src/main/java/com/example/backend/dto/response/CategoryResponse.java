@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.category;
+package com.example.backend.dto.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryInfoResponse {
+public class CategoryResponse {
     private Long id;
     private String title;
     private String description;

@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.meeting;
+package com.example.backend.dto.response;
 
 import lombok.*;
 import java.time.LocalDateTime;
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MeetingInfoResponse {
+public class MeetingResponse {
     private Long id;
     private String roomCode;
     private String title;

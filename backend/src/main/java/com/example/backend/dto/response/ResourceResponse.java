@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.resource;
+package com.example.backend.dto.response;
 
 import com.example.backend.constant.ResourceType;
 import lombok.*;
@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceInfoResponse {
+public class ResourceResponse {
     private Integer id;
     private String title;
     private String url;

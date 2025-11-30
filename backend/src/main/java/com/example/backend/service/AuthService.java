@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.request.LoginRequest;
+import com.example.backend.dto.request.UserRequest;
 import com.example.backend.dto.response.LoginResponse;
 
 public interface AuthService {
@@ -9,4 +10,6 @@ public interface AuthService {
     LoginResponse refreshToken(String oldRefreshToken);
 
     void logout();
+
+    LoginResponse register(UserRequest request);
 }

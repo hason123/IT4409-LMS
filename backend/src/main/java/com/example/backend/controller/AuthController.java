@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.request.LoginRequest;
+import com.example.backend.dto.request.UserRequest;
 import com.example.backend.dto.response.LoginResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.service.AuthService;
@@ -27,20 +28,35 @@ public class AuthController {
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.login(loginRequest);
-        // Create cookie using refreshToken from response
         ResponseCookie springCookie = ResponseCookie.from("refresh_token", response.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
                 .maxAge(refreshTokenExpiration)
                 .build();
-        // Remove refreshToken from response body if you don't want to return it as JSON
         response.setRefreshToken(null);
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.SET_COOKIE, springCookie.toString())
                 .body(response);
     }
+
+    @PostMapping("/auth/register")
+    public ResponseEntity<LoginResponse> register(@RequestBody UserRequest request) {
+        LoginResponse response = authService.register(request);
+        ResponseCookie springCookie = ResponseCookie.from("refresh_token", response.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(refreshTokenExpiration)
+                .build();
+        response.setRefreshToken(null);
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, springCookie.toString())
+                .body(response);
+    }
+
 
     @PutMapping("/auth/refresh")
     public ResponseEntity<LoginResponse> refreshToken(

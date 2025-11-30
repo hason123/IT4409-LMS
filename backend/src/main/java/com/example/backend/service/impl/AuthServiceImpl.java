@@ -1,7 +1,9 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.dto.request.LoginRequest;
+import com.example.backend.dto.request.UserRequest;
 import com.example.backend.dto.response.LoginResponse;
+import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
 import com.example.backend.service.AuthService;
 import com.example.backend.service.UserService;
@@ -30,11 +32,11 @@ public class AuthServiceImpl implements AuthService {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        User currentUserDB = userService.handleGetUserByUserName(request.getUsername());
+        User currentUser = userService.handleGetUserByUserName(request.getUsername());
         LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin();
-        userLogin.setId(currentUserDB.getId());
-        userLogin.setUsername(currentUserDB.getUserName());
-        userLogin.setRole(String.valueOf(currentUserDB.getRole().getRoleName()));
+        userLogin.setId(currentUser.getId());
+        userLogin.setUsername(currentUser.getUserName());
+        userLogin.setRole(String.valueOf(currentUser.getRole().getRoleName()));
         LoginResponse response = new LoginResponse();
         response.setUser(userLogin);
         // Generate tokens
@@ -73,4 +75,31 @@ public class AuthServiceImpl implements AuthService {
         String userName = userService.getCurrentUser().getUserName();
         userService.updateUserToken("", userName);
     }
+
+    @Override
+    public LoginResponse register(UserRequest request) {
+        UserInfoResponse registerUser = userService.createUser(request);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(registerUser.getUserName(), request.getPassword());
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        User newUser = userService.handleGetUserByUserName(registerUser.getUserName());
+        LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin();
+        userLogin.setId(newUser.getId());
+        userLogin.setUsername(newUser.getUserName());
+        userLogin.setRole(String.valueOf(newUser.getRole().getRoleName()));
+        LoginResponse response = new LoginResponse();
+        response.setUser(userLogin);
+        // Generate tokens
+        String accessToken = securityUtil.createAccessToken(authentication.getName(), response);
+        String refreshToken = securityUtil.createRefreshToken(request.getUserName(), response);
+        // Update refresh token in DB
+        userService.updateUserToken(refreshToken, request.getUserName());
+        // Set tokens in DTO
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+        return response;
+
+    }
+
+
 }

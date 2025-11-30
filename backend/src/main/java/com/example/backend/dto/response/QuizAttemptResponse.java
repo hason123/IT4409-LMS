@@ -1,4 +1,4 @@
-package com.example.backend.dto.response.quizattempt;
+package com.example.backend.dto.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuizAttemptInfoResponse {
+public class QuizAttemptResponse {
     private Long id;
     private String completedTime;
     private Integer grade;
