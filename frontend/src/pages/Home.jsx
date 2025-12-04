@@ -1,5 +1,5 @@
 import React from 'react'
-import Header from '../components/Header'
+import Header from '../components/shared/Header'
 import CourseCard from '../components/CourseCard'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom';
