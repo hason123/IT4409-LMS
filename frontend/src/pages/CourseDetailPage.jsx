@@ -1,5 +1,5 @@
 import React from 'react';
-import Header from '../components/Header';
+import Header from '../components/shared/Header';
 import CourseTabs from '../components/CourseTabs';
 import DescriptionCourse from '../components/DescriptionCourse';
 import CourseContent from '../components/CourseContent';

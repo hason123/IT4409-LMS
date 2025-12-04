@@ -1,5 +1,5 @@
 import React from 'react'
-import Header from '../components/Header'
+import Header from '../components/shared/Header'
 import CourseCard from '../components/CourseCard'
 import CourseFilters from '../components/CourseFilters'
 import { Select } from 'antd'

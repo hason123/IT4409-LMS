@@ -1,16 +1,5 @@
 import React from 'react';
 
-/**
- * Component Modal Xác nhận dùng chung
- * @param {boolean} open - Hiển thị modal hay không
- * @param {string} title - Tiêu đề modal
- * @param {string} message - Nội dung thông báo
- * @param {string} actionName - Tên nút hành động (ví dụ: "Đăng xuất", "Xóa", "Lưu")
- * @param {string} color - Màu nút hành động (primary, red, green, etc)
- * @param {function} onConfirm - Callback khi người dùng xác nhận
- * @param {function} onCancel - Callback khi người dùng hủy bỏ
- * @param {boolean} isLoading - Trạng thái loading
- */
 export default function ConfirmModal({
   open = false,
   title = 'Xác nhận hành động',
