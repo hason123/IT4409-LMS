@@ -3,16 +3,51 @@ import Avatar from "../Avatar";
 import ConfirmModal from "./ConfirmModal";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, BellIcon } from "@heroicons/react/24/outline";
 
-export default function Header() {
+export default function Header({ menuItems }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, logout } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const notificationRef = useRef(null);
+
+  const defaultMenuItems = [
+    { label: "Khóa học", path: "/courses" },
+    { label: "Lộ trình học", path: "#" },
+    { label: "Giới thiệu", path: "/home" },
+    { label: "Liên hệ", path: "#" },
+  ];
+
+  const itemsToRender = menuItems || defaultMenuItems;
+
+  const notifications = [
+    {
+      id: 1,
+      title: "Khóa học mới",
+      message: 'Khóa học "ReactJS Nâng Cao" vừa được xuất bản.',
+      time: "2 giờ trước",
+      isRead: false,
+    },
+    {
+      id: 2,
+      title: "Nhắc nhở học tập",
+      message: "Bạn chưa hoàn thành bài tập của ngày hôm nay.",
+      time: "5 giờ trước",
+      isRead: false,
+    },
+    {
+      id: 3,
+      title: "Cập nhật hệ thống",
+      message: "Hệ thống sẽ bảo trì vào lúc 00:00 ngày mai.",
+      time: "1 ngày trước",
+      isRead: true,
+    },
+  ];
 
   // Helper function to check if a path is active
   const isActive = (path) => {
@@ -25,12 +60,18 @@ export default function Header() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setIsNotificationOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownRef]);
+  }, [dropdownRef, notificationRef]);
 
   const handleLogoutConfirm = async () => {
     setIsLoggingOut(true);
@@ -58,40 +99,19 @@ export default function Header() {
               </h2>
             </div>
             <nav className="hidden lg:flex items-center gap-8">
-              <button
-                type="button"
-                className={`text-sm font-medium leading-normal hover:text-primary bg-transparent ${
-                  isActive("/courses")
-                    ? "text-primary font-bold"
-                    : "text-[#111418] dark:text-white/90"
-                }`}
-                onClick={() => navigate("/courses")}
-              >
-                Khóa học
-              </button>
-              <Link
-                className="text-sm font-medium leading-normal text-[#111418] dark:text-white/90 hover:text-primary"
-                to="#"
-              >
-                Lộ trình học
-              </Link>
-              <button
-                type="button"
-                className={`text-sm font-medium leading-normal hover:text-primary bg-transparent ${
-                  isActive("/home")
-                    ? "text-primary font-bold"
-                    : "text-[#111418] dark:text-white/90"
-                }`}
-                onClick={() => navigate("/home")}
-              >
-                Giới thiệu
-              </button>
-              <Link
-                className="text-sm font-medium leading-normal text-[#111418] dark:text-white/90 hover:text-primary"
-                to="#"
-              >
-                Liên hệ
-              </Link>
+              {itemsToRender.map((item, index) => (
+                <Link
+                  key={index}
+                  to={item.path}
+                  className={`text-sm font-medium leading-normal hover:text-primary bg-transparent ${
+                    isActive(item.path) && item.path !== "#"
+                      ? "text-primary font-bold"
+                      : "text-[#111418] dark:text-white/90"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </nav>
           </div>
 
@@ -109,45 +129,99 @@ export default function Header() {
               </div>
             </label>
             {isLoggedIn ? (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 focus:outline-none"
-                >
-                  <Avatar />
-                </button>
+              <>
+                <div className="relative" ref={notificationRef}>
+                  <button
+                    onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                    className="text-[#111418] dark:text-white hover:text-primary transition-colors relative p-1 focus:outline-none"
+                  >
+                    <BellIcon className="h-6 w-6" />
+                    <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900"></span>
+                  </button>
 
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
-                    <Link
-                      to="/profile"
-                      state={{ activeTab: "profile" }}
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      Hồ sơ
-                    </Link>
-                    <Link
-                      to="/profile"
-                      state={{ activeTab: "settings" }}
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      Cài đặt
-                    </Link>
-                    <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        setShowLogoutConfirm(true);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Đăng xuất
-                    </button>
-                  </div>
-                )}
-              </div>
+                  {isNotificationOpen && (
+                    <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
+                      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                          Thông báo
+                        </h3>
+                      </div>
+                      <div>
+                        {notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0 relative"
+                          >
+                            <div className="flex justify-between items-start gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white break-words">
+                                  {notification.title}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 break-words">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {notification.time}
+                                </p>
+                              </div>
+                              {!notification.isRead && (
+                                <span className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="border-t border-gray-100 dark:border-gray-700">
+                        <Link
+                          to="#"
+                          className="block px-4 py-2 text-xs font-medium text-center text-primary hover:text-primary/80"
+                        >
+                          Xem tất cả thông báo
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center gap-2 focus:outline-none"
+                  >
+                    <Avatar />
+                  </button>
+
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
+                      <Link
+                        to="/profile"
+                        state={{ activeTab: "profile" }}
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        Hồ sơ
+                      </Link>
+                      <Link
+                        to="/profile"
+                        state={{ activeTab: "settings" }}
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        Cài đặt
+                      </Link>
+                      <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                      <button
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          setShowLogoutConfirm(true);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        Đăng xuất
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <div className="flex gap-2">
                 <Link

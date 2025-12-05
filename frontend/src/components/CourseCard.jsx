@@ -1,5 +1,9 @@
 import React from "react";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  UserGroupIcon,
+  CalendarDaysIcon,
+} from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
 export default function CourseCard({
@@ -9,8 +13,96 @@ export default function CourseCard({
   image,
   rating = 0,
   reviews,
+  type = "student", // 'student' | 'teacher'
+  status, // 'active' | 'draft' | 'archived'
+  code,
+  studentsCount,
+  schedule,
+  onManage,
+  onEdit,
+  onPreview,
 }) {
   const navigate = useNavigate();
+
+  if (type === "teacher") {
+    return (
+      <div className="flex flex-col w-full bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+        <div
+          className="bg-center bg-no-repeat aspect-video bg-cover"
+          style={{ backgroundImage: `url(${image})` }}
+        ></div>
+        <div className="p-4 flex flex-col flex-1">
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white pr-2">
+              {title}
+            </h3>
+            {status === "active" && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                Hoạt động
+              </span>
+            )}
+            {status === "draft" && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                Bản nháp
+              </span>
+            )}
+            {status === "archived" && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                Đã lưu trữ
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Mã lớp: {code}
+          </p>
+          <div className="flex-grow space-y-3 text-sm text-gray-600 dark:text-gray-300 mb-4">
+            <div className="flex items-center gap-2">
+              <UserGroupIcon className="h-5 w-5" />
+              <span>{studentsCount} học viên</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CalendarDaysIcon className="h-5 w-5" />
+              <span>{schedule}</span>
+            </div>
+          </div>
+          <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+            {status === "active" ? (
+              <>
+                <button
+                  onClick={onPreview}
+                  className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-3 bg-primary text-white text-xs font-bold leading-normal tracking-wide hover:bg-primary/90"
+                >
+                  Xem chi tiết
+                </button>
+                <button
+                  onClick={onManage}
+                  className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold leading-normal tracking-wide"
+                >
+                  Quản lý
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={onEdit}
+                  className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-3 bg-primary text-white text-xs font-bold leading-normal tracking-wide hover:bg-primary/90"
+                >
+                  Soạn thảo
+                </button>
+                <button
+                  onClick={onPreview}
+                  className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold leading-normal tracking-wide"
+                >
+                  Xem trước
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const stars = [];
   for (let i = 1; i <= 5; i++) {
     if (rating >= i) {

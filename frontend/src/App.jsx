@@ -7,6 +7,9 @@ import Home from "./pages/Home";
 import CoursesPage from "./pages/CoursesPage";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import ProfilePage from "./pages/ProfilePage";
+import TeacherDashboard from "./pages/TeacherDashboard";
+import TeacherCourses from "./pages/TeacherCourses";
+import TeacherCourseDetail from "./pages/TeacherCourseDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const GOOGLE_CLIENT_ID =
@@ -32,6 +35,22 @@ export default function App() {
       <Route
         path="/profile"
         element={<ProtectedRoute element={<ProfilePage />} />}
+      />
+      <Route
+        path="/teacher/dashboard"
+        element={<ProtectedRoute element={<TeacherDashboard />} />}
+      />
+      <Route
+        path="/teacher/courses"
+        element={<ProtectedRoute element={<TeacherCourses />} />}
+      />
+      <Route
+        path="/teacher/courses/create"
+        element={<ProtectedRoute element={<TeacherCourseDetail />} />}
+      />
+      <Route
+        path="/teacher/courses/:id"
+        element={<ProtectedRoute element={<TeacherCourseDetail />} />}
       />
     </Routes>
     //    </AuthProvider>
