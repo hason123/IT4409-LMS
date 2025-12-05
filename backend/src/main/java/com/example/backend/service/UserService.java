@@ -19,13 +19,15 @@ public interface UserService {
 
     void deleteUserById(Long id);
 
-    UserInfoResponse createGoogleUser(String email, String name);
+    User createGoogleUser(String email, String name);
 
     UserInfoResponse updateUser(Long id, UserRequest request);
 
     Object getUserById(Long id);
 
     UserInfoResponse createUser(UserRequest request);
+
+    UserInfoResponse convertUserInfoToDTO(User user);
 
     // Object getUserById(Long id);
 

@@ -1,6 +1,7 @@
 package com.example.backend.config;
 
 import com.example.backend.dto.response.LoginResponse;
+import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
 import com.example.backend.service.impl.UserServiceImpl;
@@ -45,6 +46,7 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             googleUser =  userService.createGoogleUser(email, name);
         }
         // Build JWTs
+        assert googleUser != null;
         LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(
                 googleUser.getId(),
                 googleUser.getUserName(),

@@ -40,9 +40,8 @@ public class UserServiceImpl implements UserService {
     public boolean isCurrentUser(Long userId) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof Jwt jwt) {
-            String currentUserName = jwt.getClaim("sub"); // decode token de lay phan sub
-            Long currentUserId = userRepository.findByUserName(currentUserName).getId();
-            return currentUserId.equals(userId);
+            Long currentUserId = Long.valueOf(jwt.getSubject()); // sub = userId
+            return userId.equals(currentUserId);
         }
         return false;
     }
@@ -51,11 +50,13 @@ public class UserServiceImpl implements UserService {
     public User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof Jwt jwt) {
-            String currentUserName = jwt.getClaim("sub"); // decode token de lay phan sub
-            return userRepository.findByUserName(currentUserName);
+            Long currentUserId = Long.valueOf(jwt.getSubject()); // sub = userId
+            return userRepository.findById(currentUserId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         }
         return null;
     }
+
 
     @Override
     public User handleGetUserByUserNameAndRefreshToken(String userName, String refreshToken) {
@@ -83,10 +84,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfoResponse createGoogleUser(String email, String username) {
-        User googleUser = User.builder().userName(username).password("123").gmail(email).role(roleRepository.findByRoleName(RoleType.USER)).build();
-        userRepository.save(googleUser);
-        return convertUserInfoToDTO(googleUser);
+    public User createGoogleUser(String email, String username) {
+        User googleUser = User.builder()
+                .userName(username)
+                .password("123")
+                .gmail(email)
+                .role(roleRepository.findByRoleName(RoleType.USER))
+                .build();
+        return userRepository.save(googleUser);
     }
 
 
@@ -150,6 +155,7 @@ public class UserServiceImpl implements UserService {
         return convertUserInfoToDTO(user);
     }
 
+    @Override
     public UserInfoResponse convertUserInfoToDTO(User user){
         UserInfoResponse userDTO = new UserInfoResponse();
         userDTO.setUserName(user.getUserName());

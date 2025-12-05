@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.request.UserRequest;
 import com.example.backend.dto.response.user.UserInfoResponse;
+import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +44,9 @@ public class UserController {
 
     @PostMapping("/user/google")
     public ResponseEntity<UserInfoResponse> createGoogleUser(@RequestParam String email, @RequestParam String username) {
-        UserInfoResponse newGoogleUser = userService.createGoogleUser(email, username);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newGoogleUser);
+        User newGoogleUser = userService.createGoogleUser(email, username);
+        UserInfoResponse newGoogleUserDTO = userService.convertUserInfoToDTO(newGoogleUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newGoogleUserDTO);
     }
 }
 

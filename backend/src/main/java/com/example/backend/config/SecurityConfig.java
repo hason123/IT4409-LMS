@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 //.csrf(csrf -> csrf.disable())// dùng lambda thay vì csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/api/v1/auth/login", "/api/v1/auth/register",
+                        .requestMatchers("/", "/api/v1/lms/auth/login", "/api/v1/lms/auth/register",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/oauth2/**").permitAll()
                         .anyRequest().authenticated() // tất cả request được phép
                 )
