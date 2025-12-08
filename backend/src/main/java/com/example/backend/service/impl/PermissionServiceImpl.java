@@ -41,6 +41,9 @@ public class PermissionServiceImpl implements PermissionService {
         permissionRepository.deleteById(id);
     }
 
+
+    
+
     @Override
     public PermissionInfoResponse getPermissionById(Integer id) {
         Permission permission = permissionRepository.findById(id).orElse(null);
