@@ -1,11 +1,8 @@
 import React, { useState } from 'react'
-import { UserIcon, EnvelopeIcon, LockClosedIcon, AcademicCapIcon } from '@heroicons/react/24/outline'
-
-import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserIcon, EnvelopeIcon, LockClosedIcon, AcademicCapIcon } from '@heroicons/react/24/outline'
-import { register } from '../api/auth'
-import { useAuth } from '../contexts/AuthContext'
+import { register } from '../../api/auth'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function RegisterForm() {
   const navigate = useNavigate();
@@ -103,9 +100,11 @@ export default function RegisterForm() {
         studentNumber: ""
       };
 
-      const data = await register(requestData);
-      if (data.accessToken) {
-        loginUser(data.accessToken);
+      const res = await register(requestData);
+      console.log('Registration response:', res);
+      if (res.data && res.data.accessToken) {
+        loginUser(res.data.accessToken, res.data.user);
+        console.log('Registered and logged in successfully');
         navigate('/');
       } else {
         // Should not happen if register returns login response
