@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
                 .userName(username)
                 .password("123")
                 .gmail(email)
-                .role(roleRepository.findByRoleName(RoleType.USER))
+                .role(roleRepository.findByRoleName(RoleType.STUDENT))
                 .build();
         return userRepository.save(googleUser);
     }

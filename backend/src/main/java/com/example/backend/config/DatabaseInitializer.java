@@ -24,7 +24,7 @@ public class DatabaseInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (roleRepository.count() == 0) {
             Role admin = new Role(); admin.setRoleName(RoleType.ADMIN);
-            Role user = new Role(); user.setRoleName(RoleType.USER);
+            Role user = new Role(); user.setRoleName(RoleType.STUDENT);
             Role teacher = new Role(); teacher.setRoleName(RoleType.TEACHER);
             roleRepository.saveAll(List.of(admin, user, teacher));
         }
@@ -40,7 +40,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             User student = new User();
             student.setUserName("student");
             student.setPassword(new BCryptPasswordEncoder().encode("123"));
-            student.setRole(roleRepository.findByRoleName(RoleType.USER));
+            student.setRole(roleRepository.findByRoleName(RoleType.STUDENT));
             userRepository.saveAll(List.of(admin, teacher, student));
         }
 
