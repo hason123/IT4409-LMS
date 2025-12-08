@@ -14,6 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -138,6 +141,12 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("User not found");
         }
         return convertUserInfoToDTO(user);
+    }
+
+    @Override
+    public Object getAllUsers() {
+        List<UserInfoResponse> users = userRepository.findAll().stream().map(this::convertUserInfoToDTO).collect(Collectors.toList());
+        return users;
     }
 
     @Override

@@ -54,5 +54,12 @@ public class UserController {
         UserInfoResponse newGoogleUserDTO = userService.convertUserInfoToDTO(newGoogleUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(newGoogleUserDTO);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users")
+    public ResponseEntity<List<UserInfoResponse>> getAllUsers() {
+        Object users = userService.getAllUsers();
+        return ResponseEntity.ok((List<UserInfoResponse>) users);
+    }
 }
 

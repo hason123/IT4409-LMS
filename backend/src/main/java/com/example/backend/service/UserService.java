@@ -25,6 +25,8 @@ public interface UserService {
 
     Object getUserById(Long id);
 
+    Object getAllUsers();
+
     UserInfoResponse createUser(UserRequest request);
 
     UserInfoResponse convertUserInfoToDTO(User user);
