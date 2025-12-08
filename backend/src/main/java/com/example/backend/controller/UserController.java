@@ -6,6 +6,7 @@ import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -19,29 +20,34 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     @GetMapping("/user/{id}")
     public ResponseEntity<UserInfoResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok((UserInfoResponse) userService.getUserById(id));
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     @PutMapping("/user/{id}")
     public ResponseEntity<UserInfoResponse> updateUser(@PathVariable Long id, @RequestBody UserRequest request) {
         UserInfoResponse updatedUser = userService.updateUser(id, request);
         return ResponseEntity.ok(updatedUser);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
     public ResponseEntity<UserInfoResponse> createUser(@RequestBody UserRequest request) {
         UserInfoResponse newUser = userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/user/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("permitAll()")
     @PostMapping("/user/google")
     public ResponseEntity<UserInfoResponse> createGoogleUser(@RequestParam String email, @RequestParam String username) {
         User newGoogleUser = userService.createGoogleUser(email, username);
