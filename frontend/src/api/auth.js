@@ -1,6 +1,8 @@
 // API xác thực cho frontend
+const API_URL = 'http://localhost:8080/api/v1/lms/auth';
+
 export async function login(username, password) {
-  const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+  const response = await fetch(`${API_URL}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include', // nhận cookie refresh_token
@@ -10,9 +12,23 @@ export async function login(username, password) {
   return await response.json(); // trả về accessToken, user info
 }
 
+export async function register(userData) {
+  const response = await fetch(`${API_URL}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(userData)
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Đăng ký thất bại');
+  }
+  return await response.json();
+}
+
 // Đăng nhập bằng Google
 export async function googleLogin(credentialResponse) {
-  const response = await fetch('http://localhost:8080/api/v1/auth/google', {
+  const response = await fetch(`${API_URL}/google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include', // nhận cookie refresh_token
