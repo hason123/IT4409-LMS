@@ -9,7 +9,7 @@ public class BackendApplication {
 
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure()
-                .directory("backend")
+                .directory("./")
                 .filename(".env")
                 .load();
         dotenv.entries().forEach(entry -> {

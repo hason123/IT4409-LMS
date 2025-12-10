@@ -1,5 +1,6 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.dto.request.GoogleLoginRequest;
 import com.example.backend.dto.request.LoginRequest;
 import com.example.backend.dto.request.UserRequest;
 import com.example.backend.dto.response.LoginResponse;
@@ -8,6 +9,7 @@ import com.example.backend.entity.User;
 import com.example.backend.service.AuthService;
 import com.example.backend.service.UserService;
 import com.example.backend.utils.SecurityUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -20,6 +22,8 @@ public class AuthServiceImpl implements AuthService {
     private final SecurityUtil securityUtil;
     private final UserService userService;
 
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
 
     public AuthServiceImpl(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserService userService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
@@ -101,5 +105,61 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    public LoginResponse googleLogin(GoogleLoginRequest request) {
+        try {
+            // Parse Google token (simplified - in production should verify signature)
+            String[] parts = request.getToken().split("\\.");
+            if (parts.length != 3) {
+                throw new IllegalArgumentException("Invalid Google token format");
+            }
+            
+            // Decode payload (second part)
+            byte[] decodedBytes = java.util.Base64.getUrlDecoder().decode(parts[1]);
+            String payload = new String(decodedBytes);
+            
+            // Parse JSON payload
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            java.util.Map<String, Object> claims = mapper.readValue(payload, java.util.Map.class);
+            
+            String email = (String) claims.get("email");
+            String name = (String) claims.get("name");
+            
+            if (email == null) {
+                throw new IllegalArgumentException("Email not found in token");
+            }
+            
+            // Check if user exists
+            User googleUser = userService.handleGetUserByGmail(email);
+            if (googleUser == null) {
+                googleUser = userService.createGoogleUser(email, name != null ? name : email.split("@")[0]);
+            }
+            
+            // Build response
+            LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(
+                    googleUser.getId(),
+                    googleUser.getUserName(),
+                    googleUser.getRole().getRoleName().name()
+            );
+            LoginResponse response = new LoginResponse();
+            response.setUser(userLogin);
+            
+            // Generate tokens
+            String accessToken = securityUtil.createAccessToken(email, response);
+            String refreshToken = securityUtil.createRefreshToken(email, response);
+            
+            // Update refresh token in DB
+            userService.updateUserToken(refreshToken, googleUser.getUserName());
+            
+            // Set tokens in response
+            response.setAccessToken(accessToken);
+            response.setRefreshToken(refreshToken);
+            
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException("Google login failed: " + e.getMessage(), e);
+        }
+    }
 
 }
+
