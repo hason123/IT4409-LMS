@@ -87,7 +87,7 @@ export default function RegisterForm() {
     setApiError('');
 
     try {
-      const roleName = formData.role === 'STUDENT' ? 'USER' : 'TEACHER';
+      const roleName = formData.role === 'STUDENT' ? 'STUDENT' : 'TEACHER';
       const requestData = {
         userName: formData.username,
         fullName: formData.fullName,
@@ -99,6 +99,8 @@ export default function RegisterForm() {
         birthday: "",
         studentNumber: ""
       };
+
+      console.log('Register request data:', requestData);
 
       const res = await register(requestData);
       console.log('Registration response:', res);
@@ -210,7 +212,7 @@ export default function RegisterForm() {
             value={formData.confirmPassword}
             onChange={handleChange}
             onBlur={handleBlur}
-            className={`form-input flex w-full ${errors.confirmPassword ? '!border !border-red-500 focus:!border-red-500' : ''}`} 
+            className={`form-input flex w-full`} 
             placeholder="Confirm your password" 
           />
         </div>
@@ -244,8 +246,8 @@ export default function RegisterForm() {
               <input 
                 type="radio" 
                 name="role" 
-                value="LECTURER" 
-                checked={formData.role === 'LECTURER'} 
+                value="TEACHER" 
+                checked={formData.role === 'TEACHER'} 
                 onChange={handleChange}
                 className="peer h-4 w-4 cursor-pointer appearance-none rounded-full border border-slate-300 checked:border-primary checked:bg-primary transition-all"
               />

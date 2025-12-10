@@ -17,10 +17,25 @@ export default function ProtectedRoute({ element, allowedRoles }) {
   // Check role if allowedRoles is provided
   if (allowedRoles && user) {
     if (!allowedRoles.includes(user.role)) {
+      // Redirect user to their dashboard based on role
+      const roleRedirects = {
+        'STUDENT': '/home',
+        'TEACHER': '/teacher/dashboard',
+        'ADMIN': '/admin/dashboard'
+      };
+      const redirectPath = roleRedirects[user.role] || '/home';
+      
       return (
-        <div className="flex flex-col items-center justify-center h-screen">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
-          <p className="text-gray-600">You do not have permission to view this page.</p>
+        <div className="flex flex-col items-center justify-center h-screen bg-background-light dark:bg-background-dark">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-red-600 dark:text-red-400 mb-4">
+              Truy cập bị từ chối
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">
+              Bạn không có quyền truy cập trang này.
+            </p>
+            <Navigate to={redirectPath} replace />
+          </div>
         </div>
       );
     }

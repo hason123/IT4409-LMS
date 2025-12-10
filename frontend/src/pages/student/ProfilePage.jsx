@@ -6,6 +6,7 @@ import MyInformation from "../../components/student/profile/MyInformation";
 import MyCourses from "../../components/student/profile/MyCourses";
 import AccountSettings from "../../components/student/profile/AccountSettings";
 import ChangePassword from "../../components/student/profile/ChangePassword";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   UserIcon,
   BookOpenIcon,
@@ -18,13 +19,19 @@ import {
 
 export default function ProfilePage() {
   const location = useLocation();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
+  const [profileData, setProfileData] = useState(null);
 
   useEffect(() => {
     if (location.state && location.state.activeTab) {
       setActiveTab(location.state.activeTab);
     }
   }, [location.state]);
+
+  const handleProfileUpdate = (updatedData) => {
+    setProfileData(updatedData);
+  };
 
   const tabs = [
     { id: "profile", label: "Thông tin cá nhân", icon: UserIcon },
@@ -41,7 +48,7 @@ export default function ProfilePage() {
   const renderContent = () => {
     switch (activeTab) {
       case "profile":
-        return <MyInformation />;
+        return <MyInformation onUpdate={handleProfileUpdate} />;
       case "courses":
         return <MyCourses />;
       case "certificate":
@@ -85,10 +92,10 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex flex-col">
                     <h1 className="text-[#111418] dark:text-white text-base font-medium leading-normal">
-                      Nguyen Van A
+                      {profileData?.fullName || user?.username || "User"}
                     </h1>
                     <p className="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal">
-                      nguyenvana@email.com
+                      {profileData?.gmail || "No email"}
                     </p>
                   </div>
                 </div>
