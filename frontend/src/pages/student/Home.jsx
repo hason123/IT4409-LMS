@@ -1,6 +1,6 @@
 import React from 'react'
-import Header from '../components/Header'
-import CourseCard from '../components/CourseCard'
+import Header from '../../components/layout/Header'
+import CourseCard from '../../components/course/CourseCard'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom';
 

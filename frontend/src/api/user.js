@@ -1,0 +1,55 @@
+const API_URL = 'http://localhost:8080/api/v1/lms';
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('accessToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': token ? `Bearer ${token}` : ''
+  };
+};
+
+export async function getUserById(id) {
+  const response = await fetch(`${API_URL}/user/${id}`, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch user data');
+  }
+  return await response.json();
+}
+
+export async function updateUser(id, userData) {
+  const response = await fetch(`${API_URL}/user/${id}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(userData)
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update user data');
+  }
+  return await response.json();
+}
+
+export async function getAllUsers(page = 0, size = 50) {
+  const response = await fetch(`${API_URL}/user?page=${page}&size=${size}`, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch users');
+  }
+  return await response.json();
+}
+
+export async function deleteUser(id) {
+  const response = await fetch(`${API_URL}/user/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete user');
+  }
+  return await response.json();
+}
+

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import LoginForm from '../components/LoginForm'
-import RegisterForm from '../components/RegisterForm'
+import LoginForm from '../../components/auth/LoginForm'
+import RegisterForm from '../../components/auth/RegisterForm'
 
 export default function AuthPage({ defaultTab = 'login' }) {
   const [tab, setTab] = useState(defaultTab)
@@ -18,10 +18,10 @@ export default function AuthPage({ defaultTab = 'login' }) {
       </div>
 
       <div className="flex flex-col justify-center items-center w-full lg:w-1/3 p-6 sm:p-8">
-        <div className="flex flex-col gap-8 w-full max-w-md">
+        <div className="flex flex-col gap-6 w-full max-w-md">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-3xl">school</span>
-            <p className="text-xl font-bold text-[#111418] dark:text-white">Learnify</p>
+            <p className="text-xl font-bold text-[#111418] dark:text-white">LearnOnline</p>
           </div>
 
           <div className="flex flex-col gap-2 text-left">
