@@ -89,8 +89,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createGoogleUser(String email, String username) {
         User googleUser = User.builder()
-                .userName(username)
+                .userName(email)
                 .password("123")
+                .fullName(username)
                 .gmail(email)
                 .role(roleRepository.findByRoleName(RoleType.STUDENT))
                 .build();
@@ -173,6 +174,7 @@ public class UserServiceImpl implements UserService {
         userDTO.setAddress(user.getAddress());
         userDTO.setPhoneNumber(user.getPhoneNumber());
         userDTO.setFullName(user.getFullName());
+        userDTO.setGmail(user.getGmail());
         userDTO.setRoleName(user.getRole().getRoleName().toString());
         return userDTO;
     }

@@ -7,6 +7,7 @@ import MyCourses from "../../components/student/profile/MyCourses";
 import AccountSettings from "../../components/student/profile/AccountSettings";
 import ChangePassword from "../../components/student/profile/ChangePassword";
 import { useAuth } from "../../contexts/AuthContext";
+import { getUserById } from "../../api/user";
 import {
   UserIcon,
   BookOpenIcon,
@@ -22,6 +23,27 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const [profileData, setProfileData] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?.id) {
+        try {
+          setIsLoading(true);
+          const res = await getUserById(user.id);
+          setUserData(res.data);
+          setProfileData(res.data);
+        } catch (err) {
+          console.error("Failed to fetch user data:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    fetchUserData();
+  }, [user?.id]);
 
   useEffect(() => {
     if (location.state && location.state.activeTab) {
@@ -31,6 +53,7 @@ export default function ProfilePage() {
 
   const handleProfileUpdate = (updatedData) => {
     setProfileData(updatedData);
+    setUserData(updatedData);
   };
 
   const tabs = [
@@ -48,7 +71,7 @@ export default function ProfilePage() {
   const renderContent = () => {
     switch (activeTab) {
       case "profile":
-        return <MyInformation onUpdate={handleProfileUpdate} />;
+        return <MyInformation userData={userData} isLoading={isLoading} onUpdate={handleProfileUpdate} />;
       case "courses":
         return <MyCourses />;
       case "certificate":
@@ -91,10 +114,10 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex flex-col">
-                    <h1 className="text-[#111418] dark:text-white text-base font-medium leading-normal">
+                    <h1 className="text-[#111418] dark:text-white text-base font-medium leading-normal break-all">
                       {profileData?.fullName || user?.username || "User"}
                     </h1>
-                    <p className="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal">
+                    <p className="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal break-all">
                       {profileData?.gmail || "No email"}
                     </p>
                   </div>
