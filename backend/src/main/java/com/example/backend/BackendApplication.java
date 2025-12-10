@@ -8,10 +8,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BackendApplication {
 
     public static void main(String[] args) {
-        Dotenv dotenv = Dotenv.configure()
-                .directory("backend")
-                .filename(".env")
-                .load();
+        Dotenv dotenv = Dotenv.load();
+
+        // Dotenv dotenv = Dotenv.configure()
+        //         .directory(".")
+        //         .filename(".env")
+        //         .load();
         dotenv.entries().forEach(entry -> {
             System.setProperty(entry.getKey(), entry.getValue());
         });
