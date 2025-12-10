@@ -1,8 +1,122 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CameraIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { updateUser, getUserById } from "../../../api/user";
+import { useAuth } from "../../../contexts/AuthContext";
 
-export default function MyInformation() {
+export default function MyInformation({ onUpdate }) {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [initialData, setInitialData] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    gmail: "",
+    phoneNumber: "",
+    birthday: "",
+    address: "",
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?.id) {
+        try {
+          const res = await getUserById(user.id);
+          const data = res.data;
+          setInitialData(data);
+          setFormData({
+            fullName: data.fullName || "",
+            gmail: data.gmail || "",
+            phoneNumber: data.phoneNumber || "",
+            birthday: data.birthday || "",
+            address: data.address || "",
+          });
+        } catch (err) {
+          setError("Không thể tải thông tin người dùng. Vui lòng thử lại.");
+          console.error("Failed to fetch user data:", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchUserData();
+  }, [user?.id]);
+
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        fullName: initialData.fullName || "",
+        gmail: initialData.gmail || "",
+        phoneNumber: initialData.phoneNumber || "",
+        birthday: initialData.birthday || "",
+        address: initialData.address || "",
+      });
+    }
+  }, [initialData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      if (!user?.id) {
+        throw new Error("User ID not found");
+      }
+      
+      const updatedUser = await updateUser(user.id, {
+        ...formData,
+        userName: initialData?.userName // Keep username as is
+      });
+      
+      setInitialData(updatedUser.data);
+      if (onUpdate) {
+        onUpdate(updatedUser.data);
+      }
+      setSuccess("Cập nhật thông tin thành công!");
+      setIsEditing(false);
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Cập nhật thất bại. Vui lòng thử lại.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (initialData) {
+      setFormData({
+        fullName: initialData.fullName || "",
+        gmail: initialData.gmail || "",
+        phoneNumber: initialData.phoneNumber || "",
+        birthday: initialData.birthday || "",
+        address: initialData.address || "",
+      });
+    }
+    setIsEditing(false);
+    setError("");
+    setSuccess("");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+          <p className="text-[#617589] dark:text-gray-400">Đang tải thông tin...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -25,6 +139,22 @@ export default function MyInformation() {
           </button>
         )}
       </div>
+      
+      {error && (
+        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg flex items-center gap-2">
+          <svg className="h-5 w-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          {success}
+        </div>
+      )}
+
       <div className="py-6 flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <div className="flex-grow w-full">
@@ -34,10 +164,12 @@ export default function MyInformation() {
               </p>
               <div className="flex w-full flex-1 items-stretch rounded-lg">
                 <input
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
                   disabled={!isEditing}
                   className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Nhập họ và tên của bạn"
-                  defaultValue="Nguyen Van A"
                 />
               </div>
             </label>
@@ -50,11 +182,13 @@ export default function MyInformation() {
             </p>
             <div className="flex w-full flex-1 items-stretch rounded-lg">
               <input
+                name="gmail"
+                value={formData.gmail}
+                onChange={handleChange}
                 disabled={!isEditing}
                 className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Nhập email của bạn"
                 type="email"
-                defaultValue="nguyenvana@email.com"
               />
             </div>
           </label>
@@ -64,11 +198,13 @@ export default function MyInformation() {
             </p>
             <div className="flex w-full flex-1 items-stretch rounded-lg">
               <input
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
                 disabled={!isEditing}
                 className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Nhập số điện thoại của bạn"
                 type="tel"
-                defaultValue="0987654321"
               />
             </div>
           </label>
@@ -78,10 +214,12 @@ export default function MyInformation() {
             </p>
             <div className="flex w-full flex-1 items-stretch rounded-lg">
               <input
+                name="birthday"
+                value={formData.birthday}
+                onChange={handleChange}
                 disabled={!isEditing}
-                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 type="date"
-                defaultValue="1995-08-15"
               />
             </div>
           </label>
@@ -91,10 +229,12 @@ export default function MyInformation() {
             </p>
             <div className="flex w-full flex-1 items-stretch rounded-lg">
               <input
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
                 disabled={!isEditing}
                 className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Nhập địa chỉ của bạn"
-                defaultValue="123 Example St, District 1, Ho Chi Minh City"
               />
             </div>
           </label>
@@ -103,16 +243,18 @@ export default function MyInformation() {
       {isEditing && (
         <div className="flex justify-end gap-4 pt-6 border-t border-black/10 dark:border-white/10">
           <button
-            onClick={() => setIsEditing(false)}
-            className="flex items-center justify-center h-10 px-6 rounded-lg bg-background-light dark:bg-white/10 text-black dark:text-white text-sm font-bold leading-normal tracking-[-0.015em] hover:bg-black/5 dark:hover:bg-white/20 transition-colors"
+            onClick={handleCancel}
+            disabled={loading}
+            className="flex items-center justify-center h-10 px-6 rounded-lg bg-background-light dark:bg-white/10 text-black dark:text-white text-sm font-bold leading-normal tracking-[-0.015em] hover:bg-black/5 dark:hover:bg-white/20 transition-colors disabled:opacity-50"
           >
             Hủy
           </button>
           <button
-            onClick={() => setIsEditing(false)}
-            className="flex items-center justify-center h-10 px-6 rounded-lg bg-primary text-white text-sm font-bold leading-normal tracking-[-0.015em] hover:bg-primary/90 transition-colors"
+            onClick={handleSave}
+            disabled={loading}
+            className="flex items-center justify-center h-10 px-6 rounded-lg bg-primary text-white text-sm font-bold leading-normal tracking-[-0.015em] hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            Lưu thay đổi
+            {loading ? "Đang lưu..." : "Lưu thay đổi"}
           </button>
         </div>
       )}

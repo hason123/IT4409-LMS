@@ -11,6 +11,7 @@ import {
 export default function TeacherCourses() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all"); // 'all', 'active', 'draft', 'archived'
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Mock data
   const [courses] = useState([
@@ -98,6 +99,8 @@ export default function TeacherCourses() {
                 </div>
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg leading-5 bg-white dark:bg-gray-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm dark:text-white"
                   placeholder="Tìm kiếm theo tên hoặc mã khóa học..."
                 />

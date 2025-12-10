@@ -10,6 +10,8 @@ import ProfilePage from "./pages/student/ProfilePage";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherCourses from "./pages/teacher/TeacherCourses";
 import TeacherCourseDetail from "./pages/teacher/TeacherCourseDetail";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
 const GOOGLE_CLIENT_ID =
@@ -24,11 +26,16 @@ function RootRedirect() {
     return <Navigate to="/login" replace />;
   }
 
+  // Redirect based on user role
   if (user?.role === 'TEACHER') {
     return <Navigate to="/teacher/dashboard" replace />;
   }
   
-  // Default for USER (Student) and others
+  if (user?.role === 'ADMIN') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  
+  // Default for STUDENT and others
   return <Navigate to="/home" replace />;
 }
 
@@ -42,11 +49,11 @@ export default function App() {
           {/* Student Routes */}
           <Route
             path="/home"
-            element={<ProtectedRoute element={<Home />} allowedRoles={['USER']} />}
+            element={<ProtectedRoute element={<Home />} allowedRoles={['STUDENT']} />}
           />
           <Route
             path="/profile"
-            element={<ProtectedRoute element={<ProfilePage />} allowedRoles={['USER']} />}
+            element={<ProtectedRoute element={<ProfilePage />} allowedRoles={['STUDENT']} />}
           />
 
           {/* Public/Auth Routes */}
@@ -56,11 +63,11 @@ export default function App() {
           {/* Common Routes (Student, Teacher, Admin) */}
           <Route
             path="/courses"
-            element={<ProtectedRoute element={<CoursesPage />} allowedRoles={['USER', 'TEACHER', 'ADMIN']} />}
+            element={<ProtectedRoute element={<CoursesPage />} allowedRoles={['STUDENT', 'TEACHER', 'ADMIN']} />}
           />
           <Route
             path="/courses/:id"
-            element={<ProtectedRoute element={<CourseDetailPage />} allowedRoles={['USER', 'TEACHER', 'ADMIN']} />}
+            element={<ProtectedRoute element={<CourseDetailPage />} allowedRoles={['STUDENT', 'TEACHER', 'ADMIN']} />}
           />
 
           {/* Teacher Routes */}
@@ -79,6 +86,16 @@ export default function App() {
           <Route
             path="/teacher/courses/:id"
             element={<ProtectedRoute element={<TeacherCourseDetail />} allowedRoles={['TEACHER']} />}
+          />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin/dashboard"
+            element={<ProtectedRoute element={<AdminDashboard />} allowedRoles={['ADMIN']} />}
+          />
+          <Route
+            path="/admin/users"
+            element={<ProtectedRoute element={<AdminUserManagement />} allowedRoles={['ADMIN']} />}
           />
         </Routes>
        </AuthProvider>

@@ -13,6 +13,7 @@ export default function Header({ menuItems }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
@@ -125,6 +126,8 @@ export default function Header({ menuItems }) {
                   className="form-input flex w-full min-w-0 flex-1"
                   style={{ height: "40px" }}
                   placeholder="Tìm kiếm..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </label>

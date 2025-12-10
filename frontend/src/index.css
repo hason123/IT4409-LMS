@@ -31,7 +31,7 @@ body {
 }
 
 .form-input:focus {
-  @apply outline-none ring-2 ring-primary/50;
+  @apply outline-none ring-1 ring-primary/50;
 }
 
 .card {
@@ -107,3 +107,130 @@ button:hover {
 .animate-fade-in-scale {
   animation: fadeInScale 0.2s ease-out forwards;
 }
+
+/* Ant Design Dark Mode Styling */
+.dark .ant-select {
+  --antd-control-bg: rgb(17, 24, 39);
+  --antd-control-border-color: rgb(55, 65, 81);
+  --antd-control-text-color: rgb(243, 244, 246);
+  --antd-control-placeholder-color: rgb(107, 114, 128);
+}
+
+.dark .ant-select .ant-select-selector {
+  background-color: rgb(17, 24, 39) !important;
+  border-color: rgb(55, 65, 81) !important;
+  color: rgb(243, 244, 246) !important;
+}
+
+.dark .ant-select .ant-select-selector:hover {
+  border-color: rgb(107, 114, 128) !important;
+}
+
+.dark .ant-select .ant-select-selector:focus {
+  border-color: #137fec !important;
+  box-shadow: 0 0 0 2px rgba(19, 127, 236, 0.2) !important;
+}
+
+.dark .ant-select-focused .ant-select-selector {
+  border-color: #137fec !important;
+  box-shadow: 0 0 0 2px rgba(19, 127, 236, 0.2) !important;
+}
+
+.dark .ant-select .ant-select-clear {
+  color: rgb(107, 114, 128) !important;
+}
+
+.dark .ant-select-item {
+  color: rgb(243, 244, 246) !important;
+}
+
+.dark .ant-select-dropdown {
+  background-color: rgb(31, 41, 55) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .ant-select-item-option {
+  color: rgb(243, 244, 246) !important;
+}
+
+.dark .ant-select-item-option:hover {
+  background-color: rgb(55, 65, 81) !important;
+}
+
+.dark .ant-select-item-option-selected {
+  background-color: rgb(37, 99, 235) !important;
+}
+
+.dark .ant-select-item-option-selected:hover {
+  background-color: rgb(37, 99, 235) !important;
+}
+
+.dark .ant-select-clear-icon {
+  color: rgb(107, 114, 128) !important;
+}
+
+.ant-select .ant-select-selector {
+  border-color: rgb(209, 213, 219) !important;
+  border-radius: 0.5rem !important;
+}
+
+.ant-select .ant-select-selector:hover {
+  border-color: #137fec !important;
+}
+
+.ant-select-focused .ant-select-selector {
+  border-color: #137fec !important;
+  box-shadow: 0 0 0 2px rgba(19, 127, 236, 0.1) !important;
+}
+
+.ant-select-item-option-selected {
+  background-color: rgba(19, 127, 236, 0.1) !important;
+  color: #137fec !important;
+}
+
+/* Ant Design Popconfirm Dark Mode */
+.dark .ant-popover-inner {
+  background-color: rgb(31, 41, 55) !important;
+  border-color: rgb(55, 65, 81) !important;
+}
+
+.dark .ant-popover-title {
+  color: rgb(243, 244, 246) !important;
+}
+
+.dark .ant-popover-inner-content {
+  color: rgb(209, 213, 219) !important;
+}
+
+.dark .ant-btn-default {
+  color: rgb(243, 244, 246) !important;
+  border-color: rgb(107, 114, 128) !important;
+  background-color: rgb(17, 24, 39) !important;
+}
+
+.dark .ant-btn-default:hover {
+  color: rgb(243, 244, 246) !important;
+  border-color: rgb(107, 114, 128) !important;
+  background-color: rgb(31, 41, 55) !important;
+}
+
+.dark .ant-btn-primary {
+  background-color: #137fec !important;
+  border-color: #137fec !important;
+}
+
+.dark .ant-btn-primary:hover {
+  background-color: #0d5fb8 !important;
+  border-color: #0d5fb8 !important;
+}
+
+.dark .ant-btn-dangerous {
+  background-color: rgb(239, 68, 68) !important;
+  border-color: rgb(239, 68, 68) !important;
+}
+
+.dark .ant-btn-dangerous:hover {
+  background-color: rgb(220, 38, 38) !important;
+  border-color: rgb(220, 38, 38) !important;
+}
+
