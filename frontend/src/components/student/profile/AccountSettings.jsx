@@ -35,10 +35,10 @@ export default function AccountSettings() {
       <div className="flex flex-wrap justify-between items-start gap-4 pb-6 border-b border-black/10 dark:border-white/10">
         <div className="flex min-w-72 flex-col gap-2">
           <p className="text-3xl font-bold tracking-tight text-[#111418] dark:text-white">
-            Cài đặt tài khoản
+            Cài đặt hệ thống
           </p>
           <p className="text-[#617589] dark:text-gray-400 text-base font-normal leading-normal">
-            Quản lý cài đặt tài khoản của bạn.
+            Quản lý cài đặt hệ thống của bạn.
           </p>
         </div>
         {!isEditing && (

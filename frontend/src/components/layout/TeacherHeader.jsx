@@ -11,7 +11,7 @@ import {
 
 export default function TeacherHeader({ toggleSidebar }) {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -175,13 +175,13 @@ export default function TeacherHeader({ toggleSidebar }) {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-3 focus:outline-none hover:bg-slate-50 dark:hover:bg-slate-800/50 p-1 rounded-lg transition-colors"
             >
-              <Avatar />
+              <Avatar src={user?.avatar} alt={user?.fullName} />
               <div className="hidden sm:flex flex-col text-left">
-                <p className="text-sm font-bold text-[#111418] dark:text-white">
-                  Trần Văn An
+                <p className="text-sm font-bold text-[#111418] dark:text-white max-w-[150px] truncate">
+                  {user?.fullName || user?.username || "Giáo viên"}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Giáo viên
+                  {user?.role === "ADMIN" ? "Quản trị viên" : "Giáo viên"}
                 </p>
               </div>
             </button>
@@ -189,16 +189,14 @@ export default function TeacherHeader({ toggleSidebar }) {
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
                 <Link
-                  to="/profile"
-                  state={{ activeTab: "profile" }}
+                  to="/teacher/profile"
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setIsDropdownOpen(false)}
                 >
                   Hồ sơ
                 </Link>
                 <Link
-                  to="/profile"
-                  state={{ activeTab: "settings" }}
+                  to="/teacher/settings"
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setIsDropdownOpen(false)}
                 >

@@ -6,6 +6,7 @@ import {
   AcademicCapIcon,
   UserGroupIcon,
   ChartBarIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 
 export default function TeacherSidebar() {
@@ -38,6 +39,12 @@ export default function TeacherSidebar() {
           label="Báo cáo/Thống kê"
           active={currentPath === "/teacher/reports"}
           to="/teacher/reports"
+        />
+        <SidebarLink
+          icon={<Cog6ToothIcon className="h-6 w-6" />}
+          label="Cài đặt hệ thống"
+          active={currentPath === "/teacher/settings"}
+          to="/teacher/settings"
         />
       </nav>
     </aside>

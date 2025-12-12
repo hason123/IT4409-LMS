@@ -66,7 +66,7 @@ export default function ProfilePage() {
     //   icon: ReceiptPercentIcon,
     // },
     { id: "password", label: "Đổi mật khẩu", icon: LockClosedIcon },
-    { id: "settings", label: "Cài đặt tài khoản", icon: Cog6ToothIcon },
+    { id: "settings", label: "Cài đặt hệ thống", icon: Cog6ToothIcon },
   ];
   const renderContent = () => {
     switch (activeTab) {

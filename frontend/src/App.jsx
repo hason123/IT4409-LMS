@@ -10,6 +10,8 @@ import ProfilePage from "./pages/student/ProfilePage";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherCourses from "./pages/teacher/TeacherCourses";
 import TeacherCourseDetail from "./pages/teacher/TeacherCourseDetail";
+import TeacherProfilePage from "./pages/teacher/TeacherProfilePage";
+import TeacherSettingsPage from "./pages/teacher/TeacherSettingsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import ProtectedRoute from "./components/common/ProtectedRoute";
@@ -86,6 +88,14 @@ export default function App() {
           <Route
             path="/teacher/courses/:id"
             element={<ProtectedRoute element={<TeacherCourseDetail />} allowedRoles={['TEACHER']} />}
+          />
+          <Route
+            path="/teacher/profile"
+            element={<ProtectedRoute element={<TeacherProfilePage />} allowedRoles={['TEACHER']} />}
+          />
+          <Route
+            path="/teacher/settings"
+            element={<ProtectedRoute element={<TeacherSettingsPage />} allowedRoles={['TEACHER']} />}
           />
 
           {/* Admin Routes */}

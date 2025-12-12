@@ -24,7 +24,7 @@ export default function TeacherDashboard() {
       {/* Teacher Header */}
       <TeacherHeader />
 
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex">
         {/* Sidebar */}
         <TeacherSidebar />
 
