@@ -41,7 +41,7 @@ export default function AccountSettings() {
             Quản lý cài đặt hệ thống của bạn.
           </p>
         </div>
-        {!isEditing && (
+        {/* {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
             className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#f0f2f5] dark:bg-gray-700 text-[#111418] dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#e0e2e5] dark:hover:bg-gray-600 transition-colors"
@@ -49,7 +49,7 @@ export default function AccountSettings() {
             <PencilIcon className="h-4 w-4 mr-2" />
             <span className="truncate">Chỉnh sửa</span>
           </button>
-        )}
+        )} */}
       </div>
       <div className="py-6 flex flex-col gap-6">
         {/* Language Setting */}

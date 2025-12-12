@@ -14,6 +14,8 @@ import TeacherProfilePage from "./pages/teacher/TeacherProfilePage";
 import TeacherSettingsPage from "./pages/teacher/TeacherSettingsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
+import AdminProfilePage from "./pages/admin/AdminProfilePage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
 const GOOGLE_CLIENT_ID =
@@ -106,6 +108,14 @@ export default function App() {
           <Route
             path="/admin/users"
             element={<ProtectedRoute element={<AdminUserManagement />} allowedRoles={['ADMIN']} />}
+          />
+          <Route
+            path="/admin/profile"
+            element={<ProtectedRoute element={<AdminProfilePage />} allowedRoles={['ADMIN']} />}
+          />
+          <Route
+            path="/admin/settings"
+            element={<ProtectedRoute element={<AdminSettingsPage />} allowedRoles={['ADMIN']} />}
           />
         </Routes>
        </AuthProvider>
