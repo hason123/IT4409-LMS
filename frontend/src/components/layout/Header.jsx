@@ -8,7 +8,7 @@ import { MagnifyingGlassIcon, BellIcon } from "@heroicons/react/24/outline";
 export default function Header({ menuItems }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout, user } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -188,9 +188,14 @@ export default function Header({ menuItems }) {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-2 focus:outline-none"
+                    className="flex items-center gap-2 focus:outline-none hover:bg-slate-50 dark:hover:bg-slate-800/50 p-1 rounded-lg transition-colors"
                   >
-                    <Avatar />
+                    <Avatar src={user?.avatar} alt={user?.fullName} />
+                    <div className="hidden sm:flex flex-col text-left">
+                      <p className="text-sm font-bold text-[#111418] dark:text-white max-w-[150px] truncate">
+                        {user?.fullName || user?.username || "User"}
+                      </p>
+                    </div>
                   </button>
 
                   {isDropdownOpen && (

@@ -69,7 +69,7 @@ export default function TeacherCourseDetail() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
       <TeacherHeader />
 
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex">
         <TeacherSidebar />
 
         <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 h-full">

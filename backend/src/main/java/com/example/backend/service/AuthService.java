@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.request.GoogleLoginRequest;
 import com.example.backend.dto.request.LoginRequest;
 import com.example.backend.dto.request.UserRequest;
 import com.example.backend.dto.response.LoginResponse;
@@ -12,4 +13,6 @@ public interface AuthService {
     void logout();
 
     LoginResponse register(UserRequest request);
+
+    LoginResponse googleLogin(GoogleLoginRequest request);
 }

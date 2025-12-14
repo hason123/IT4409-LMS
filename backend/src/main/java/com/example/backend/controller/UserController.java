@@ -20,13 +20,13 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/user/{id}")
     public ResponseEntity<UserInfoResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok((UserInfoResponse) userService.getUserById(id));
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @PutMapping("/user/{id}")
     public ResponseEntity<UserInfoResponse> updateUser(@PathVariable Long id, @RequestBody UserRequest request) {
         UserInfoResponse updatedUser = userService.updateUser(id, request);

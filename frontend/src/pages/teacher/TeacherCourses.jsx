@@ -64,7 +64,7 @@ export default function TeacherCourses() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
       <TeacherHeader />
 
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex">
         {/* Sidebar - Reused structure from TeacherDashboard */}
         <TeacherSidebar />
 

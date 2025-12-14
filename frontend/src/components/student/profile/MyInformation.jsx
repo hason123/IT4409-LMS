@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { CameraIcon, PencilIcon } from "@heroicons/react/24/solid";
-import { updateUser, getUserById } from "../../../api/user";
+import { updateUser } from "../../../api/user";
 import { useAuth } from "../../../contexts/AuthContext";
 
-export default function MyInformation({ onUpdate }) {
+export default function MyInformation({ userData, isLoading: parentLoading, onUpdate }) {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [initialData, setInitialData] = useState(null);
@@ -14,48 +14,29 @@ export default function MyInformation({ onUpdate }) {
     birthday: "",
     address: "",
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(parentLoading || true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Fetch user data when component mounts
+  // Initialize form data from userData prop
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (user?.id) {
-        try {
-          const res = await getUserById(user.id);
-          const data = res.data;
-          setInitialData(data);
-          setFormData({
-            fullName: data.fullName || "",
-            gmail: data.gmail || "",
-            phoneNumber: data.phoneNumber || "",
-            birthday: data.birthday || "",
-            address: data.address || "",
-          });
-        } catch (err) {
-          setError("Không thể tải thông tin người dùng. Vui lòng thử lại.");
-          console.error("Failed to fetch user data:", err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-    fetchUserData();
-  }, [user?.id]);
-
-  // Update form when initialData changes
-  useEffect(() => {
-    if (initialData) {
+    if (userData) {
+      setInitialData(userData);
       setFormData({
-        fullName: initialData.fullName || "",
-        gmail: initialData.gmail || "",
-        phoneNumber: initialData.phoneNumber || "",
-        birthday: initialData.birthday || "",
-        address: initialData.address || "",
+        fullName: userData.fullName || "",
+        gmail: userData.gmail || "",
+        phoneNumber: userData.phoneNumber || "",
+        birthday: userData.birthday || "",
+        address: userData.address || "",
       });
+      setLoading(false);
     }
-  }, [initialData]);
+  }, [userData]);
+
+  // Update loading state from parent
+  useEffect(() => {
+    setLoading(parentLoading);
+  }, [parentLoading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

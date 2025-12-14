@@ -32,7 +32,7 @@ export async function updateUser(id, userData) {
 }
 
 export async function getAllUsers(page = 0, size = 50) {
-  const response = await fetch(`${API_URL}/user?page=${page}&size=${size}`, {
+  const response = await fetch(`${API_URL}/users?page=${page}&size=${size}`, {
     method: 'GET',
     headers: getAuthHeaders()
   });

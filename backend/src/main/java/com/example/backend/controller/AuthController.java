@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.request.GoogleLoginRequest;
 import com.example.backend.dto.request.LoginRequest;
 import com.example.backend.dto.request.UserRequest;
 import com.example.backend.dto.response.LoginResponse;
@@ -57,6 +58,21 @@ public class AuthController {
                 .body(response);
     }
 
+    @PostMapping("/auth/google")
+    public ResponseEntity<LoginResponse> googleLogin(@RequestBody GoogleLoginRequest request) {
+        LoginResponse response = authService.googleLogin(request);
+        ResponseCookie springCookie = ResponseCookie.from("refresh_token", response.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(refreshTokenExpiration)
+                .build();
+        response.setRefreshToken(null);
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, springCookie.toString())
+                .body(response);
+    }
 
     @PutMapping("/auth/refresh")
     public ResponseEntity<LoginResponse> refreshToken(
