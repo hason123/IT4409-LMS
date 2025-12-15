@@ -6,10 +6,14 @@ import AuthPage from "./pages/auth/AuthPage";
 import Home from "./pages/student/Home";
 import CoursesPage from "./pages/common/CoursesPage";
 import CourseDetailPage from "./pages/common/CourseDetailPage";
+import QuizAttempt from "./pages/student/QuizAttempt";
+import QuizResult from "./pages/student/QuizResult";
 import ProfilePage from "./pages/student/ProfilePage";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherCourses from "./pages/teacher/TeacherCourses";
-import TeacherCourseDetail from "./pages/teacher/TeacherCourseDetail";
+import CreateCourse from "./pages/teacher/CreateCourse";
+import LectureDetail from "./pages/teacher/LectureDetail";
+import QuizDetail from "./pages/teacher/QuizDetail";
 import TeacherProfilePage from "./pages/teacher/TeacherProfilePage";
 import TeacherSettingsPage from "./pages/teacher/TeacherSettingsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -59,6 +63,14 @@ export default function App() {
             path="/profile"
             element={<ProtectedRoute element={<ProfilePage />} allowedRoles={['STUDENT']} />}
           />
+          <Route
+            path="/quizzes/:id/attempt"
+            element={<ProtectedRoute element={<QuizAttempt />} allowedRoles={['STUDENT']} />}
+          />
+          <Route
+            path="/quizzes/:id/result"
+            element={<ProtectedRoute element={<QuizResult />} allowedRoles={['STUDENT']} />}
+          />
 
           {/* Public/Auth Routes */}
           <Route path="/login" element={<AuthPage defaultTab="login" />} />
@@ -85,11 +97,27 @@ export default function App() {
           />
           <Route
             path="/teacher/courses/create"
-            element={<ProtectedRoute element={<TeacherCourseDetail />} allowedRoles={['TEACHER']} />}
+            element={<ProtectedRoute element={<CreateCourse />} allowedRoles={['TEACHER']} />}
           />
           <Route
-            path="/teacher/courses/:id"
-            element={<ProtectedRoute element={<TeacherCourseDetail />} allowedRoles={['TEACHER']} />}
+            path="/teacher/courses/edit/:id"
+            element={<ProtectedRoute element={<CreateCourse />} allowedRoles={['TEACHER']} />}
+          />
+          <Route
+            path="/teacher/courses/:courseId/lectures/create"
+            element={<ProtectedRoute element={<LectureDetail />} allowedRoles={['TEACHER']} />}
+          />
+          <Route
+            path="/teacher/courses/:courseId/lectures/:lectureId"
+            element={<ProtectedRoute element={<LectureDetail />} allowedRoles={['TEACHER']} />}
+          />
+          <Route
+            path="/teacher/courses/:courseId/quizzes/create"
+            element={<ProtectedRoute element={<QuizDetail />} allowedRoles={['TEACHER']} />}
+          />
+          <Route
+            path="/teacher/courses/:courseId/quizzes/:quizId"
+            element={<ProtectedRoute element={<QuizDetail />} allowedRoles={['TEACHER']} />}
           />
           <Route
             path="/teacher/profile"
