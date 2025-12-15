@@ -10,7 +10,7 @@ import {
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 
-export default function TeacherCourseDetail() {
+export default function CreateCourse() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isExistingCourse = !!id;
