@@ -57,7 +57,11 @@ export default function TeacherCourses() {
   };
 
   const handleEditCourse = (id) => {
-    navigate(`/teacher/courses/${id}`);
+    navigate(`/teacher/courses/edit/${id}`);
+  };
+
+  const handlePreviewCourse = (id) => {
+    navigate(`/courses/${id}`);
   };
 
   return (
@@ -163,7 +167,7 @@ export default function TeacherCourses() {
                   code={course.code}
                   studentsCount={course.studentsCount}
                   schedule={course.schedule}
-                  onPreview={() => handleEditCourse(course.id)}
+                  onPreview={() => handlePreviewCourse(course.id)}
                   onManage={() => handleEditCourse(course.id)}
                   onEdit={() => handleEditCourse(course.id)}
                 />
