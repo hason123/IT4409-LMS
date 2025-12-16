@@ -63,4 +63,12 @@ public class GlobalExceptionHandler {
         res.setMessage(e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
     }
+
+    @ExceptionHandler(value = BusinessException.class)
+    public ResponseEntity<ApiResponse<Object>> BusinessException(BusinessException e) {
+        ApiResponse<Object> res = new ApiResponse<>();
+        res.setCode(HttpStatus.BAD_REQUEST.value());
+        res.setMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
 }

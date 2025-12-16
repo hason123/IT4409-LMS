@@ -2,31 +2,39 @@ package com.example.backend.service.impl;
 
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.response.CloudinaryResponse;
+import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.CloudinaryService;
 import com.example.backend.service.UserService;
+import com.example.backend.utils.FileUploadUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CloudinaryService cloudinaryService;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, CloudinaryService cloudinaryService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Override
@@ -144,10 +152,34 @@ public class UserServiceImpl implements UserService {
         return convertUserInfoToDTO(user);
     }
 
+    @Transactional
+    public CloudinaryResponse uploadImage(final Long id, final MultipartFile file) {
+        final User avatarUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        FileUploadUtil.assertAllowed(file, "image");
+        final String cloudinaryImageId = avatarUser.getCloudinaryImageId();
+        if(StringUtils.hasText(cloudinaryImageId)) {
+            cloudinaryService.deleteFile(cloudinaryImageId);
+        }
+        final String fileName = FileUploadUtil.getFileName(file.getOriginalFilename());
+        final CloudinaryResponse response = this.cloudinaryService.uploadFile(file, fileName, "image");
+        avatarUser.setImageUrl(response.getUrl());
+        avatarUser.setCloudinaryImageId(response.getPublicId());
+        userRepository.save(avatarUser);
+        return response;
+    }
+
     @Override
-    public Object getAllUsers() {
-        List<UserInfoResponse> users = userRepository.findAll().stream().map(this::convertUserInfoToDTO).collect(Collectors.toList());
-        return users;
+    public PageResponse<UserInfoResponse> getUserPage(Pageable pageable) {
+        Page<User> userPage = userRepository.findAll(pageable);
+        Page<UserInfoResponse> userResponse = userPage.map(this::convertUserInfoToDTO);
+        PageResponse<UserInfoResponse> pageDTO = new PageResponse<>(
+                userResponse.getNumber() + 1,
+                userResponse.getTotalPages(),
+                userResponse.getNumberOfElements(),
+                userResponse.getContent()
+        );
+        return pageDTO;
     }
 
     @Override

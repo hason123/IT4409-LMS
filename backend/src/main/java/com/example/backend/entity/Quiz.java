@@ -24,6 +24,7 @@ public class Quiz extends BaseEntity {
     @Column(name = "min_pass_score")
     private Integer minPassScore;
     private Integer maxPassScore;
+    private Integer time;
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;

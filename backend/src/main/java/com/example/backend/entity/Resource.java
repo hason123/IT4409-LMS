@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-
 import com.example.backend.constant.ResourceType;
 
 @Getter
@@ -16,7 +15,6 @@ import com.example.backend.constant.ResourceType;
 @SQLDelete(sql = "UPDATE resource SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 public class Resource extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -28,7 +26,7 @@ public class Resource extends BaseEntity {
     private ResourceType type;
 
     @Column(name = "orderindex")
-    private String orderIndex;
+    private Integer orderIndex;
 
     @ManyToOne
     @JoinColumn(name = "lesson_id")

@@ -38,6 +38,10 @@ public class User extends BaseEntity {
     private String refreshToken;
     @Column(name = "gmail")
     private String gmail;
+    @Column(name = "image_url", columnDefinition = "MEDIUMTEXT")
+    private String imageUrl;
+    @Column(name = "cloudinary_image_id")
+    private String cloudinaryImageId;
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;

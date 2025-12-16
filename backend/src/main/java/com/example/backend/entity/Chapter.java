@@ -20,7 +20,7 @@ public class Chapter extends BaseEntity{
     private Integer id;
     private String title;
     @Column(name = "order_index")
-    private String orderIndex;
+    private Integer orderIndex;
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
