@@ -4,8 +4,10 @@ import CourseTabs from "../../components/course/CourseTabs";
 import DescriptionCourse from "../../components/course/DescriptionCourse";
 import CourseContent from "../../components/course/CourseContent";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function CourseDetailPage() {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#333333] dark:text-gray-200">
       <Header />
@@ -94,9 +96,11 @@ export default function CourseDetailPage() {
                     </span>
                   </div>
                 </div>
-                <button class="w-full flex min-w-[84px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-transparent text-primary dark:text-primary border-2 border-primary text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors">
-                  <span class="truncate">Đăng ký học</span>
-                </button>
+                {user?.role !== 'TEACHER' && (
+                  <button className="w-full flex min-w-[84px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-transparent text-primary dark:text-primary border-2 border-primary text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors">
+                    <span className="truncate">Đăng ký học</span>
+                  </button>
+                )}
               </div>
               {/* Tabs */}
               <div className="w-full">
