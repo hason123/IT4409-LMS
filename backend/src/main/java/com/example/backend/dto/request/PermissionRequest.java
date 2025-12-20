@@ -9,4 +9,5 @@ public class PermissionRequest {
     private String name;
     private String method;
     private String description;
+    private String apiPath;
 }

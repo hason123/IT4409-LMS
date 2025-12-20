@@ -11,15 +11,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/categories")
-@RequiredArgsConstructor
+@RequestMapping("/api/v1/lms/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;
+
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping

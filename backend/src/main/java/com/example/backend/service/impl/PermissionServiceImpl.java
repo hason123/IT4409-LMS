@@ -7,10 +7,10 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.PermissionRepository;
 import com.example.backend.service.PermissionService;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
 @Service
 public class PermissionServiceImpl implements PermissionService {
     private final PermissionRepository permissionRepository;
@@ -23,7 +23,7 @@ public class PermissionServiceImpl implements PermissionService {
     public PermissionInfoResponse createPermission(PermissionRequest request) {
         Permission permission = new Permission();
         permission.setName(request.getName());
-        permission.setApiPath(request.getApiPath());
+        permission.setApiPath(request.getDescription());
         permission.setMethod(request.getMethod());
         permission.setDescription(request.getDescription());
         
@@ -105,3 +105,5 @@ public class PermissionServiceImpl implements PermissionService {
         return permission;
     }
 }
+
+ */

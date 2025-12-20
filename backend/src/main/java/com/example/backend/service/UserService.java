@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
@@ -32,6 +33,8 @@ public interface UserService {
     PageResponse<UserInfoResponse> getUserPage(Pageable pageable);
 
     UserInfoResponse createUser(UserRequest request);
+
+    PageResponse<UserInfoResponse> searchUser(SearchUserRequest request, Pageable pageable);
 
     UserInfoResponse convertUserInfoToDTO(User user);
 

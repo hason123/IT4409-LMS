@@ -15,17 +15,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+
+    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
 
     @Override
     public CategoryResponse createCategory(CategoryRequest request) {
         Category category = new Category();
         category.setTitle(request.getTitle());
         category.setDescription(request.getDescription());
-
         return mapToResponse(categoryRepository.save(category));
     }
 
@@ -33,7 +35,6 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponse getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-
         return mapToResponse(category);
     }
 
@@ -49,10 +50,8 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-
         category.setTitle(request.getTitle());
         category.setDescription(request.getDescription());
-
         return mapToResponse(categoryRepository.save(category));
     }
 
@@ -60,7 +59,6 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-
         categoryRepository.delete(category); // soft delete
     }
 
@@ -92,7 +90,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryResponse responseDTO = new CategoryResponse();
         responseDTO.setId(category.getId());
         responseDTO.setTitle(category.getTitle());
-        
+        responseDTO.setDescription(category.getDescription());
         return responseDTO;
     }
 }

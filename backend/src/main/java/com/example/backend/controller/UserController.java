@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
@@ -75,6 +76,15 @@ public class UserController {
     public ResponseEntity<CloudinaryResponse> uploadImage(@PathVariable final Long id, @RequestPart final MultipartFile file) {
         CloudinaryResponse response = userService.uploadImage(id, file);
         return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @GetMapping("/users/search")
+    public ResponseEntity<PageResponse<UserInfoResponse>> searchUsers(@RequestParam(value = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
+                                                                            @RequestParam(value = "pageSize", required = false, defaultValue = "5") Integer pageSize, SearchUserRequest request){
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        PageResponse<UserInfoResponse> results = userService.searchUser(request,pageable);
+        return ResponseEntity.ok(results);
     }
 }
 

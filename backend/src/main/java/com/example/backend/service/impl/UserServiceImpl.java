@@ -2,6 +2,7 @@ package com.example.backend.service.impl;
 
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
@@ -12,9 +13,11 @@ import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.CloudinaryService;
 import com.example.backend.service.UserService;
+import com.example.backend.specification.UserSpecification;
 import com.example.backend.utils.FileUploadUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -196,6 +199,36 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return convertUserInfoToDTO(user);
     }
+
+    @Override
+    public PageResponse<UserInfoResponse> searchUser(SearchUserRequest request, Pageable pageable) {
+        Specification<User> spec = (root, query, cb) -> cb.conjunction();
+        if (StringUtils.hasText(request.getUserName())) {
+            spec = spec.and(UserSpecification.likeUserName(request.getUserName()));
+        }
+        if (StringUtils.hasText(request.getFullName())) {
+            spec = spec.and(UserSpecification.likeFullName(request.getFullName()));
+        }
+        if (StringUtils.hasText(request.getStudentNumber())) {
+            spec = spec.and(UserSpecification.hasStudentNumber(request.getStudentNumber()));
+        }
+        if (StringUtils.hasText(request.getGmail())) {
+            spec = spec.and(UserSpecification.likeGmail(request.getGmail()));
+        }
+        if (StringUtils.hasText(request.getRoleName())) {
+            RoleType roleType = RoleType.valueOf(request.getRoleName().toUpperCase());
+            spec = spec.and(UserSpecification.hasRole(roleType));
+        }
+        Page<User> userPage = userRepository.findAll(spec, pageable);
+        Page<UserInfoResponse> response = userPage.map(this::convertUserInfoToDTO);
+        return new PageResponse<>(
+                response.getNumber() + 1,
+                response.getNumberOfElements(),
+                response.getTotalPages(),
+                response.getContent()
+        );
+    }
+
 
     @Override
     public UserInfoResponse convertUserInfoToDTO(User user){
