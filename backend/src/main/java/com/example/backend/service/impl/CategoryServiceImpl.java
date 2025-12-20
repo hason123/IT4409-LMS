@@ -2,11 +2,14 @@ package com.example.backend.service.impl;
 
 import com.example.backend.dto.request.CategoryRequest;
 import com.example.backend.dto.response.CategoryResponse;
+import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.Category;
 import com.example.backend.repository.CategoryRepository;
 import com.example.backend.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,5 +70,29 @@ public class CategoryServiceImpl implements CategoryService {
                 category.getTitle(),
                 category.getDescription()
         );
+    }
+
+    @Override
+    public PageResponse<CategoryResponse> getCategoryPage(Pageable pageable) {
+        Page<Category> categoryPage = categoryRepository.findAll(pageable);
+        Page<CategoryResponse> categoryResponsePage = categoryPage.map(this::convertCategoryToDTO);
+        
+        PageResponse<CategoryResponse> pageDTO = new PageResponse<>(
+                categoryResponsePage.getNumber() + 1, 
+                categoryResponsePage.getTotalPages(),
+                (int) categoryResponsePage.getTotalElements(),
+                categoryResponsePage.getContent()
+        );
+
+        return pageDTO;
+    }
+
+    @Override
+    public CategoryResponse convertCategoryToDTO(Category category) {
+        CategoryResponse responseDTO = new CategoryResponse();
+        responseDTO.setId(category.getId());
+        responseDTO.setTitle(category.getTitle());
+        
+        return responseDTO;
     }
 }
