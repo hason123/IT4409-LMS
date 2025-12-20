@@ -2,6 +2,8 @@ package com.example.backend.dto.response;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,4 +14,5 @@ public class PermissionResponse {
     private String apiPath;
     private String method;
     private String description;
+    private List<String> roleName;
 }

@@ -11,6 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 public class RoleRequest {
     private RoleType roleName;
-    private String RoleDesc;
+    private String roleDesc;
     private List<Long> permissionIds;
 }

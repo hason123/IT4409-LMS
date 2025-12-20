@@ -1,6 +1,8 @@
 package com.example.backend.dto.request;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -10,4 +12,5 @@ public class PermissionRequest {
     private String method;
     private String description;
     private String apiPath;
+    private List<Long> roleIds;
 }
