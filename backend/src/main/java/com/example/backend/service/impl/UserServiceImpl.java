@@ -6,6 +6,7 @@ import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
+import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
@@ -241,6 +242,16 @@ public class UserServiceImpl implements UserService {
         userDTO.setFullName(user.getFullName());
         userDTO.setGmail(user.getGmail());
         userDTO.setRoleName(user.getRole().getRoleName().toString());
+        return userDTO;
+    }
+
+    @Override
+    public UserViewResponse convertUserViewToDTO(User user){
+        UserViewResponse userDTO = new UserViewResponse();
+        userDTO.setUserName(user.getUserName());
+        userDTO.setStudentNumber(user.getStudentNumber());
+        userDTO.setFullName(user.getFullName());
+        userDTO.setGmail(user.getGmail());
         return userDTO;
     }
 

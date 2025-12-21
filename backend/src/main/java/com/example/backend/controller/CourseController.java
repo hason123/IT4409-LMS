@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.request.CourseRequest;
-import com.example.backend.dto.response.CourseResponse;
+import com.example.backend.dto.request.course.CourseRequest;
+import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.service.CourseService;
 import org.springframework.data.domain.PageRequest;

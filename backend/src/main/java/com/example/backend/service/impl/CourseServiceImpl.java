@@ -2,27 +2,38 @@ package com.example.backend.service.impl;
 
 
 import com.example.backend.constant.RoleType;
-import com.example.backend.dto.request.CourseRequest;
-import com.example.backend.dto.response.CourseResponse;
+import com.example.backend.dto.request.course.CourseRequest;
+import com.example.backend.dto.request.course.StudentCourseRequest;
+import com.example.backend.dto.request.search.SearchUserRequest;
+import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.Category;
 import com.example.backend.entity.Course;
+import com.example.backend.entity.StudentProgress;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
-import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.CourseRepository;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.CourseService;
 import com.example.backend.service.UserService;
+import com.example.backend.specification.UserSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import java.util.List;
 
 @Service
 public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final CategoryRepository categoryRepository;
     private final UserService userService;
+   // private final UserRepository userRepository;
+
 
     public CourseServiceImpl(CourseRepository courseRepository, CategoryRepository categoryRepository, UserService userService) {
         this.courseRepository = courseRepository;
@@ -69,9 +80,6 @@ public class CourseServiceImpl implements CourseService {
             courseRepository.deleteById(id);
         }
     }
-
-    //@Override
-    //public void addStudentsToCourse()
 
     @Override
     public CourseResponse getCourseById(Long id) {

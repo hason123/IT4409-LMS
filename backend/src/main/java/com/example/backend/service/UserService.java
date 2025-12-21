@@ -5,6 +5,7 @@ import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
+import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +40,8 @@ public interface UserService {
     UserInfoResponse convertUserInfoToDTO(User user);
 
     CloudinaryResponse uploadImage(final Long id, final MultipartFile file);
+
+    UserViewResponse convertUserViewToDTO(User user);
 
     // Object getUserById(Long id);
 

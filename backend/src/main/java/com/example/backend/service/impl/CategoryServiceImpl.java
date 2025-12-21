@@ -3,8 +3,10 @@ package com.example.backend.service.impl;
 import com.example.backend.dto.request.CategoryRequest;
 import com.example.backend.dto.response.CategoryResponse;
 import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.entity.Category;
 import com.example.backend.repository.CategoryRepository;
+import com.example.backend.repository.CourseRepository;
 import com.example.backend.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,11 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CourseRepository courseRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, CourseRepository courseRepository) {
         this.categoryRepository = categoryRepository;
+        this.courseRepository = courseRepository;
     }
 
     @Override
