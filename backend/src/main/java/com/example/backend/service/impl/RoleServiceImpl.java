@@ -2,8 +2,9 @@ package com.example.backend.service.impl;
 
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.RoleRequest;
-import com.example.backend.dto.response.PageResponseDTO;
-import com.example.backend.dto.response.role.RoleResponse;
+import com.example.backend.dto.request.UserRoleRequest;
+import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.RoleResponse;
 import com.example.backend.entity.Permission;
 import com.example.backend.entity.Role;
 import com.example.backend.entity.User;
@@ -35,96 +36,68 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public RoleResponse createRole(RoleRequest request) {
-        log.info("Creating new role: {}", request.getRoleName());
-        
+        Role role = new Role();
         if (roleRepository.existsByRoleName(RoleType.valueOf(request.getRoleName()))) {
             throw new DataIntegrityViolationException(
-                "Role name already exists: " + request.getRoleName()
+                    "Role name already exists: " + request.getRoleName()
             );
         }
-        
-        Role role = new Role();
         role.setRoleName(RoleType.valueOf(request.getRoleName()));
-        role.setRoleDesc(request.getDescription());
+        role.setRoleDesc(request.getRoleDesc());
         
         if (request.getPermissionIds() != null && !request.getPermissionIds().isEmpty()) {
             List<Permission> permissions = request.getPermissionIds().stream()
                     .map(id -> permissionRepository.findById(id)
-                            .orElseThrow(() -> {
-                                log.error("Permission with id {} not found", id);
-                                return new ResourceNotFoundException("Permission not found with id: " + id);
-                            }))
+                            .orElseThrow(() -> new ResourceNotFoundException("Permission not found with id: " + id)))
                     .toList();
             log.info("Adding {} permissions to role", permissions.size());
             role.setPermissions(permissions);
         }
-        
         Role savedRole = roleRepository.save(role);
         log.info("Role created successfully with id: {}", savedRole.getRoleID());
-        
         return convertToDTO(savedRole);
     }
 
     @Override
     public RoleResponse updateRole(RoleRequest request, Long roleId) {
-        log.info("Update role with id {}", roleId);
-        
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> {
                     log.error("Role with id {} not found", roleId);
                     return new ResourceNotFoundException("Role not found with id: " + roleId);
                 });
-
-        role.setRoleDesc(request.getDescription());
-        
-
+        role.setRoleDesc(request.getRoleDesc());
         if (request.getPermissionIds() != null) {
             List<Permission> permissions = request.getPermissionIds().stream()
                     .map(id -> permissionRepository.findById(id)
-                            .orElseThrow(() -> {
-                                log.error("Permission with id {} not found", id);
-                                return new ResourceNotFoundException("Permission not found with id: " + id);
-                            }))
+                            .orElseThrow(() -> new ResourceNotFoundException("Permission not found with id: " + id)))
                     .toList();
-            log.info("Adding or removing permissions of a role");
             role.setPermissions(permissions);
         }
-        
         roleRepository.save(role);
-        log.info("Role with id {} has been updated", roleId);
-        
         return convertToDTO(role);
     }
 
     @Override
     public void deleteRole(Long roleId) {
         Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> {
-                    log.error("Role with id {} not found", roleId);
-                    return new ResourceNotFoundException("Role not found with id: " + roleId);
-                });
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
         role.getPermissions().forEach(permission -> permission.getRoles().remove(role));
-        
         role.getUsers().forEach(user -> {
-            Role defaultRole = roleRepository.findByRoleName(RoleType.STUDENT)
-                    .orElseThrow(() -> new ResourceNotFoundException("Default STUDENT role not found"));
+            Role defaultRole = roleRepository.findByRoleName(RoleType.STUDENT);
+            if(defaultRole == null) {
+                throw new ResourceNotFoundException("Role with id " + defaultRole.getRoleID() + " not found");
+            }
             user.setRole(defaultRole);
             userRepository.save(user);
         });
-        
-        roleRepository.deleteById(roleId);
-        log.info("Role with id {} has been deleted", roleId);
+        roleRepository.delete(role);
     }
 
     @Override
-    public PageResponseDTO<RoleResponse> getPageRole(Pageable pageable) {
-        log.info("Get roles with page {}", pageable);
-        
+    public PageResponse<RoleResponse> getPageRole(Pageable pageable) {
         Page<Role> roles = roleRepository.findAll(pageable);
         Page<RoleResponse> rolePage = roles.map(this::convertToDTO);
-        
-        return new PageResponseDTO<>(
+        return new PageResponse<>(
                 rolePage.getNumber() + 1,
                 rolePage.getNumberOfElements(),
                 rolePage.getTotalPages(),
@@ -135,35 +108,35 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleResponse getRole(Long roleId) {
         log.info("Get role with id {}", roleId);
-        
         Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> {
-                    log.error("Role with id {} not found", roleId);
-                    return new ResourceNotFoundException("Role not found with id: " + roleId);
-                });
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
         return convertToDTO(role);
+    }
+
+    @Override
+    public void updateUserRole(UserRoleRequest request){
+        if(roleRepository.existsByRoleName(RoleType.valueOf(request.getRoleName()))){
+            Role roleUpdated = roleRepository.findByRoleName(RoleType.valueOf(request.getRoleName()));
+            request.getUserIds().stream()
+                    .map(userId -> userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId)))
+                    .forEach(user -> {
+                        user.setRole(roleUpdated);
+                        userRepository.save(user);
+                    });
+        }
+        else throw new ResourceNotFoundException("Role not found with name: " + request.getRoleName());
     }
 
     public RoleResponse convertToDTO(Role role) {
         RoleResponse response = new RoleResponse();
-        response.setRoleName(role.getRoleName().toString());
-        response.setRoleId(role.getRoleID());
-        response.setDescription(role.getRoleDesc());
-        response.setCreatedDate(role.getCreatedDate());
-        response.setLastModifiedDate(role.getLastModifiedDate());
-        
-        // Convert permissions to DTOs
-        List<RoleResponse.PermissionDTO> permissions = role.getPermissions().stream()
-                .map(permission -> new RoleResponse.PermissionDTO(
-                        permission.getId(),
-                        permission.getName(),
-                        permission.getApiPath(),
-                        permission.getMethod()
-                ))
+        response.setRoleName(role.getRoleName().name());
+        response.setRoleID(role.getRoleID());
+        response.setRoleDesc(role.getRoleDesc());
+        List<Long> permissionIds = role.getPermissions()
+                .stream()
+                .map(Permission::getId)
                 .toList();
-        response.setPermissions(permissions);
-        
+        response.setPermissionIds(permissionIds);
         return response;
     }
 }

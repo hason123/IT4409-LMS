@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RoleResponse {
     private Long roleID;
-    private RoleType roleName;
+    private String roleName;
     private String roleDesc;
-    private List<String> permissionIds;
+    private List<Long> permissionIds;
 }
