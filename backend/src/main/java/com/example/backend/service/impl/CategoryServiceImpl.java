@@ -5,6 +5,7 @@ import com.example.backend.dto.response.CategoryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.entity.Category;
+import com.example.backend.entity.Course;
 import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.CourseRepository;
 import com.example.backend.service.CategoryService;
@@ -63,6 +64,9 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
+        for (Course course : category.getCourses()) {
+            course.setCategory(null);
+        }
         categoryRepository.delete(category); // soft delete
     }
 
@@ -78,14 +82,12 @@ public class CategoryServiceImpl implements CategoryService {
     public PageResponse<CategoryResponse> getCategoryPage(Pageable pageable) {
         Page<Category> categoryPage = categoryRepository.findAll(pageable);
         Page<CategoryResponse> categoryResponsePage = categoryPage.map(this::convertCategoryToDTO);
-        
         PageResponse<CategoryResponse> pageDTO = new PageResponse<>(
                 categoryResponsePage.getNumber() + 1, 
                 categoryResponsePage.getTotalPages(),
                 (int) categoryResponsePage.getTotalElements(),
                 categoryResponsePage.getContent()
         );
-
         return pageDTO;
     }
 

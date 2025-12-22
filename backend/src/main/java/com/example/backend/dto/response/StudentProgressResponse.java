@@ -8,7 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 public class StudentProgressResponse {
     private Long id;
-    private String studentName;
+    //private String userName;
+    private String fullName;
+    private String studentNumber;
     private String courseTitle;
     private String lessonProgress;
     private String quizProgress;

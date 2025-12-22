@@ -4,6 +4,7 @@ import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.StudentProgressResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.Course;
 import com.example.backend.entity.StudentProgress;
@@ -67,12 +68,24 @@ public class StudentProgressServiceImpl implements StudentProgressService {
         studentProgressRepository.deleteAll(progresses);
     }
 
-    @Transactional
+    public PageResponse<StudentProgressResponse> getStudentProgressPage(Pageable pageable){
+        Page<StudentProgress> studentProgressPage = studentProgressRepository.findAll(pageable);
+        Page<StudentProgressResponse> studentProgressResponse = studentProgressPage.map(this::convertStudentProgressToDTO);
+        PageResponse<StudentProgressResponse> response = new PageResponse<>(
+                studentProgressResponse.getNumber() + 1,
+                studentProgressResponse.getTotalPages(),
+                studentProgressResponse.getNumberOfElements(),
+                studentProgressResponse.getContent()
+        );
+        return response;
+
+    }
+
     @Override
     public PageResponse<UserViewResponse> searchStudentsInCourse(Long courseId, SearchUserRequest request, Pageable pageable) {
         Specification<User> spec = buildBaseUserSearchSpec(request);
         spec = spec.and(UserSpecification.hasRole(RoleType.STUDENT));
-        spec = spec.and(UserSpecification.notInCourse(courseId));
+        spec = spec.and(UserSpecification.inCourse(courseId));
         Page<User> userPage = userRepository.findAll(spec, pageable);
         Page<UserViewResponse> response = userPage.map(userService::convertUserViewToDTO);
         return new PageResponse<>(
@@ -87,7 +100,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
     public PageResponse<UserViewResponse> searchStudentsNotInCourse(Long courseId, SearchUserRequest request, Pageable pageable) {
         Specification<User> spec = buildBaseUserSearchSpec(request);
         spec = spec.and(UserSpecification.hasRole(RoleType.STUDENT));
-        spec = spec.and(UserSpecification.inCourse(courseId));
+        spec = spec.and(UserSpecification.notInCourse(courseId));
         Page<User> userPage = userRepository.findAll(spec, pageable);
         Page<UserViewResponse> response = userPage.map(userService::convertUserViewToDTO);
         return new PageResponse<>(
@@ -114,5 +127,16 @@ public class StudentProgressServiceImpl implements StudentProgressService {
             spec = spec.and(UserSpecification.likeGmail(request.getGmail()));
         }
         return spec;
+    }
+
+    private StudentProgressResponse convertStudentProgressToDTO(StudentProgress studentProgress) {
+        StudentProgressResponse response = new StudentProgressResponse();
+        response.setLessonProgress(studentProgress.getLessonProgress());
+        response.setQuizProgress(studentProgress.getQuizProgress());
+        response.setStudentNumber(studentProgress.getStudent().getFullName());
+        response.setCourseTitle(studentProgress.getCourse().getTitle());
+        response.setFullName(studentProgress.getStudent().getFullName());
+        response.setId(studentProgress.getId());
+        return response;
     }
 }

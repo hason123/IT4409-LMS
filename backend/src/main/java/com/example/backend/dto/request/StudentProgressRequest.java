@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 public class StudentProgressRequest {
     private Long studentId;
-    private Long courceId;
+    private Long courseId;
 }
