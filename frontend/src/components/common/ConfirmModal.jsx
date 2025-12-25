@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function ConfirmModal({
   open = false,
@@ -10,6 +11,8 @@ export default function ConfirmModal({
   onCancel = () => {},
   isLoading = false,
 }) {
+  const { t } = useTranslation();
+  
   if (!open) return null;
 
   // Map color để tạo class name động
@@ -59,7 +62,7 @@ export default function ConfirmModal({
             className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-bold leading-normal tracking-[0.015em] border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-background-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={isLoading}
           >
-            <span className="truncate">Hủy bỏ</span>
+            <span className="truncate">{t('common.huyBo')}</span>
           </button>
           <button
             onClick={onConfirm}
@@ -67,7 +70,7 @@ export default function ConfirmModal({
             disabled={isLoading}
           >
             <span className="truncate">
-              {isLoading ? 'Đang xử lý...' : actionName}
+              {isLoading ? t('common.dangXuLy') : actionName}
             </span>
           </button>
         </div>

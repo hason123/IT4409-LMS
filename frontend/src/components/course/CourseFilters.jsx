@@ -118,6 +118,21 @@ export default function CourseFilters({ onFilterChange }) {
               <span className="text-sm ml-2 text-gray-600 dark:text-gray-300">4.0 & Up</span>
             </div>
           </label>
+
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input 
+              checked={filters.rating === '0.0'} 
+              onChange={handleRatingChange}
+              value="0.0"
+              className="form-radio h-4 w-4 text-primary" 
+              name="rating" 
+              type="radio"
+            />
+            <div className="flex items-center">
+              <span className="material-symbols-outlined !text-lg text-gray-400" style={{fontVariationSettings: "'FILL' 0"}}>star</span>
+              <span className="text-sm ml-2 text-gray-600 dark:text-gray-300">Khóa học mới</span>
+            </div>
+          </label>
         </div>
       </div>
 

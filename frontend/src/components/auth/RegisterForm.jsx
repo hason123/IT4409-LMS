@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { UserIcon, EnvelopeIcon, LockClosedIcon, AcademicCapIcon } from '@heroicons/react/24/outline'
 import { register } from '../../api/auth'
 import { useAuth } from '../../contexts/AuthContext'
 import OtpModal from './OtpModal'
 
 export default function RegisterForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { loginUser } = useAuth();
   const [formData, setFormData] = useState({
@@ -27,22 +29,22 @@ export default function RegisterForm() {
     let error = '';
     switch (name) {
       case 'username':
-        if (!value.trim()) error = 'Vui lòng nhập tên đăng nhập';
+        if (!value.trim()) error = t('auth.vuilongNhapTenDangNhap');
         break;
       case 'fullName':
-        if (!value.trim()) error = 'Vui lòng nhập họ tên';
+        if (!value.trim()) error = t('auth.vuilongNhapHoVaTen');
         break;
       case 'email':
-        if (!value.trim()) error = 'Vui lòng nhập email';
-        else if (!/\S+@\S+\.\S+/.test(value)) error = 'Email không hợp lệ';
+        if (!value.trim()) error = t('auth.vuilongNhapEmail');
+        else if (!/\S+@\S+\.\S+/.test(value)) error = t('auth.emailKhongHopLe');
         break;
       case 'password':
-        if (!value) error = 'Vui lòng nhập mật khẩu';
-        else if (value.length < 6) error = 'Mật khẩu phải có ít nhất 6 ký tự';
+        if (!value) error = t('auth.vuilongNhapMatKhau');
+        else if (value.length < 6) error = t('auth.matKhauToi6KyTu');
         break;
       case 'confirmPassword':
-        if (!value) error = 'Vui lòng xác nhận mật khẩu';
-        else if (formData.password && value !== formData.password) error = 'Mật khẩu không khớp';
+        if (!value) error = t('auth.vuilongXacNhanMatKhau');
+        else if (formData.password && value !== formData.password) error = t('auth.matKhauKhongKhop');
         break;
       default:
         break;
@@ -122,11 +124,11 @@ export default function RegisterForm() {
         setShowOtpModal(true);
       } else {
         // Fallback: if no userId in response, navigate to login
-        setApiError('Đăng ký thành công. Vui lòng đăng nhập.');
+        setApiError(t('auth.dangKyThanhCong'));
         setTimeout(() => navigate('/login'), 2000);
       }
     } catch (err) {
-      setApiError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      setApiError(err.message || t('auth.dangKyThatBai'));
     } finally {
       setLoading(false);
     }
@@ -141,7 +143,7 @@ export default function RegisterForm() {
       )}
 
       <div className="flex flex-col w-full">
-        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">Username <span className="text-red-500">*</span></p>
+        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">{t('auth.tenDangNhap')} <span className="text-red-500">*</span></p>
         <div className={`input-group w-full ${errors.username ? '!border-red-500' : ''}`}>
           <div className={`icon-area border-r border-[#dbe0e6] dark:border-gray-600 ${errors.username ? '!border-red-500' : ''}`}>
             <UserIcon className="h-5 w-5" />
@@ -152,14 +154,14 @@ export default function RegisterForm() {
             onChange={handleChange}
             onBlur={handleBlur}
             className="form-input flex w-full" 
-            placeholder="Create a username" 
+            placeholder={t('auth.nhapTenDangNhap')} 
           />
         </div>
         {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
       </div>
 
       <div className="flex flex-col w-full">
-        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">Full name <span className="text-red-500">*</span></p>
+        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">{t('auth.hoVaTen')} <span className="text-red-500">*</span></p>
         <div className={`input-group w-full ${errors.fullName ? '!border-red-500' : ''}`}>
           <div className={`icon-area border-r border-[#dbe0e6] dark:border-gray-600 ${errors.fullName ? '!border-red-500' : ''}`}>
             <UserIcon className="h-5 w-5" />
@@ -170,14 +172,14 @@ export default function RegisterForm() {
             onChange={handleChange}
             onBlur={handleBlur}
             className={`form-input flex w-full`} 
-            placeholder="Your full name" 
+            placeholder={t('auth.nhapHoVaTen')} 
           />
         </div>
         {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
       </div>
 
       <div className="flex flex-col w-full">
-        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">Email <span className="text-red-500">*</span></p>
+        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">{t('auth.email')} <span className="text-red-500">*</span></p>
         <div className={`input-group w-full ${errors.email ? '!border-red-500' : ''}`}>
           <div className={`icon-area border-r border-[#dbe0e6] dark:border-gray-600 ${errors.email ? '!border-red-500' : ''}`}>
             <EnvelopeIcon className="h-5 w-5" />
@@ -188,14 +190,14 @@ export default function RegisterForm() {
             onChange={handleChange}
             onBlur={handleBlur}
             className={`form-input flex w-full`} 
-            placeholder="you@example.com" 
+            placeholder={t('auth.nhapEmail')} 
           />
         </div>
         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
       </div>
 
       <div className="flex flex-col w-full">
-        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">Password <span className="text-red-500">*</span></p>
+        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">{t('auth.matKhau')} <span className="text-red-500">*</span></p>
         <div className={`input-group w-full ${errors.password ? '!border-red-500' : ''}`}>
           <div className={`icon-area border-r border-[#dbe0e6] dark:border-gray-600 ${errors.password ? '!border-red-500' : ''}`}>
             <LockClosedIcon className="h-5 w-5" />
@@ -207,14 +209,14 @@ export default function RegisterForm() {
             onChange={handleChange}
             onBlur={handleBlur}
             className="form-input flex w-full" 
-            placeholder="Create a password" 
+            placeholder={t('auth.nhapMatKhau')} 
           />
         </div>
         {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
       </div>
 
       <div className="flex flex-col w-full">
-        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">Confirm password <span className="text-red-500">*</span></p>
+        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">{t('auth.xacNhanMatKhau')} <span className="text-red-500">*</span></p>
         <div className={`input-group w-full ${errors.confirmPassword ? '!border-red-500' : ''}`}>
           <div className={`icon-area border-r border-[#dbe0e6] dark:border-gray-600 ${errors.confirmPassword ? '!border-red-500' : ''}`}>
             <LockClosedIcon className="h-5 w-5" />
@@ -226,14 +228,14 @@ export default function RegisterForm() {
             onChange={handleChange}
             onBlur={handleBlur}
             className={`form-input flex w-full`} 
-            placeholder="Confirm your password" 
+            placeholder={t('auth.nhapLaiMatKhau')} 
           />
         </div>
         {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
       </div>
 
       <div className="flex flex-col w-full">
-        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">Đăng ký tài khoản <span className="text-red-500">*</span></p>
+        <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">{t('auth.vaiTro')} <span className="text-red-500">*</span></p>
         <div className="flex items-center gap-6 px-1">
           <label className="flex items-center gap-2 cursor-pointer group">
             <div className="relative flex items-center">
@@ -251,7 +253,7 @@ export default function RegisterForm() {
                 </svg>
               </div>
             </div>
-            <span className="text-[#111418] dark:text-gray-200 text-sm group-hover:text-primary transition-colors">Sinh viên</span>
+            <span className="text-[#111418] dark:text-gray-200 text-sm group-hover:text-primary transition-colors">{t('auth.sinhVien')}</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer group">
@@ -270,16 +272,18 @@ export default function RegisterForm() {
                 </svg>
               </div>
             </div>
-            <span className="text-[#111418] dark:text-gray-200 text-sm group-hover:text-primary transition-colors">Giảng viên</span>
+            <span className="text-[#111418] dark:text-gray-200 text-sm group-hover:text-primary transition-colors">{t('auth.giaoVien')}</span>
           </label>
         </div>
       </div>
 
       <button type="submit" className="btn btn-primary w-full text-base font-bold" disabled={loading}>
-        {loading ? 'Creating account...' : 'Create account'}
+        {loading ? t('auth.dangDangKy') : t('auth.dangKy')}
       </button>
 
-      <p className="text-center text-sm text-[#617589] dark:text-gray-400">By registering, you agree to our <a className="font-medium text-primary hover:underline" href="#">Terms</a>.</p>
+      <p className="text-center text-sm text-[#617589] dark:text-gray-400">
+        {t('auth.thoaThuan')} <a className="font-medium text-primary hover:underline" href="#">{t('auth.đieuKhoanDichVu')}</a>.
+      </p>
 
       {/* OTP Modal */}
       <OtpModal 

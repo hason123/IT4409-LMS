@@ -304,9 +304,9 @@ export default function TeacherHeader({ toggleSidebar }) {
       {/* Logout Confirmation Modal */}
       <ConfirmModal
         open={showLogoutConfirm}
-        title="Xác nhận đăng xuất"
-        message="Bạn có chắc chắn muốn đăng xuất không?"
-        actionName="Đăng xuất"
+        title={t("common.xacNhanDangXuat")}
+        message={t("common.banCoChacChanMuonDangXuat")}
+        actionName={t("common.dangXuat")}
         color="red"
         onConfirm={handleLogoutConfirm}
         onCancel={() => setShowLogoutConfirm(false)}

@@ -364,19 +364,9 @@ export default function Header({ menuItems }) {
       {/* Modal Xác nhận Đăng xuất */}
       <ConfirmModal
         open={showLogoutConfirm}
-        title="Xác nhận đăng xuất"
-        message="Bạn có chắc chắn muốn đăng xuất không?"
-        actionName="Đăng xuất"
-        color="red"
-        onConfirm={handleLogoutConfirm}
-        onCancel={() => setShowLogoutConfirm(false)}
-        isLoading={isLoggingOut}
-      />
-      <ConfirmModal
-        open={showLogoutConfirm}
-        title="Xác nhận đăng xuất"
-        message="Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?"
-        actionName="Đăng xuất"
+        title={t("common.xacNhanDangXuat")}
+        message={t("common.banCoChacChanMuonDangXuat")}
+        actionName={t("common.dangXuat")}
         color="red"
         onConfirm={handleLogoutConfirm}
         onCancel={() => setShowLogoutConfirm(false)}

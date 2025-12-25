@@ -27,6 +27,17 @@ export default function CourseDetailPage() {
   const [publishing, setPublishing] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
   const [enrollmentStatus, setEnrollmentStatus] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+    useEffect(() => {
+      const handleResize = () => {
+        setSidebarCollapsed(window.innerWidth < 1024);
+      };
+  
+      handleResize();
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
   const fetchCourse = async () => {
     try {
@@ -174,7 +185,9 @@ export default function CourseDetailPage() {
         {isTeacherOrAdmin ? <TeacherHeader /> : <Header />}
           <div className="flex items-center justify-center">
             {isTeacherOrAdmin && <TeacherSidebar />}
-            <main className={`flex-1 ${isTeacherOrAdmin ? "lg:ml-64 pt-16" : "max-w-7xl"} w-full`}>
+            <main className={`flex-1 ${isTeacherOrAdmin ? `${
+          sidebarCollapsed ? "pl-20 pt-16" : "pl-64 pt-16"
+        }` : "max-w-7xl"} w-full`}>
               <div className="container mx-auto sm:px-6 lg:px-8 py-8">
                 {/* Back Button */}
                 <button
