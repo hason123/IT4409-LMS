@@ -56,14 +56,7 @@ public class PermissionServiceImpl implements PermissionService {
         return convertPermissionToDTO(updatedPermission);
     }
 
-    @Override
-    public void deletePermissionById(Integer id) {
-        Permission permission = permissionRepository.findById(id).orElse(null);
-        if (permission == null) {
-            throw new ResourceNotFoundException("Permission not found");
-        }
-        permissionRepository.deleteById(id);
-    }
+    
 
     @Override
     public PermissionInfoResponse getPermissionById(Integer id) {
