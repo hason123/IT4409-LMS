@@ -20,6 +20,10 @@ public class Course extends BaseEntity{
     private Long id;
     private String title;
     private String description;
+    @Column(name = "image_url", columnDefinition = "MEDIUMTEXT")
+    private String imageUrl;
+    @Column(name = "cloudinary_image_id")
+    private String cloudinaryImageId;
     @OneToMany(mappedBy = "course")
     private List<Chapter> chapters;
     @OneToMany(mappedBy = "course")

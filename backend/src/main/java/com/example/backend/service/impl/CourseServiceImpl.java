@@ -5,6 +5,7 @@ import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.course.CourseRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
+import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
@@ -16,15 +17,19 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.CourseRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.CloudinaryService;
 import com.example.backend.service.CourseService;
 import com.example.backend.service.UserService;
 import com.example.backend.specification.UserSpecification;
+import com.example.backend.utils.FileUploadUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @Service
@@ -32,13 +37,15 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final CategoryRepository categoryRepository;
     private final UserService userService;
+    private final CloudinaryService cloudinaryService;
    // private final UserRepository userRepository;
 
 
-    public CourseServiceImpl(CourseRepository courseRepository, CategoryRepository categoryRepository, UserService userService) {
+    public CourseServiceImpl(CourseRepository courseRepository, CategoryRepository categoryRepository, UserService userService, CloudinaryService cloudinaryService) {
         this.courseRepository = courseRepository;
         this.categoryRepository = categoryRepository;
         this.userService = userService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Override
@@ -97,6 +104,23 @@ public class CourseServiceImpl implements CourseService {
                 courseResponsePage.getNumberOfElements(),
                 courseResponsePage.getContent()
         );
+        return response;
+    }
+
+    @Override
+    public CloudinaryResponse uploadImage(Long id, MultipartFile file) {
+        final Course uploadCourse = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        FileUploadUtil.assertAllowed(file, "image");
+        final String cloudinaryImageId = uploadCourse.getCloudinaryImageId();
+        if(StringUtils.hasText(cloudinaryImageId)) {
+            cloudinaryService.deleteFile(cloudinaryImageId);
+        }
+        final String fileName = FileUploadUtil.getFileName(file.getOriginalFilename());
+        final CloudinaryResponse response = this.cloudinaryService.uploadFile(file, fileName, "image");
+        uploadCourse.setImageUrl(response.getUrl());
+        uploadCourse.setCloudinaryImageId(response.getPublicId());
+        courseRepository.save(uploadCourse);
         return response;
     }
 

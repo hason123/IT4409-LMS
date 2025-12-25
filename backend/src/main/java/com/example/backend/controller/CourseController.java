@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.request.course.CourseRequest;
+import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.service.CourseService;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/lms")
@@ -58,6 +60,13 @@ public class CourseController {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
         PageResponse<CourseResponse> response =
                 courseService.getAllCourses(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @PostMapping("/courses/{id}/avatar")
+    public ResponseEntity<CloudinaryResponse> uploadImage(@PathVariable final Long id, @RequestPart final MultipartFile file) {
+        CloudinaryResponse response = courseService.uploadImage(id, file);
         return ResponseEntity.ok(response);
     }
 }
