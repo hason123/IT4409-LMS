@@ -31,6 +31,30 @@ public class PermissionServiceImpl implements PermissionService {
         return convertPermissionToDTO(savedPermission);
     }
     
+    @Override
+    public PermissionInfoResponse updatePermission(Integer id, PermissionRequest request) {
+        Permission permission = permissionRepository.findById(id).orElse(null);
+        
+        if (permission == null) {
+            throw new ResourceNotFoundException("Permission not found");
+        }
+      
+        if (request.getName() != null) {
+            permission.setName(request.getName());
+        }
+        if (request.getApiPath() != null) {
+            permission.setApiPath(request.getApiPath());
+        }
+        if (request.getMethod() != null) {
+            permission.setMethod(request.getMethod());
+        }
+        if (request.getDescription() != null) {
+            permission.setDescription(request.getDescription());
+        }
+        
+        Permission updatedPermission = permissionRepository.save(permission);
+        return convertPermissionToDTO(updatedPermission);
+    }
 
     @Override
     public void deletePermissionById(Integer id) {
