@@ -9,7 +9,7 @@ const getAuthHeaders = () => {
 };
 
 export async function getUserById(id) {
-  const response = await fetch(`${API_URL}/user/${id}`, {
+  const response = await fetch(`${API_URL}/users/${id}`, {
     method: 'GET',
     headers: getAuthHeaders()
   });
@@ -20,7 +20,7 @@ export async function getUserById(id) {
 }
 
 export async function updateUser(id, userData) {
-  const response = await fetch(`${API_URL}/user/${id}`, {
+  const response = await fetch(`${API_URL}/users/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(userData)
@@ -32,7 +32,7 @@ export async function updateUser(id, userData) {
 }
 
 export async function getAllUsers(page = 0, size = 50) {
-  const response = await fetch(`${API_URL}/users?page=${page}&size=${size}`, {
+  const response = await fetch(`${API_URL}/users?pageNumber=${page+1}&pageSize=${size}`, {
     method: 'GET',
     headers: getAuthHeaders()
   });
@@ -43,7 +43,7 @@ export async function getAllUsers(page = 0, size = 50) {
 }
 
 export async function deleteUser(id) {
-  const response = await fetch(`${API_URL}/user/${id}`, {
+  const response = await fetch(`${API_URL}/users/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders()
   });
