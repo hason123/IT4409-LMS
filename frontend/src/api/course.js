@@ -72,3 +72,22 @@ export async function uploadCourseImage(courseId, file) {
 
   return await response.json();
 }
+
+export async function updateCourse(id, courseData) {
+  const token = localStorage.getItem('accessToken');
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(courseData)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update course');
+  }
+
+  return await response.json();
+}

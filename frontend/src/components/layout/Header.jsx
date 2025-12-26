@@ -190,7 +190,7 @@ export default function Header({ menuItems }) {
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="flex items-center gap-2 focus:outline-none hover:bg-slate-50 dark:hover:bg-slate-800/50 p-1 rounded-lg transition-colors"
                   >
-                    <Avatar src={user?.avatar} alt={user?.fullName} />
+                    <Avatar src={user?.avatar} alt={user?.fullName || user?.username} />
                     <div className="hidden sm:flex flex-col text-left">
                       <p className="text-sm font-bold text-[#111418] dark:text-white max-w-[150px] truncate">
                         {user?.fullName || user?.username || "User"}

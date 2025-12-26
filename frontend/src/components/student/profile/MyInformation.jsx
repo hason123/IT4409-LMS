@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CameraIcon, PencilIcon } from "@heroicons/react/24/solid";
-import { updateUser } from "../../../api/user";
+import { updateUser, uploadUserAvatar } from "../../../api/user";
 import { useAuth } from "../../../contexts/AuthContext";
 
 export default function MyInformation({ userData, isLoading: parentLoading, onUpdate }) {
@@ -17,6 +17,8 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
   const [loading, setLoading] = useState(parentLoading || true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   // Initialize form data from userData prop
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
         birthday: userData.birthday || "",
         address: userData.address || "",
       });
+      setAvatarPreview(userData.avatar || null);
       setLoading(false);
     }
   }, [userData]);
@@ -41,6 +44,14 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSave = async () => {
@@ -56,13 +67,20 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
         ...formData,
         userName: initialData?.userName // Keep username as is
       });
+
+      if (avatarFile) {
+        await uploadUserAvatar(user.id, avatarFile);
+        // Update avatar in updatedUser data if needed, or fetch user again
+        // For now, we assume the avatar upload is successful and the preview is correct
+      }
       
       setInitialData(updatedUser.data);
       if (onUpdate) {
-        onUpdate(updatedUser.data);
+        onUpdate({ ...updatedUser.data, avatar: avatarPreview });
       }
       setSuccess("Cập nhật thông tin thành công!");
       setIsEditing(false);
+      setAvatarFile(null);
       // Auto-hide success message after 3 seconds
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -82,6 +100,8 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
         birthday: initialData.birthday || "",
         address: initialData.address || "",
       });
+      setAvatarPreview(initialData.avatar || null);
+      setAvatarFile(null);
     }
     setIsEditing(false);
     setError("");
@@ -138,6 +158,33 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
 
       <div className="py-6 flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row items-center gap-6">
+          <div className="relative group">
+            <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 border-2 border-gray-100 dark:border-gray-600">
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Avatar"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-primary text-white text-3xl font-bold uppercase">
+                  {formData.fullName ? formData.fullName.charAt(0) : "U"}
+                </div>
+              )}
+            </div>
+            {isEditing && (
+              <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <CameraIcon className="h-8 w-8 text-white" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+              </label>
+            )}
+          </div>
+
           <div className="flex-grow w-full">
             <label className="flex flex-col min-w-40">
               <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">

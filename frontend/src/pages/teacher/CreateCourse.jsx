@@ -1,286 +1,254 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Select, DatePicker, Spin, Alert } from "antd";
-import dayjs from "dayjs";
-import TeacherHeader from "../../components/layout/TeacherHeader";
-import TeacherSidebar from "../../components/layout/TeacherSidebar";
+import {
+  Form,
+  Input,
+  Select,
+  Spin,
+  Alert,
+  Upload,
+  message,
+} from "antd";
 import {
   PhotoIcon,
-  ArrowPathIcon,
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
-import { createCourse, uploadCourseImage } from "../../api/course";
+import TeacherHeader from "../../components/layout/TeacherHeader";
+import TeacherSidebar from "../../components/layout/TeacherSidebar";
+import { createCourse, uploadCourseImage, getCourseById, updateCourse } from "../../api/course";
 import { getAllCategories } from "../../api/category";
+
+const { TextArea } = Input;
 
 export default function CreateCourse() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isExistingCourse = !!id;
-  const [isEditMode, setIsEditMode] = useState(!id);
+
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
   const [imageFile, setImageFile] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(!id);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    categoryId: null,
-    image: null,
-  });
-
+  /* ------------------ FETCH CATEGORIES ------------------ */
   useEffect(() => {
     fetchCategories();
   }, []);
 
   const fetchCategories = async () => {
     try {
-      const response = await getAllCategories(1, 100);
-      const data = response.data;
-      setCategories(data.pageList.map(cat => ({ value: cat.id, label: cat.title })));
+      const res = await getAllCategories(1, 100);
+      setCategories(
+        res.data.pageList.map(cat => ({
+          value: cat.id,
+          label: cat.title,
+        }))
+      );
     } catch (err) {
-      console.error("Failed to fetch categories", err);
+      console.error(err);
     }
   };
 
-  // Mock data loading
+  /* ------------------ LOAD COURSE ------------------ */
   useEffect(() => {
     if (isExistingCourse) {
-      // Simulate API call
-      setFormData({
-        title: "Lập trình Web Nâng cao",
-        description:
-          "Khóa học chuyên sâu về phát triển ứng dụng web hiện đại với React, Node.js và các công nghệ mới nhất.",
-        categoryId: 1,
-        image:
-          "https://lh3.googleusercontent.com/aida-public/AB6AXuDjWYE9YVPV3H1zSqbOGW1RjnlaidRmejYvO_yFuwy1aWEz4NPu-b85eHuTCIZoQ404QcPBgP3Q7TzZu7WEo0fUD67zxmGFdz4KeGWy9PpcStSq-pqKVBMgJ18CZ3nFYDGAiCIk7sySK7pE3oRJ6g9B6DjA6AJngBkIyzXlve6MrFf5nHSH_CjwllCqB-8Ax20V572rWfezlemKtdRHh7Rmitv1e6Qf15Ni6JQ9Pv0peV_90PCIyHdrAaWW7AOqneM1A8RTNclhwbY",
-      });
+      const fetchCourse = async () => {
+        try {
+          setLoading(true);
+          const response = await getCourseById(id);
+          const data = response.data;
+          form.setFieldsValue({
+            title: data.title,
+            description: data.description,
+            categoryId: data.categoryId,
+            image: data.imageUrl,
+          });
+        } catch (err) {
+          console.error(err);
+          message.error("Không thể tải thông tin khóa học");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCourse();
     }
-  }, [isExistingCourse]);
+  }, [isExistingCourse, id, form]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setFormData(prev => ({
-        ...prev,
-        image: URL.createObjectURL(file)
-      }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  /* ------------------ SUBMIT ------------------ */
+  const onFinish = async (values) => {
     setLoading(true);
     setError(null);
 
     try {
+      let courseId = id;
       if (isExistingCourse) {
-        // Update logic here (not implemented yet)
-        console.log("Update course:", formData);
-      } else {
-        // Create course
-        const newCourse = await createCourse({
-          title: formData.title,
-          description: formData.description,
-          categoryId: formData.categoryId
+        await updateCourse(id, {
+          title: values.title,
+          description: values.description,
+          categoryId: values.categoryId,
         });
-
-        // Upload image if selected
-        if (imageFile && newCourse.id) {
-          await uploadCourseImage(newCourse.id, imageFile);
-        }
-
-        navigate("/teacher/courses");
+        message.success("Cập nhật khóa học thành công");
+      } else {
+        const course = await createCourse({
+          title: values.title,
+          description: values.description,
+          categoryId: values.categoryId,
+        });
+        courseId = course.id;
+        message.success("Tạo khóa học thành công");
       }
+
+      if (imageFile && courseId) {
+        await uploadCourseImage(courseId, imageFile);
+      }
+
+      navigate("/teacher/courses");
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Có lỗi xảy ra");
     } finally {
       setLoading(false);
     }
   };
 
+  /* ------------------ IMAGE UPLOAD ------------------ */
+  const beforeUpload = (file) => {
+    setImageFile(file);
+    form.setFieldValue("image", URL.createObjectURL(file));
+    return false; // chặn upload tự động
+  };
+
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <TeacherHeader />
 
       <div className="flex">
         <TeacherSidebar />
 
-        <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 h-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <header className="mb-8 flex items-center justify-between">
-              <h1 className="text-2xl md:text-3xl font-bold text-[#111418] dark:text-white">
+        <main className="flex-1 lg:ml-64 pt-16 bg-slate-50 dark:bg-slate-900">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <header className="mb-8 flex justify-between items-center">
+              <h1 className="text-3xl font-bold">
                 {isExistingCourse ? "Chi tiết khóa học" : "Tạo khóa học mới"}
               </h1>
+
               {isExistingCourse && !isEditMode && (
                 <button
                   onClick={() => setIsEditMode(true)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg"
                 >
-                  <PencilSquareIcon className="h-5 w-5" />
+                  <PencilSquareIcon className="w-5 h-5" />
                   Chỉnh sửa
                 </button>
               )}
             </header>
 
             {error && (
-              <Alert message="Lỗi" description={error} type="error" showIcon className="mb-6" />
+              <Alert
+                type="error"
+                message="Lỗi"
+                description={error}
+                showIcon
+                className="mb-6"
+              />
             )}
 
-            <div className="bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 lg:p-8 shadow-sm">
-              <form
-                onSubmit={handleSubmit}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm">
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinish}
+                disabled={!isEditMode}
+                validateTrigger="onBlur"
               >
-                {/* Left Column */}
-                <div className="lg:col-span-2 flex flex-col gap-6">
-                  {/* Title */}
-                  <div>
-                    <label
-                      htmlFor="title"
-                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
-                    >
-                      Tiêu đề khóa học
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* LEFT */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <Form.Item
+                      label="Tiêu đề khóa học"
                       name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      disabled={!isEditMode}
-                      placeholder="Nhập tiêu đề cho khóa học của bạn"
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-slate-100 dark:disabled:bg-gray-800 disabled:text-slate-500"
-                      required
-                    />
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập tiêu đề khóa học" },
+                      ]}
                     >
-                      Mô tả khóa học
-                    </label>
-                    <textarea
-                      id="description"
+                      <Input placeholder="Nhập tiêu đề khóa học" className="h-[40px]"/>
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Mô tả khóa học"
                       name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      disabled={!isEditMode}
-                      rows={6}
-                      placeholder="Nhập mô tả chi tiết về khóa học, mục tiêu và đối tượng học viên..."
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y disabled:bg-slate-100 dark:disabled:bg-gray-800 disabled:text-slate-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Right Column */}
-                <div className="lg:col-span-1 flex flex-col gap-6">
-                  {/* Image Uploader */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Ảnh đại diện khóa học
-                    </label>
-                    <div className="flex items-center justify-center w-full">
-                      <label
-                        htmlFor="dropzone-file"
-                        className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg ${
-                          isEditMode
-                            ? "cursor-pointer bg-slate-50 dark:bg-gray-700/50 hover:bg-slate-100 dark:hover:bg-gray-700"
-                            : "cursor-not-allowed bg-slate-100 dark:bg-gray-800"
-                        } transition-colors`}
-                      >
-                        {formData.image ? (
-                          <img
-                            src={formData.image}
-                            alt="Course Preview"
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <PhotoIcon className="w-10 h-10 mb-3 text-slate-400" />
-                            <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">
-                              <span className="font-semibold">
-                                Nhấn để tải lên
-                              </span>{" "}
-                              hoặc kéo thả
-                            </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              PNG, JPG or GIF (MAX. 800x400px)
-                            </p>
-                          </div>
-                        )}
-                        <input
-                          id="dropzone-file"
-                          type="file"
-                          className="hidden"
-                          disabled={!isEditMode}
-                          onChange={handleImageChange}
-                          accept="image/*"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Field */}
-                  <div>
-                    <label
-                      htmlFor="categoryId"
-                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập mô tả khóa học" },
+                      ]}
                     >
-                      Lĩnh vực
-                    </label>
-                    <Select
-                      id="categoryId"
-                      value={formData.categoryId}
-                      onChange={(value) =>
-                        setFormData((prev) => ({ ...prev, categoryId: value }))
-                      }
-                      disabled={!isEditMode}
-                      className="w-full h-[42px]"
-                      options={categories}
-                      placeholder="Chọn lĩnh vực"
-                    />
+                      <TextArea rows={6} placeholder="Nhập mô tả chi tiết..." />
+                    </Form.Item>
+                  </div>
+
+                  {/* RIGHT */}
+                  <div className="space-y-6">
+                    <Form.Item
+                      label="Ảnh đại diện khóa học"
+                    >
+                      <Upload
+                        beforeUpload={beforeUpload}
+                        showUploadList={false}
+                        accept="image/*"
+                      >
+                        <div className="h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-700">
+                          {form.getFieldValue("image") ? (
+                            <img
+                              src={form.getFieldValue("image")}
+                              alt="preview"
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          ) : (
+                            <div className="text-center w-full text-slate-500">
+                              <PhotoIcon className="w-10 h-10 mx-auto mb-2" />
+                              Nhấn để tải ảnh
+                            </div>
+                          )}
+                        </div>
+                      </Upload>
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Lĩnh vực"
+                      name="categoryId"
+                      rules={[
+                        { required: true, message: "Vui lòng chọn lĩnh vực" },
+                      ]}
+                    >
+                      <Select
+                        placeholder="Chọn lĩnh vực"
+                        options={categories}
+                        className="h-[40px]"
+                      />
+                    </Form.Item>
                   </div>
                 </div>
 
-                {/* Form Actions */}
                 {isEditMode && (
-                  <div className="lg:col-span-3 mt-4 flex justify-end gap-3 pt-6 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex justify-end gap-4 mt-8 pt-6 border-t">
                     <button
                       type="button"
-                      onClick={() => {
-                        if (isExistingCourse) {
-                          setIsEditMode(false);
-                        } else {
-                          navigate("/teacher/courses");
-                        }
-                      }}
-                      className="px-6 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                      onClick={() => navigate("/teacher/courses")}
+                      className="px-6 py-2 rounded-lg bg-slate-100"
                     >
                       Hủy
                     </button>
+
                     <button
                       type="submit"
+                      className="px-6 py-2 rounded-lg bg-primary text-white"
                       disabled={loading}
-                      className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30 disabled:opacity-50"
                     >
-                      {loading ? <Spin size="small" /> : (isExistingCourse ? "Lưu thay đổi" : "Tạo khóa học")}
+                      {loading ? <Spin size="small" /> : "Tạo khóa học"}
                     </button>
                   </div>
                 )}
-              </form>
+              </Form>
             </div>
           </div>
         </main>

@@ -53,3 +53,23 @@ export async function deleteUser(id) {
   return await response.json();
 }
 
+export async function uploadUserAvatar(userId, file) {
+  const token = localStorage.getItem('accessToken');
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_URL}/users/${userId}/avatar`, {
+    method: 'POST',
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : ''
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to upload avatar');
+  }
+
+  return await response.json();
+}
+
