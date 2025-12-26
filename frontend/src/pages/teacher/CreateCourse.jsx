@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Select, DatePicker } from "antd";
+import { Select, DatePicker, Spin, Alert } from "antd";
 import dayjs from "dayjs";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
@@ -9,35 +9,49 @@ import {
   ArrowPathIcon,
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
+import { createCourse, uploadCourseImage } from "../../api/course";
+import { getAllCategories } from "../../api/category";
 
 export default function CreateCourse() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isExistingCourse = !!id;
   const [isEditMode, setIsEditMode] = useState(!id);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    code: "",
-    field: "Lập trình",
-    startDate: "",
-    endDate: "",
+    categoryId: null,
     image: null,
   });
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await getAllCategories(1, 100);
+      const data = response.data;
+      setCategories(data.pageList.map(cat => ({ value: cat.id, label: cat.title })));
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
+    }
+  };
+
   // Mock data loading
-  React.useEffect(() => {
+  useEffect(() => {
     if (isExistingCourse) {
       // Simulate API call
       setFormData({
         title: "Lập trình Web Nâng cao",
         description:
           "Khóa học chuyên sâu về phát triển ứng dụng web hiện đại với React, Node.js và các công nghệ mới nhất.",
-        code: "CS102",
-        field: "Lập trình",
-        startDate: "2023-08-15",
-        endDate: "2023-12-15",
+        categoryId: 1,
         image:
           "https://lh3.googleusercontent.com/aida-public/AB6AXuDjWYE9YVPV3H1zSqbOGW1RjnlaidRmejYvO_yFuwy1aWEz4NPu-b85eHuTCIZoQ404QcPBgP3Q7TzZu7WEo0fUD67zxmGFdz4KeGWy9PpcStSq-pqKVBMgJ18CZ3nFYDGAiCIk7sySK7pE3oRJ6g9B6DjA6AJngBkIyzXlve6MrFf5nHSH_CjwllCqB-8Ax20V572rWfezlemKtdRHh7Rmitv1e6Qf15Ni6JQ9Pv0peV_90PCIyHdrAaWW7AOqneM1A8RTNclhwbY",
       });
@@ -52,17 +66,46 @@ export default function CreateCourse() {
     }));
   };
 
-  const generateCode = () => {
-    const randomCode =
-      "COURSE-" + Math.random().toString(36).substr(2, 6).toUpperCase();
-    setFormData((prev) => ({ ...prev, code: randomCode }));
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setFormData(prev => ({
+        ...prev,
+        image: URL.createObjectURL(file)
+      }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted:", formData);
-    navigate("/teacher/courses");
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (isExistingCourse) {
+        // Update logic here (not implemented yet)
+        console.log("Update course:", formData);
+      } else {
+        // Create course
+        const newCourse = await createCourse({
+          title: formData.title,
+          description: formData.description,
+          categoryId: formData.categoryId
+        });
+
+        // Upload image if selected
+        if (imageFile && newCourse.id) {
+          await uploadCourseImage(newCourse.id, imageFile);
+        }
+
+        navigate("/teacher/courses");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -89,6 +132,10 @@ export default function CreateCourse() {
               )}
             </header>
 
+            {error && (
+              <Alert message="Lỗi" description={error} type="error" showIcon className="mb-6" />
+            )}
+
             <div className="bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 lg:p-8 shadow-sm">
               <form
                 onSubmit={handleSubmit}
@@ -113,6 +160,7 @@ export default function CreateCourse() {
                       disabled={!isEditMode}
                       placeholder="Nhập tiêu đề cho khóa học của bạn"
                       className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-slate-100 dark:disabled:bg-gray-800 disabled:text-slate-500"
+                      required
                     />
                   </div>
 
@@ -134,38 +182,6 @@ export default function CreateCourse() {
                       placeholder="Nhập mô tả chi tiết về khóa học, mục tiêu và đối tượng học viên..."
                       className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y disabled:bg-slate-100 dark:disabled:bg-gray-800 disabled:text-slate-500"
                     />
-                  </div>
-
-                  {/* Class Code */}
-                  <div>
-                    <label
-                      htmlFor="code"
-                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
-                    >
-                      Mã lớp học
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="code"
-                        name="code"
-                        value={formData.code}
-                        onChange={handleInputChange}
-                        disabled={!isEditMode}
-                        placeholder="VD: TOAN10-2024"
-                        className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-24 disabled:bg-slate-100 dark:disabled:bg-gray-800 disabled:text-slate-500"
-                      />
-                      {isEditMode && (
-                        <button
-                          type="button"
-                          onClick={generateCode}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-semibold text-primary hover:text-primary/80 px-2 py-1 flex items-center gap-1"
-                        >
-                          <ArrowPathIcon className="h-4 w-4" />
-                          Tạo tự động
-                        </button>
-                      )}
-                    </div>
                   </div>
                 </div>
 
@@ -210,6 +226,8 @@ export default function CreateCourse() {
                           type="file"
                           className="hidden"
                           disabled={!isEditMode}
+                          onChange={handleImageChange}
+                          accept="image/*"
                         />
                       </label>
                     </div>
@@ -218,77 +236,22 @@ export default function CreateCourse() {
                   {/* Field */}
                   <div>
                     <label
-                      htmlFor="field"
+                      htmlFor="categoryId"
                       className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
                     >
                       Lĩnh vực
                     </label>
                     <Select
-                      id="field"
-                      value={formData.field}
+                      id="categoryId"
+                      value={formData.categoryId}
                       onChange={(value) =>
-                        setFormData((prev) => ({ ...prev, field: value }))
+                        setFormData((prev) => ({ ...prev, categoryId: value }))
                       }
                       disabled={!isEditMode}
                       className="w-full h-[42px]"
-                      options={[
-                        { value: "Lập trình", label: "Lập trình" },
-                        { value: "Toán học", label: "Toán học" },
-                        { value: "Nghệ thuật", label: "Nghệ thuật" },
-                        { value: "Vật lý", label: "Vật lý" },
-                        { value: "Ngoại ngữ", label: "Ngoại ngữ" },
-                      ]}
+                      options={categories}
+                      placeholder="Chọn lĩnh vực"
                     />
-                  </div>
-
-                  {/* Dates */}
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label
-                        htmlFor="startDate"
-                        className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
-                      >
-                        Thời gian bắt đầu
-                      </label>
-                      <DatePicker
-                        className="w-full h-[42px]"
-                        format="DD/MM/YYYY"
-                        value={
-                          formData.startDate ? dayjs(formData.startDate) : null
-                        }
-                        onChange={(date) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            startDate: date ? date.format("YYYY-MM-DD") : "",
-                          }))
-                        }
-                        disabled={!isEditMode}
-                        placeholder="Chọn ngày bắt đầu"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="endDate"
-                        className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
-                      >
-                        Thời gian kết thúc
-                      </label>
-                      <DatePicker
-                        className="w-full h-[42px]"
-                        format="DD/MM/YYYY"
-                        value={
-                          formData.endDate ? dayjs(formData.endDate) : null
-                        }
-                        onChange={(date) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            endDate: date ? date.format("YYYY-MM-DD") : "",
-                          }))
-                        }
-                        disabled={!isEditMode}
-                        placeholder="Chọn ngày kết thúc"
-                      />
-                    </div>
                   </div>
                 </div>
 
@@ -310,9 +273,10 @@ export default function CreateCourse() {
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30"
+                      disabled={loading}
+                      className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30 disabled:opacity-50"
                     >
-                      {isExistingCourse ? "Lưu thay đổi" : "Tạo khóa học"}
+                      {loading ? <Spin size="small" /> : (isExistingCourse ? "Lưu thay đổi" : "Tạo khóa học")}
                     </button>
                   </div>
                 )}
