@@ -22,12 +22,13 @@ public class Lesson extends BaseEntity{
     private String title;
     @Column(name = "content", columnDefinition = "MEDIUMTEXT")
     private String content;
-    @Column(name = "orderIndex")
-    private Integer orderIndex;
 
-    @ManyToOne
+//    @Column(name = "orderIndex")
+//    private Integer orderIndex;
+
+/*    @ManyToOne
     @JoinColumn(name = "chapter_id")
-    private Chapter chapter;
+    private Chapter chapter;*/
 
     @OneToMany(mappedBy = "lesson")
     private List<Resource> resources;

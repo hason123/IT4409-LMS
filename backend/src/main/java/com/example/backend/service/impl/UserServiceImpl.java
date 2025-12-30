@@ -234,6 +234,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfoResponse convertUserInfoToDTO(User user){
         UserInfoResponse userDTO = new UserInfoResponse();
+        userDTO.setId(user.getId());
         userDTO.setUserName(user.getUserName());
         userDTO.setBirthday(user.getBirthday());
         userDTO.setStudentNumber(user.getStudentNumber());
@@ -242,16 +243,21 @@ public class UserServiceImpl implements UserService {
         userDTO.setFullName(user.getFullName());
         userDTO.setGmail(user.getGmail());
         userDTO.setRoleName(user.getRole().getRoleName().toString());
+        userDTO.setImageUrl(user.getImageUrl());
+        userDTO.setCloudinaryImageId(user.getCloudinaryImageId());
         return userDTO;
     }
 
     @Override
     public UserViewResponse convertUserViewToDTO(User user){
         UserViewResponse userDTO = new UserViewResponse();
+        userDTO.setId(user.getId());
         userDTO.setUserName(user.getUserName());
         userDTO.setStudentNumber(user.getStudentNumber());
         userDTO.setFullName(user.getFullName());
         userDTO.setGmail(user.getGmail());
+        userDTO.setImageUrl(user.getImageUrl());
+        userDTO.setCloudinaryImageId(user.getCloudinaryImageId());
         return userDTO;
     }
 

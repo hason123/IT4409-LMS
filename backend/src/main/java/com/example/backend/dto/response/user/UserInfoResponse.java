@@ -1,5 +1,6 @@
 package com.example.backend.dto.response.user;
 
+
 import lombok.*;
 
 @Getter
@@ -7,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserInfoResponse {
+    private Long id;
     private String userName;
     private String fullName;
     private String phoneNumber;
@@ -15,4 +17,6 @@ public class UserInfoResponse {
     private String address;
     private String gmail;
     private String roleName;
+    private String imageUrl;
+    private String cloudinaryImageId;
 }

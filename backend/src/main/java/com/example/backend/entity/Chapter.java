@@ -24,8 +24,15 @@ public class Chapter extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
-    @OneToMany(mappedBy = "chapter")
+    @OneToMany(mappedBy = "chapter", cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    })
+    @OrderBy("orderIndex ASC")
+    private List<ChapterItem> items;
+
+/*    @OneToMany(mappedBy = "chapter")
     private List<Lesson> lessons;
     @OneToMany(mappedBy = "chapter")
-    private List<Quiz> quizzes;
+    private List<Quiz> quizzes;*/
 }
