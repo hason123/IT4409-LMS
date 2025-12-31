@@ -58,7 +58,8 @@ export default function CreateCourse() {
         try {
           setLoading(true);
           const response = await getCourseById(id);
-          const data = response.data;
+          // Handle potential data wrapper or direct response
+          const data = response.data || response;
           form.setFieldsValue({
             title: data.title,
             description: data.description,
@@ -91,15 +92,24 @@ export default function CreateCourse() {
         });
         message.success("Cập nhật khóa học thành công");
       } else {
-        const course = await createCourse({
+        const response = await createCourse({
           title: values.title,
           description: values.description,
           categoryId: values.categoryId,
         });
+        
+        // Ensure we get the course object whether it's wrapped in data or not
+        const course = response.data || response;
         courseId = course.id;
+
+        if (!courseId) {
+          throw new Error("Không thể lấy ID khóa học mới");
+        }
+
         message.success("Tạo khóa học thành công");
       }
 
+      // Only upload image if we have a valid courseId
       if (imageFile && courseId) {
         await uploadCourseImage(courseId, imageFile);
       }

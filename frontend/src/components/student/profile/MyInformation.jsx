@@ -23,6 +23,7 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
   // Initialize form data from userData prop
   useEffect(() => {
     if (userData) {
+      console.log("Initializing form data with userData:", userData);
       setInitialData(userData);
       setFormData({
         fullName: userData.fullName || "",

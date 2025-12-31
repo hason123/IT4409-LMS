@@ -10,14 +10,14 @@ createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <ConfigProvider
-      theme={{
-        token: {
-          fontFamily: "Lexend, ui-sans-serif, system-ui",
-        },
-      }}
-    >
+        theme={{
+          token: {
+            fontFamily: "Lexend, ui-sans-serif, system-ui",
+          },
+        }}
+      >
       <App />
-    </ConfigProvider>
+    </ConfigProvider> 
     </BrowserRouter>
   </React.StrictMode>
 )

@@ -101,9 +101,6 @@ export default function AdminUserManagement() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Mock user data
-  const mockUsers = [];
-
   // Format user data from API
   const formattedUsers = users.map(user => {
     // Map roleName từ API (ADMIN, STUDENT, TEACHER) thành code
