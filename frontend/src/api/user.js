@@ -9,7 +9,7 @@ const getAuthHeaders = () => {
 };
 
 export async function getUserById(id) {
-  const response = await fetch(`${API_URL}/user/${id}`, {
+  const response = await fetch(`${API_URL}/users/${id}`, {
     method: 'GET',
     headers: getAuthHeaders()
   });
@@ -20,7 +20,7 @@ export async function getUserById(id) {
 }
 
 export async function updateUser(id, userData) {
-  const response = await fetch(`${API_URL}/user/${id}`, {
+  const response = await fetch(`${API_URL}/users/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(userData)
@@ -32,7 +32,7 @@ export async function updateUser(id, userData) {
 }
 
 export async function getAllUsers(page = 0, size = 50) {
-  const response = await fetch(`${API_URL}/users?page=${page}&size=${size}`, {
+  const response = await fetch(`${API_URL}/users?pageNumber=${page+1}&pageSize=${size}`, {
     method: 'GET',
     headers: getAuthHeaders()
   });
@@ -43,13 +43,33 @@ export async function getAllUsers(page = 0, size = 50) {
 }
 
 export async function deleteUser(id) {
-  const response = await fetch(`${API_URL}/user/${id}`, {
+  const response = await fetch(`${API_URL}/users/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders()
   });
   if (!response.ok) {
     throw new Error('Failed to delete user');
   }
+  return await response.json();
+}
+
+export async function uploadUserAvatar(userId, file) {
+  const token = localStorage.getItem('accessToken');
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_URL}/users/${userId}/avatar`, {
+    method: 'POST',
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : ''
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to upload avatar');
+  }
+
   return await response.json();
 }
 

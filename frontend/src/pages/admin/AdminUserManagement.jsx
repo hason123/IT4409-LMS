@@ -41,7 +41,7 @@ export default function AdminUserManagement() {
       setLoading(true);
       const response = await getAllUsers(0, 200);
       // Response có thể là array hoặc object với content array
-      const userList = Array.isArray(response) ? response : (response.content || response.data || []);
+      const userList = response.data.pageList;
       setUsers(userList);
       message.success("Tải danh sách người dùng thành công");
     } catch (error) {
