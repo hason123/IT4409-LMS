@@ -1,0 +1,17 @@
+package com.example.backend.service;
+
+import com.example.backend.dto.request.QuizRequest;
+import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.QuizResponse;
+import com.example.backend.entity.Quiz;
+import org.springframework.data.domain.Pageable;
+
+public interface QuizService {
+    QuizResponse createQuiz(QuizRequest request);
+    QuizResponse getQuizById(Integer id);
+    QuizResponse updateQuiz(Integer id, QuizRequest request);
+    void deleteQuiz(Integer id);
+    
+    PageResponse<QuizResponse> getQuizPage(Pageable pageable);
+    QuizResponse convertQuizToDTO(Quiz quiz);
+}
