@@ -32,8 +32,9 @@ public class ChapterServiceImpl implements ChapterService {
         responseDTO.setId(chapter.getId());
         responseDTO.setTitle(chapter.getTitle());
         responseDTO.setOrderIndex(String.valueOf(chapter.getOrderIndex()));
-        
+        responseDTO.setDescription(chapter.getDescription());
         if (chapter.getCourse() != null) {
+            responseDTO.setCourseId(chapter.getCourse().getId());
             responseDTO.setCourseTitle(chapter.getCourse().getTitle());
         }
         
@@ -66,14 +67,13 @@ public class ChapterServiceImpl implements ChapterService {
         Chapter chapter = new Chapter();
         chapter.setTitle(request.getTitle());
         chapter.setOrderIndex(Integer.parseInt(request.getOrderIndex()));
-
+        chapter.setDescription(request.getDescription());
         // Tìm Course tương ứng Chapter
         if (request.getCourseId() != null) {
             Course course = courseRepository.findById(request.getCourseId())
                     .orElseThrow(() -> new RuntimeException("Course not found with id: " + request.getCourseId()));
             chapter.setCourse(course);
         }
-
         chapterRepository.save(chapter);
         return convertChapterToDTO(chapter);
     }
@@ -83,17 +83,15 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterResponse updateChapter(Integer id, ChapterRequest request) {
         Chapter chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Chapter not found with id: " + id));
-
         chapter.setTitle(request.getTitle());
         chapter.setOrderIndex(Integer.parseInt(request.getOrderIndex()));
-
+        chapter.setDescription(request.getDescription());
         // Cập nhật lại Course khi courseId thay đổi
         if (request.getCourseId() != null) {
             Course course = courseRepository.findById(request.getCourseId())
                     .orElseThrow(() -> new RuntimeException("Course not found with id: " + request.getCourseId()));
             chapter.setCourse(course);
         }
-
         chapterRepository.save(chapter);
         return convertChapterToDTO(chapter);
     }

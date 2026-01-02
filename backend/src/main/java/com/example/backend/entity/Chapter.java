@@ -21,6 +21,8 @@ public class Chapter extends BaseEntity{
     private String title;
     @Column(name = "order_index")
     private Integer orderIndex;
+    @Column(name = "description")
+    private String description;
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;

@@ -11,4 +11,6 @@ public class ChapterResponse {
     private String title;
     private String orderIndex;
     private String courseTitle;
+    private String description;
+    private Long courseId;
 }
