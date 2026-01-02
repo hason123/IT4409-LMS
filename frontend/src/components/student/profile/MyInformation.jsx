@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 import { CameraIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { updateUser, uploadUserAvatar } from "../../../api/user";
 import { useAuth } from "../../../contexts/AuthContext";
+import useUserStore from "../../../store/useUserStore";
 
-export default function MyInformation({ userData, isLoading: parentLoading, onUpdate }) {
-  const { user } = useAuth();
+export default function MyInformation({
+  userData,
+  isLoading: parentLoading,
+  onUpdate,
+}) {
+  const user = useUserStore((state) => state.user);
+  const updateUserStoreData = useUserStore((state) => state.updateUser);
   const [isEditing, setIsEditing] = useState(false);
   const [initialData, setInitialData] = useState(null);
   const [formData, setFormData] = useState({
@@ -31,7 +37,9 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
         birthday: userData.birthday || "",
         address: userData.address || "",
       });
-      setAvatarPreview(userData.avatar || null);
+      console.log("User Data in MyInformation:", userData);
+      // Map image_uri from backend to avatar for display
+      setAvatarPreview(userData.imageUrl);
       setLoading(false);
     }
   }, [userData]);
@@ -62,10 +70,10 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
       if (!user?.id) {
         throw new Error("User ID not found");
       }
-      
+
       const updatedUser = await updateUser(user.id, {
         ...formData,
-        userName: initialData?.userName // Keep username as is
+        userName: initialData?.userName, // Keep username as is
       });
 
       if (avatarFile) {
@@ -73,11 +81,25 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
         // Update avatar in updatedUser data if needed, or fetch user again
         // For now, we assume the avatar upload is successful and the preview is correct
       }
-      
-      setInitialData(updatedUser.data);
+
+      const fullUserData = updatedUser.data || updatedUser;
+      setInitialData(fullUserData);
       if (onUpdate) {
-        onUpdate({ ...updatedUser.data, avatar: avatarPreview });
+        onUpdate(fullUserData);
       }
+
+      // Update Zustand store with new user data
+      updateUserStoreData({
+        fullName: fullUserData.fullName,
+        gmail: fullUserData.gmail,
+        phoneNumber: fullUserData.phoneNumber,
+        birthday: fullUserData.birthday,
+        address: fullUserData.address,
+        imageUrl: fullUserData.imageUrl,
+        userName: fullUserData.userName,
+        roleName: fullUserData.roleName,
+      });
+
       setSuccess("Cập nhật thông tin thành công!");
       setIsEditing(false);
       setAvatarFile(null);
@@ -100,7 +122,7 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
         birthday: initialData.birthday || "",
         address: initialData.address || "",
       });
-      setAvatarPreview(initialData.avatar || null);
+      setAvatarPreview(initialData.avatar || initialData.image_url || null);
       setAvatarFile(null);
     }
     setIsEditing(false);
@@ -113,7 +135,9 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-          <p className="text-[#617589] dark:text-gray-400">Đang tải thông tin...</p>
+          <p className="text-[#617589] dark:text-gray-400">
+            Đang tải thông tin...
+          </p>
         </div>
       </div>
     );
@@ -140,7 +164,7 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
           </button>
         )}
       </div>
-      
+
       {error && (
         <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg">
           {error}
@@ -149,8 +173,16 @@ export default function MyInformation({ userData, isLoading: parentLoading, onUp
 
       {success && (
         <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg flex items-center gap-2">
-          <svg className="h-5 w-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          <svg
+            className="h-5 w-5 flex-shrink-0"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clipRule="evenodd"
+            />
           </svg>
           {success}
         </div>

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import useUserStore from "../../store/useUserStore";
 import Avatar from "../common/Avatar";
 import ConfirmModal from "../common/ConfirmModal";
 import {
@@ -11,7 +12,8 @@ import {
 
 export default function TeacherHeader({ toggleSidebar }) {
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
+  const user = useUserStore((state) => state.user);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -175,7 +177,10 @@ export default function TeacherHeader({ toggleSidebar }) {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-3 focus:outline-none hover:bg-slate-50 dark:hover:bg-slate-800/50 p-1 rounded-lg transition-colors"
             >
-              <Avatar src={user?.avatar} alt={user?.fullName || user?.username} />
+              <Avatar
+                src={user?.imageUrl}
+                alt={user?.fullName || user?.username}
+              />
               <div className="hidden sm:flex flex-col text-left">
                 <p className="text-sm font-bold text-[#111418] dark:text-white max-w-[150px] truncate">
                   {user?.fullName || user?.username || "Giáo viên"}
@@ -189,14 +194,22 @@ export default function TeacherHeader({ toggleSidebar }) {
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
                 <Link
-                  to={user?.role === "ADMIN" ? "/admin/profile" : "/teacher/profile"}
+                  to={
+                    user?.role === "ADMIN"
+                      ? "/admin/profile"
+                      : "/teacher/profile"
+                  }
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setIsDropdownOpen(false)}
                 >
                   Hồ sơ
                 </Link>
                 <Link
-                  to={user?.role === "ADMIN" ? "/admin/settings" : "/teacher/settings"}
+                  to={
+                    user?.role === "ADMIN"
+                      ? "/admin/settings"
+                      : "/teacher/settings"
+                  }
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setIsDropdownOpen(false)}
                 >

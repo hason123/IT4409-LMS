@@ -22,6 +22,7 @@ export default function LoginForm() {
     setLoading(true);
     try {
       const res = await login(username, password);
+      console.log("Login response:", res);
       if (res.data && res.data.accessToken) {
         loginUser(res.data.accessToken, res.data.user);
       }
