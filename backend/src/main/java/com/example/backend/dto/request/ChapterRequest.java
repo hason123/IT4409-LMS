@@ -11,4 +11,5 @@ public class ChapterRequest {
     private String title;
     private String orderIndex;
     private Long courseId;
+    private String description;
 }

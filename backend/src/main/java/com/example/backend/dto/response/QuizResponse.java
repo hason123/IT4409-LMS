@@ -10,8 +10,8 @@ public class QuizResponse {
     private Integer id;
     private String title;
     private String description;
-    private Short orderIndex;
     private Integer minPassScore;
     private Integer maxPassScore;
     private String chapterTitle;
+    private Integer chapterId;
 }

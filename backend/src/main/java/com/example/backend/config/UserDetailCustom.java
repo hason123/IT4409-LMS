@@ -23,11 +23,17 @@ public class UserDetailCustom implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("Trying to find user with username: " + username);
 
-        User user = userService.handleGetUserByUserName(username);
+        User user;
+
+        if(username.contains("@")){
+            user = userService.handleGetUserByGmail(username);
+        }
+        else{
+            user = userService.handleGetUserByUserName(username);
+        }
         if (user == null) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
-
         String roleName = user.getRole().getRoleName().name();
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + roleName);
 

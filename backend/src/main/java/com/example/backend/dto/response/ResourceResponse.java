@@ -14,4 +14,5 @@ public class ResourceResponse {
     private ResourceType type;
     private String orderIndex;
     private String lessonTitle;
+    private Integer lessonId;
 }
