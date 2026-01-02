@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  --bg-light: theme(colors.background-light);
+  --bg-light: theme(colors.background-light),
 }
 
 html, body, #root {
@@ -188,6 +188,10 @@ button:hover {
   color: #137fec !important;
 }
 
+.ant-upload.ant-upload-select {
+  width: 100% !important;
+}
+
 /* Ant Design Popconfirm Dark Mode */
 .dark .ant-popover-inner {
   background-color: rgb(31, 41, 55) !important;
@@ -234,3 +238,6 @@ button:hover {
   border-color: rgb(220, 38, 38) !important;
 }
 
+textarea {
+  height: 190px !important;
+}

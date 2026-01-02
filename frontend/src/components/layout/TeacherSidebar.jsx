@@ -41,6 +41,12 @@ export default function TeacherSidebar() {
           to="/teacher/reports"
         />
         <SidebarLink
+          icon={<UserGroupIcon className="h-6 w-6" />}
+          label="Hồ sơ cá nhân"
+          active={currentPath === "/teacher/profile"}
+          to="/teacher/profile"
+        />
+        <SidebarLink
           icon={<Cog6ToothIcon className="h-6 w-6" />}
           label="Cài đặt hệ thống"
           active={currentPath === "/teacher/settings"}

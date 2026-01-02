@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
@@ -7,49 +7,44 @@ import {
   MagnifyingGlassIcon,
   PlusCircleIcon,
 } from "@heroicons/react/24/outline";
+import { getAllCourses } from "../../api/course";
+import { Spin, Alert } from "antd";
 
 export default function TeacherCourses() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all"); // 'all', 'active', 'draft', 'archived'
   const [searchQuery, setSearchQuery] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data
-  const [courses] = useState([
-    {
-      id: "CS102",
-      title: "Lập trình Web Nâng cao",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDjWYE9YVPV3H1zSqbOGW1RjnlaidRmejYvO_yFuwy1aWEz4NPu-b85eHuTCIZoQ404QcPBgP3Q7TzZu7WEo0fUD67zxmGFdz4KeGWy9PpcStSq-pqKVBMgJ18CZ3nFYDGAiCIk7sySK7pE3oRJ6g9B6DjA6AJngBkIyzXlve6MrFf5nHSH_CjwllCqB-8Ax20V572rWfezlemKtdRHh7Rmitv1e6Qf15Ni6JQ9Pv0peV_90PCIyHdrAaWW7AOqneM1A8RTNclhwbY",
-      status: "active",
-      code: "CS102",
-      studentsCount: 35,
-      schedule: "15/08/2023 - 15/12/2023",
-    },
-    {
-      id: "DS101",
-      title: "Nhập môn Khoa học Dữ liệu",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuC31jh8oRUXkugcwSzMI5hztpCY8y8sjrrtYuZPCqIzHi9ftRSctRPAwnLMX4oOXEtc4SXebyICg_f7NOhzu_mNt8Xwgg4Fh3FU0xstrINslwtrG844uNane4ftdVPRzRrkVfOOLlXl-hyGuY0AQAZfAppHUTJlCoqwQrXWYLUNxsaQI6NWbTLNRxlzh-R4MZVG8Y9gBOu_2Q2zSPU-SFUSMkXwRip-GziSR_guuLDndkQqA_0ffe_XsQFMRHM_u_aEfoeUZGKBhiw",
-      status: "draft",
-      code: "DS101",
-      studentsCount: 0,
-      schedule: "Chưa có lịch",
-    },
-    {
-      id: "UI201",
-      title: "Thiết kế Giao diện Người dùng",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuB9QxPxPPDMxZtIFCj12bMWI7dXryfcXyfJSfYwRvfYXtsCSV18O3OLGn9_e4ht9JuYjY1GzP_dM7wanPhGiji-uY4gy2smZ5q_UINog43WGPZ4leN9qrWMmeHes1xA7ttm3CtKKc611wHqI2z9rzLj572MfsEGn-Wq0UXOaUEqLvXQzJBClrfO3tEksnx_1lyaD9E8U1nND3VcFw52JPkkfl7Kk53vq37LB2W1UzMK2woM04dEAWr7tJkq0pBjesp9461xLfxNuFs",
-      status: "active",
-      code: "UI201",
-      studentsCount: 28,
-      schedule: "01/09/2023 - 20/12/2023",
-    },
-  ]);
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
-  const filteredCourses = courses.filter((course) => {
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      // Assuming getAllCourses fetches all courses for now. 
+      // In a real app, you might want an API endpoint specifically for the teacher's courses.
+      const response = await getAllCourses(1, 100); 
+      setCourses(response.data.pageList);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredCourses = courses?.filter((course) => {
+    // Filter by search query
+    if (searchQuery && !course.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    // Filter by status (mock logic as API doesn't return status yet)
     if (activeTab === "all") return true;
-    return course.status === activeTab;
+    // return course.status === activeTab; // Uncomment when API supports status
+    return true; 
   });
 
   const handleCreateCourse = () => {
@@ -156,23 +151,31 @@ export default function TeacherCourses() {
             </div>
 
             {/* Course Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCourses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  type="teacher"
-                  title={course.title}
-                  image={course.image}
-                  status={course.status}
-                  code={course.code}
-                  studentsCount={course.studentsCount}
-                  schedule={course.schedule}
-                  onPreview={() => handlePreviewCourse(course.id)}
-                  onManage={() => handleEditCourse(course.id)}
-                  onEdit={() => handleEditCourse(course.id)}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <Spin size="large" />
+              </div>
+            ) : error ? (
+              <Alert message="Lỗi" description={error} type="error" showIcon />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCourses?.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    type="teacher"
+                    title={course.title}
+                    image={course.imageUrl || "https://via.placeholder.com/300x200?text=No+Image"}
+                    status={"active"} // Mock status
+                    code={course.id} // Mock code
+                    studentsCount={0} // Mock count
+                    schedule={"Chưa có lịch"} // Mock schedule
+                    onPreview={() => handlePreviewCourse(course.id)}
+                    onManage={() => handleEditCourse(course.id)}
+                    onEdit={() => handleEditCourse(course.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </main>
       </div>

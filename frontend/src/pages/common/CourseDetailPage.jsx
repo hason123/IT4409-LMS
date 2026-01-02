@@ -1,13 +1,57 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/layout/Header";
 import CourseTabs from "../../components/course/CourseTabs";
 import DescriptionCourse from "../../components/course/DescriptionCourse";
 import CourseContent from "../../components/course/CourseContent";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { getCourseById } from "../../api/course";
+import { Spin, Alert } from "antd";
 
 export default function CourseDetailPage() {
   const { user } = useAuth();
+  const { id } = useParams();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        const response = await getCourseById(id);
+        console.log("Fetched course details:", response);
+        setCourse(response.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchCourse();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <Alert message="Lỗi" description={error} type="error" showIcon />
+      </div>
+    );
+  }
+
+  if (!course) return null;
+
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#333333] dark:text-gray-200">
       <Header />
@@ -28,7 +72,7 @@ export default function CourseDetailPage() {
               /
             </span>
             <span className="text-gray-800 dark:text-gray-200 text-sm font-medium">
-              The Complete Web Developer Course 3.0
+              {course.title}
             </span>
           </div>
           <div className="grid grid-cols-12 gap-8">
@@ -36,24 +80,22 @@ export default function CourseDetailPage() {
             <div className="col-span-12 lg:col-span-8">
               <div className="flex flex-col gap-4 mb-6">
                 <p className="text-[#111418] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">
-                  The Complete Web Developer Course 3.0
+                  {course.title}
                 </p>
                 <p className="text-gray-600 dark:text-gray-300 text-lg">
-                  Học Lập trình Web bằng cách xây dựng 25 trang web và ứng dụng
-                  di động bằng HTML, CSS, Javascript, PHP, Python, MySQL và hơn
-                  thế nữa!
+                  {course.description}
                 </p>
                 <div className="flex items-center gap-4 text-sm text-gray-700 dark:text-gray-300 mt-2">
                   <div className="flex items-center gap-2">
                     <img
-                      alt="Avatar giảng viên Rob Percival"
+                      alt={`Avatar giảng viên ${course.teacherName}`}
                       className="w-8 h-8 rounded-full object-cover"
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhE6xdMrjAf3wdfHim4XGXWu3OqQvnxB4867xflSLd5V9-yT4yG-ZMEZiwrIirdOFJzHqSp2-MTT68oHt7LaXzL9ujl-dzXRiw7I9NOiXuUE1L9s1P3Kc3bolXXCDB6v5XhXbwdprTYw1DyT6YlY6D1-uN8gLHOsrNKkLNN40ldPvbDCyTUCXUnV7mBp3VNsJMOdl5pPtgJCCnpF1l9a9SFvc9W47I9P5dSub8YrS3UvjRb7xT_IEtbW2JljPyy3QAivITahhBpb4"
                     />
                     <span>
                       Giảng viên:{" "}
                       <span className="font-semibold text-[#111418] dark:text-white">
-                        Bình Trần
+                        {course.teacherName}
                       </span>
                     </span>
                   </div>
@@ -107,7 +149,7 @@ export default function CourseDetailPage() {
                 {/* Tabs */}
                 <CourseTabs
                   tabs={[
-                    { label: "Mô tả", content: <DescriptionCourse /> },
+                    { label: "Mô tả", content: <DescriptionCourse description={course.description} /> },
                     { label: "Nội dung khóa học", content: <CourseContent /> },
                     { label: "Giảng viên", content: <div>...</div> },
                     { label: "Đánh giá", content: <div>...</div> },
