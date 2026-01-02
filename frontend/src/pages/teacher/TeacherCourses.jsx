@@ -25,9 +25,9 @@ export default function TeacherCourses() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      // Assuming getAllCourses fetches all courses for now. 
+      // Assuming getAllCourses fetches all courses for now.
       // In a real app, you might want an API endpoint specifically for the teacher's courses.
-      const response = await getAllCourses(1, 100); 
+      const response = await getAllCourses(1, 100);
       setCourses(response.data.pageList);
     } catch (err) {
       setError(err.message);
@@ -38,13 +38,16 @@ export default function TeacherCourses() {
 
   const filteredCourses = courses?.filter((course) => {
     // Filter by search query
-    if (searchQuery && !course.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+    if (
+      searchQuery &&
+      !course.title.toLowerCase().includes(searchQuery.toLowerCase())
+    ) {
       return false;
     }
     // Filter by status (mock logic as API doesn't return status yet)
     if (activeTab === "all") return true;
     // return course.status === activeTab; // Uncomment when API supports status
-    return true; 
+    return true;
   });
 
   const handleCreateCourse = () => {
@@ -56,7 +59,7 @@ export default function TeacherCourses() {
   };
 
   const handlePreviewCourse = (id) => {
-    navigate(`/courses/${id}`);
+    navigate(`/teacher/courses/${id}`);
   };
 
   return (
@@ -106,7 +109,7 @@ export default function TeacherCourses() {
               </div>
 
               {/* Filter Chips */}
-              <div className="flex gap-3 overflow-x-auto pb-2">
+              {/* <div className="flex gap-3 overflow-x-auto pb-2">
                 <button
                   onClick={() => setActiveTab("all")}
                   className={`flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 transition-colors ${
@@ -147,7 +150,7 @@ export default function TeacherCourses() {
                 >
                   <span className="text-sm font-medium">Đã lưu trữ</span>
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {/* Course Grid */}
@@ -157,6 +160,24 @@ export default function TeacherCourses() {
               </div>
             ) : error ? (
               <Alert message="Lỗi" description={error} type="error" showIcon />
+            ) : filteredCourses?.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-gray-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">
+                    Chưa có khóa học nào
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-6">
+                    Bắt đầu tạo khóa học của bạn để bắt đầu giảng dạy
+                  </p>
+                </div>
+                <button
+                  onClick={handleCreateCourse}
+                  className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                >
+                  <PlusCircleIcon className="h-5 w-5" />
+                  <span>Tạo khóa học mới</span>
+                </button>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCourses?.map((course) => (
@@ -164,7 +185,10 @@ export default function TeacherCourses() {
                     key={course.id}
                     type="teacher"
                     title={course.title}
-                    image={course.imageUrl || "https://via.placeholder.com/300x200?text=No+Image"}
+                    image={
+                      course.imageUrl ||
+                      "https://via.placeholder.com/300x200?text=No+Image"
+                    }
                     status={"active"} // Mock status
                     code={course.id} // Mock code
                     studentsCount={0} // Mock count

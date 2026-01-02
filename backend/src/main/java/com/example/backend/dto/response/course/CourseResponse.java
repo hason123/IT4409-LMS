@@ -13,6 +13,7 @@ public class CourseResponse {
     private String description;
     private Long teacherId;
     private String teacherName;
+    private Long categoryId;
     private String categoryName;
     private String imageUrl;
     private String cloudinaryImageId;

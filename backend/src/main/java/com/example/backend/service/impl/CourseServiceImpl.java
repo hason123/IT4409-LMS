@@ -129,6 +129,7 @@ public class CourseServiceImpl implements CourseService {
         response.setId(course.getId());
         response.setTitle(course.getTitle());
         response.setDescription(course.getDescription());
+        response.setCategoryId(course.getCategory().getId());
         response.setCategoryName(course.getCategory().getTitle());
         response.setTeacherId(course.getTeacher().getId());
         response.setTeacherName(course.getTeacher().getFullName());

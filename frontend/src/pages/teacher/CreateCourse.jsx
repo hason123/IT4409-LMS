@@ -1,24 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Form,
-  Input,
-  Select,
-  Spin,
-  Alert,
-  Upload,
-  message,
-} from "antd";
+import { Form, Input, Select, Spin, Alert, Upload, message, Modal } from "antd";
 import {
   PhotoIcon,
   PencilSquareIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
-import { createCourse, uploadCourseImage, getCourseById, updateCourse } from "../../api/course";
+import {
+  createCourse,
+  uploadCourseImage,
+  getCourseById,
+  updateCourse,
+  deleteCourse,
+} from "../../api/course";
 import { getAllCategories } from "../../api/category";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
+const whiteSpinner = (
+  <LoadingOutlined style={{ fontSize: 16, color: "#fff" }} spin />
+);
+
+// Styles for disabled form inputs with better contrast
+const disabledFormStyles = `
+  .disabled-form .ant-input:disabled,
+  .disabled-form .ant-input-textarea-disabled textarea {
+    background-color: #f5f5f5 !important;
+    color: #262626 !important;
+    border-color: #d9d9d9 !important;
+  }
+  .disabled-form .ant-select-disabled .ant-select-selector {
+    background-color: #f5f5f5 !important;
+    border-color: #d9d9d9 !important;
+  }
+  .disabled-form .ant-select-disabled .ant-select-selector .ant-select-selection-item {
+    color: #262626 !important;
+  }
+  .disabled-form .ant-select-disabled .ant-select-selection-placeholder {
+    color: #8c8c8c !important;
+  }
+`;
+
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.textContent = disabledFormStyles;
+  document.head.appendChild(style);
+}
 
 export default function CreateCourse() {
   const { id } = useParams();
@@ -30,18 +59,26 @@ export default function CreateCourse() {
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
   const [imageFile, setImageFile] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(!id);
+  const [isCreateMode, setIsCreateMode] = useState(!id);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [newCourseId, setNewCourseId] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   /* ------------------ FETCH CATEGORIES ------------------ */
   useEffect(() => {
     fetchCategories();
   }, []);
 
+  console.log("is create mode:", isCreateMode);
+
   const fetchCategories = async () => {
     try {
       const res = await getAllCategories(1, 100);
       setCategories(
-        res.data.pageList.map(cat => ({
+        res.data.pageList.map((cat) => ({
           value: cat.id,
           label: cat.title,
         }))
@@ -83,6 +120,8 @@ export default function CreateCourse() {
 
     try {
       let courseId = id;
+
+      // Step 1: Create or update course (WITHOUT image)
       if (isExistingCourse) {
         await updateCourse(id, {
           title: values.title,
@@ -90,21 +129,24 @@ export default function CreateCourse() {
           categoryId: values.categoryId,
         });
         message.success("Cập nhật khóa học thành công");
+        
+        setNewCourseId(courseId);
+        setShowImageModal(true);
       } else {
-        const course = await createCourse({
+        // For new courses, send all data except image
+        const courseResponse = await createCourse({
           title: values.title,
           description: values.description,
           categoryId: values.categoryId,
         });
-        courseId = course.id;
+        // Get course ID from response
+        courseId = courseResponse.data?.id || courseResponse.id;
         message.success("Tạo khóa học thành công");
-      }
 
-      if (imageFile && courseId) {
-        await uploadCourseImage(courseId, imageFile);
+        // Step 2: Show modal to upload image for new course
+        setNewCourseId(courseId);
+        setShowImageModal(true);
       }
-
-      navigate("/teacher/courses");
     } catch (err) {
       setError(err.message || "Có lỗi xảy ra");
     } finally {
@@ -115,8 +157,47 @@ export default function CreateCourse() {
   /* ------------------ IMAGE UPLOAD ------------------ */
   const beforeUpload = (file) => {
     setImageFile(file);
-    form.setFieldValue("image", URL.createObjectURL(file));
     return false; // chặn upload tự động
+  };
+
+  /* ------------------ HANDLE IMAGE MODAL SAVE ------------------ */
+  const handleImageModalSave = async () => {
+    if (imageFile && newCourseId) {
+      setUploadingImage(true);
+      try {
+        await uploadCourseImage(newCourseId, imageFile);
+        message.success("Tải ảnh khóa học thành công");
+        setShowImageModal(false);
+        setImageFile(null);
+        navigate("/teacher/courses");
+      } catch (err) {
+        message.error(err.message || "Lỗi khi tải ảnh");
+      } finally {
+        setUploadingImage(false);
+      }
+    }
+  };
+
+  /* ------------------ HANDLE IMAGE MODAL SKIP ------------------ */
+  const handleImageModalSkip = () => {
+    setShowImageModal(false);
+    setImageFile(null);
+    navigate("/teacher/courses");
+  };
+
+  /* ------------------ HANDLE DELETE COURSE ------------------ */
+  const handleDeleteCourse = async () => {
+    try {
+      setDeleting(true);
+      await deleteCourse(id);
+      message.success("Khóa học đã được xóa thành công");
+      navigate("/teacher/courses");
+    } catch (err) {
+      message.error(err.message || "Lỗi khi xóa khóa học");
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
   };
 
   return (
@@ -133,14 +214,23 @@ export default function CreateCourse() {
                 {isExistingCourse ? "Chi tiết khóa học" : "Tạo khóa học mới"}
               </h1>
 
-              {isExistingCourse && !isEditMode && (
-                <button
-                  onClick={() => setIsEditMode(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg"
-                >
-                  <PencilSquareIcon className="w-5 h-5" />
-                  Chỉnh sửa
-                </button>
+              {isExistingCourse && !isCreateMode && !isEditMode && (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setIsEditMode(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg"
+                  >
+                    <PencilSquareIcon className="w-5 h-5" />
+                    Chỉnh sửa
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    <TrashIcon className="w-5 h-5" />
+                    Xóa
+                  </button>
+                </div>
               )}
             </header>
 
@@ -159,8 +249,9 @@ export default function CreateCourse() {
                 form={form}
                 layout="vertical"
                 onFinish={onFinish}
-                disabled={!isEditMode}
+                disabled={!isEditMode && !isCreateMode}
                 validateTrigger="onBlur"
+                className={!isEditMode && !isCreateMode ? "disabled-form" : ""}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* LEFT */}
@@ -169,17 +260,26 @@ export default function CreateCourse() {
                       label="Tiêu đề khóa học"
                       name="title"
                       rules={[
-                        { required: true, message: "Vui lòng nhập tiêu đề khóa học" },
+                        {
+                          required: true,
+                          message: "Vui lòng nhập tiêu đề khóa học",
+                        },
                       ]}
                     >
-                      <Input placeholder="Nhập tiêu đề khóa học" className="h-[40px]"/>
+                      <Input
+                        placeholder="Nhập tiêu đề khóa học"
+                        className="h-[40px]"
+                      />
                     </Form.Item>
 
                     <Form.Item
                       label="Mô tả khóa học"
                       name="description"
                       rules={[
-                        { required: true, message: "Vui lòng nhập mô tả khóa học" },
+                        {
+                          required: true,
+                          message: "Vui lòng nhập mô tả khóa học",
+                        },
                       ]}
                     >
                       <TextArea rows={6} placeholder="Nhập mô tả chi tiết..." />
@@ -188,31 +288,6 @@ export default function CreateCourse() {
 
                   {/* RIGHT */}
                   <div className="space-y-6">
-                    <Form.Item
-                      label="Ảnh đại diện khóa học"
-                    >
-                      <Upload
-                        beforeUpload={beforeUpload}
-                        showUploadList={false}
-                        accept="image/*"
-                      >
-                        <div className="h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-700">
-                          {form.getFieldValue("image") ? (
-                            <img
-                              src={form.getFieldValue("image")}
-                              alt="preview"
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            <div className="text-center w-full text-slate-500">
-                              <PhotoIcon className="w-10 h-10 mx-auto mb-2" />
-                              Nhấn để tải ảnh
-                            </div>
-                          )}
-                        </div>
-                      </Upload>
-                    </Form.Item>
-
                     <Form.Item
                       label="Lĩnh vực"
                       name="categoryId"
@@ -229,11 +304,15 @@ export default function CreateCourse() {
                   </div>
                 </div>
 
-                {isEditMode && (
+                {(isCreateMode || isEditMode) && (
                   <div className="flex justify-end gap-4 mt-8 pt-6 border-t">
                     <button
                       type="button"
-                      onClick={() => navigate("/teacher/courses")}
+                      // onClick={() => setIsEditMode(false)}
+                      onClick={() => {
+                        if(!isCreateMode) setIsEditMode(false);
+                        else navigate("/teacher/courses");
+                      }}
                       className="px-6 py-2 rounded-lg bg-slate-100"
                     >
                       Hủy
@@ -244,7 +323,7 @@ export default function CreateCourse() {
                       className="px-6 py-2 rounded-lg bg-primary text-white"
                       disabled={loading}
                     >
-                      {loading ? <Spin size="small" /> : "Tạo khóa học"}
+                      {loading ? <Spin size="small" /> : isCreateMode ? "Tạo khóa học" : "Cập nhật khóa học"}
                     </button>
                   </div>
                 )}
@@ -253,6 +332,85 @@ export default function CreateCourse() {
           </div>
         </main>
       </div>
+
+      {/* IMAGE UPLOAD MODAL */}
+      <Modal
+        title="Tải ảnh đại diện khóa học"
+        open={showImageModal}
+        onCancel={handleImageModalSkip}
+        footer={null}
+        centered
+      >
+        <div className="space-y-6">
+          <Upload
+            beforeUpload={beforeUpload}
+            showUploadList={false}
+            accept="image/*"
+          >
+            <div className="h-64 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer hover:bg-slate-100">
+              {imageFile ? (
+                <img
+                  src={URL.createObjectURL(imageFile)}
+                  alt="preview"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <div className="text-center w-full text-slate-500">
+                  <PhotoIcon className="w-10 h-10 mx-auto mb-2" />
+                  Nhấn để tải ảnh
+                </div>
+              )}
+            </div>
+          </Upload>
+
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={handleImageModalSkip}
+              className="px-6 py-2 rounded-lg bg-slate-100 text-slate-700"
+              disabled={uploadingImage}
+            >
+              Bỏ qua
+            </button>
+            <button
+              onClick={handleImageModalSave}
+              className="px-6 py-2 rounded-lg bg-primary text-white flex items-center gap-2"
+              disabled={!imageFile || uploadingImage}
+            >
+              {uploadingImage ? <Spin indicator={whiteSpinner} /> : "Lưu"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal
+        title="Xác nhận xóa khóa học"
+        open={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        footer={null}
+        centered
+      >
+        <p className="mb-6">
+          Bạn có chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn
+          tác.
+        </p>
+        <div className="flex justify-end gap-4">
+          <button
+            onClick={() => setShowDeleteModal(false)}
+            className="px-6 py-2 rounded-lg bg-slate-100 text-slate-700"
+            disabled={deleting}
+          >
+            Hủy
+          </button>
+          <button
+            onClick={handleDeleteCourse}
+            className="px-6 py-2 rounded-lg bg-red-600 text-white flex items-center gap-2"
+            disabled={deleting}
+          >
+            {deleting ? <Spin indicator={whiteSpinner} /> : "Xóa"}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
