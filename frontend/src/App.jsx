@@ -187,6 +187,15 @@ export default function App() {
             }
           />
           <Route
+            path="/teacher/courses/:courseId/chapters/:chapterId/lectures/create"
+            element={
+              <ProtectedRoute
+                element={<LectureDetail />}
+                allowedRoles={["TEACHER"]}
+              />
+            }
+          />
+          <Route
             path="/teacher/courses/:courseId/lectures/:lectureId"
             element={
               <ProtectedRoute
@@ -197,6 +206,15 @@ export default function App() {
           />
           <Route
             path="/teacher/courses/:courseId/quizzes/create"
+            element={
+              <ProtectedRoute
+                element={<QuizDetail />}
+                allowedRoles={["TEACHER"]}
+              />
+            }
+          />
+          <Route
+            path="/teacher/courses/:courseId/chapters/:chapterId/quizzes/create"
             element={
               <ProtectedRoute
                 element={<QuizDetail />}
