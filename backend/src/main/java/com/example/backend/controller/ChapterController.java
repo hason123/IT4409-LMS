@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/lms/chapters")
@@ -20,7 +21,7 @@ public class ChapterController {
         this.chapterService = chapterService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping
     public ResponseEntity<ChapterResponse> createChapter(@RequestBody ChapterRequest request) {
         return ResponseEntity.ok(chapterService.createChapter(request));
@@ -43,7 +44,13 @@ public class ChapterController {
         return ResponseEntity.ok(chapterPage);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
+    @GetMapping("/course/{courseId}")
+    public ResponseEntity<List<ChapterResponse>> getChaptersByCourseId(@PathVariable Long courseId) {
+        return ResponseEntity.ok(chapterService.getChaptersByCourseId(courseId));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/{id}")
     public ResponseEntity<ChapterResponse> updateChapter(
             @PathVariable Integer id,
@@ -52,7 +59,7 @@ public class ChapterController {
         return ResponseEntity.ok(chapterService.updateChapter(id, request));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteChapter(@PathVariable Integer id) {
         chapterService.deleteChapter(id);

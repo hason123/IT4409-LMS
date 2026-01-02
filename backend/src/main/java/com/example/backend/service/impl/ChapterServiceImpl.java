@@ -103,4 +103,12 @@ public class ChapterServiceImpl implements ChapterService {
                 .orElseThrow(() -> new RuntimeException("Chapter not found with id: " + id));
         chapterRepository.delete(chapter);
     }
+
+    @Override
+    public List<ChapterResponse> getChaptersByCourseId(Long courseId) {
+        List<Chapter> chapters = chapterRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
+        return chapters.stream()
+                .map(this::convertChapterToDTO)
+                .toList();
+    }
 }

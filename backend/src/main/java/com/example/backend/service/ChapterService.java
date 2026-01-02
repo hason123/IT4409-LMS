@@ -5,6 +5,7 @@ import com.example.backend.dto.response.ChapterResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.Chapter;
 import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 public interface ChapterService {
     ChapterResponse createChapter(ChapterRequest request);
@@ -13,5 +14,7 @@ public interface ChapterService {
     void deleteChapter(Integer id);
     
     PageResponse<ChapterResponse> getChapterPage(Pageable pageable);
+    List<ChapterResponse> getChaptersByCourseId(Long courseId);
     ChapterResponse convertChapterToDTO(Chapter chapter);
 }
+
