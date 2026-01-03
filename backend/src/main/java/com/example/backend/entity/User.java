@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -38,6 +40,8 @@ public class User extends BaseEntity {
     private String refreshToken;
     @Column(name = "gmail")
     private String gmail;
+    @Column(name = "is_verified", nullable = false)
+    private boolean isVerified = false;
     @Column(name = "image_url", columnDefinition = "MEDIUMTEXT")
     private String imageUrl;
     @Column(name = "cloudinary_image_id")
@@ -49,6 +53,8 @@ public class User extends BaseEntity {
     private List<StudentProgress> studentProgress;
     @OneToMany(mappedBy = "teacher")
     private List<Course> taughtCourses;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Otp> otps = new ArrayList<>();
 
 
 }

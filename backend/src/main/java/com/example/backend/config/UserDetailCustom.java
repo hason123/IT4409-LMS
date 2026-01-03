@@ -1,6 +1,7 @@
 package com.example.backend.config;
 
 import com.example.backend.entity.User;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.service.UserService;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,6 +35,10 @@ public class UserDetailCustom implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
+        if (!user.isVerified()) {
+            throw new UnauthorizedException("Chưa xác thực OTP");
+        }
+
         String roleName = user.getRole().getRoleName().name();
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + roleName);
 

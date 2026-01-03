@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.request.RegisterRequest;
+import com.example.backend.dto.request.UserCreateRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
@@ -27,15 +28,21 @@ public interface UserService {
 
     User createGoogleUser(String email, String name);
 
-    UserInfoResponse updateUser(Long id, UserRequest request);
+    UserInfoResponse updateUser(Long id, RegisterRequest request);
 
     Object getUserById(Long id);
 
     PageResponse<UserInfoResponse> getUserPage(Pageable pageable);
 
-    UserInfoResponse createUser(UserRequest request);
+    UserInfoResponse registerUser(RegisterRequest request);
+
+    UserInfoResponse createUser(UserCreateRequest request);
 
     PageResponse<UserInfoResponse> searchUser(SearchUserRequest request, Pageable pageable);
+
+    void initiateEmailVerification(String gmail);
+
+    void resetPasswordVerification(String gmail);
 
     UserInfoResponse convertUserInfoToDTO(User user);
 

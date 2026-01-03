@@ -38,6 +38,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             admin.setAddress("Hà Nội");
             admin.setPassword(new BCryptPasswordEncoder().encode("123"));
             admin.setRole(roleRepository.findByRoleName(RoleType.ADMIN));
+            admin.setVerified(true);
             User teacher = new User();
             teacher.setUserName("teacher");
             teacher.setFullName("TEACHER");
@@ -47,6 +48,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             teacher.setAddress("Hà Nội");
             teacher.setPassword(new BCryptPasswordEncoder().encode("123"));
             teacher.setRole(roleRepository.findByRoleName(RoleType.TEACHER));
+            teacher.setVerified(true);
             User student = new User();
             student.setUserName("student");
             student.setFullName("STUDENT");
@@ -56,6 +58,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             student.setAddress("Hà Nội");
             student.setPassword(new BCryptPasswordEncoder().encode("123"));
             student.setRole(roleRepository.findByRoleName(RoleType.STUDENT));
+            student.setVerified(true);
             userRepository.saveAll(List.of(admin, teacher, student));
         }
 

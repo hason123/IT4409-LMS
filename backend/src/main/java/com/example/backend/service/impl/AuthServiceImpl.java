@@ -1,18 +1,21 @@
 package com.example.backend.service.impl;
 
-import com.example.backend.dto.request.GoogleLoginRequest;
-import com.example.backend.dto.request.LoginRequest;
-import com.example.backend.dto.request.UserRequest;
+import com.example.backend.constant.OtpType;
+import com.example.backend.dto.request.*;
 import com.example.backend.dto.response.LoginResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BusinessException;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService;
+import com.example.backend.service.OtpService;
 import com.example.backend.service.UserService;
 import com.example.backend.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -21,14 +24,20 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
     private final UserService userService;
+    private final OtpService otpService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
 
-    public AuthServiceImpl(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserService userService) {
+    public AuthServiceImpl(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserService userService, OtpService otpService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
+        this.otpService = otpService;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -81,28 +90,104 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginResponse register(UserRequest request) {
-        UserInfoResponse registerUser = userService.createUser(request);
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(registerUser.getUserName(), request.getPassword());
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        User newUser = userService.handleGetUserByUserName(registerUser.getUserName());
+    public void register(RegisterRequest request) {
+        userService.registerUser(request);
+        userService.initiateEmailVerification(request.getGmail());
+    }
+
+    @Override
+    public LoginResponse verifyOtp(OtpVerificationRequest request) {
+        User user = (User) userService.getUserById(request.getUserId());
+        boolean valid = otpService.validateOtp(
+                user,
+                request.getCode(),
+                OtpType.EMAIL_VERIFICATION
+        );
+        if (!valid) {
+            throw new BusinessException("OTP không hợp lệ hoặc đã hết hạn");
+        }
+        user.setVerified(true);
+        userRepository.save(user);
+        Authentication authentication =
+                authenticationManagerBuilder.getObject().authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                user.getUserName(),
+                                user.getPassword()
+                        )
+                );
+        return buildLoginResponse(authentication, user);
+    }
+
+    @Override
+    public void changePassWord(ChangePasswordRequest request){
+        User user = userService.getCurrentUser();
+        if(passwordEncoder.matches(request.getOldPassword(), user.getPassword())){
+            if(request.getConfirmNewPassword().equals(request.getNewPassword())){
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user);
+            }
+            else throw new BusinessException("Hai mật khẩu không trùng khớp");
+        }
+        else throw new BusinessException("Mật khẩu bạn nhập không chính xác");
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequest request) {
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw new BusinessException("Hai mật khẩu không trùng khớp");
+        }
+        User user = userService.handleGetUserByGmail(request.getGmail());
+        if (user == null) {
+            throw new BusinessException("Người dùng không tồn tại");
+        }
+        boolean validOtp = otpService.validateOtp(
+                user,
+                request.getOtp(),
+                OtpType.PASSWORD_RESET
+        );
+        if (!validOtp) {
+            throw new BusinessException("OTP không hợp lệ hoặc đã hết hạn");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    public void resendRegisterOtp(String gmail) {
+        User user = userService.handleGetUserByGmail(gmail);
+        if (user == null) {
+            throw new BusinessException("Người dùng không tồn tại");
+        }
+        if (user.isVerified()) {
+            throw new BusinessException("Tài khoản đã được xác thực");
+        }
+        otpService.resendOtp(user, OtpType.EMAIL_VERIFICATION);
+    }
+
+    @Override
+    public void resendResetPasswordOtp(String gmail) {
+        User user = userService.handleGetUserByGmail(gmail);
+        if (user == null) {
+            throw new BusinessException("Người dùng không tồn tại");
+        }
+        otpService.resendOtp(user, OtpType.PASSWORD_RESET);
+    }
+
+    private LoginResponse buildLoginResponse(Authentication authentication, User user) {
         LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin();
-        userLogin.setId(newUser.getId());
-        userLogin.setUsername(newUser.getUserName());
-        userLogin.setRole(String.valueOf(newUser.getRole().getRoleName()));
+        userLogin.setId(user.getId());
+        userLogin.setUsername(user.getUserName());
+        userLogin.setRole(user.getRole().getRoleName().name());
         LoginResponse response = new LoginResponse();
         response.setUser(userLogin);
-        // Generate tokens
-        String accessToken = securityUtil.createAccessToken(authentication.getName(), response);
-        String refreshToken = securityUtil.createRefreshToken(request.getUserName(), response);
-        // Update refresh token in DB
-        userService.updateUserToken(refreshToken, request.getUserName());
-        // Set tokens in DTO
+        String accessToken =
+                securityUtil.createAccessToken(authentication.getName(), response);
+        String refreshToken =
+                securityUtil.createRefreshToken(authentication.getName(), response);
+        userService.updateUserToken(refreshToken, user.getUserName());
         response.setAccessToken(accessToken);
         response.setRefreshToken(refreshToken);
         return response;
-
     }
 
     @Override

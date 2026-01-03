@@ -1,18 +1,22 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.constant.OtpType;
 import com.example.backend.constant.RoleType;
-import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.request.RegisterRequest;
+import com.example.backend.dto.request.UserCreateRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
+import com.example.backend.entity.Otp;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.CloudinaryService;
+import com.example.backend.service.OtpService;
 import com.example.backend.service.UserService;
 import com.example.backend.specification.UserSpecification;
 import com.example.backend.utils.FileUploadUtil;
@@ -33,12 +37,15 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryService cloudinaryService;
+    private final OtpService otpService;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, CloudinaryService cloudinaryService) {
+
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, CloudinaryService cloudinaryService, OtpService otpService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.cloudinaryService = cloudinaryService;
+        this.otpService = otpService;
     }
 
     @Override
@@ -106,13 +113,14 @@ public class UserServiceImpl implements UserService {
                 .fullName(username)
                 .gmail(email)
                 .role(roleRepository.findByRoleName(RoleType.STUDENT))
+                .isVerified(true)
                 .build();
         return userRepository.save(googleUser);
     }
 
 
     @Override
-    public UserInfoResponse updateUser(Long id, UserRequest request) {
+    public UserInfoResponse updateUser(Long id, RegisterRequest request) {
         User updatedUser = userRepository.findById(id).orElse(null);
 
         if(!isCurrentUser(id) ){
@@ -187,7 +195,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfoResponse createUser(UserRequest request){
+    public UserInfoResponse registerUser(RegisterRequest request){
         User user = new User();
         user.setUserName(request.getUserName());
         user.setRole(roleRepository.findByRoleName(RoleType.valueOf(request.getRoleName())));
@@ -197,6 +205,23 @@ public class UserServiceImpl implements UserService {
         user.setGmail(request.getGmail());
         user.setStudentNumber(request.getStudentNumber());
         user.setFullName(request.getFullName());
+        user.setVerified(false);
+        userRepository.save(user);
+        return convertUserInfoToDTO(user);
+    }
+
+    @Override
+    public UserInfoResponse createUser(UserCreateRequest request){
+        User user = new User();
+        user.setUserName(request.getUserName());
+        user.setRole(roleRepository.findByRoleName(RoleType.valueOf(request.getRoleName())));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setAddress(request.getAddress());
+        user.setGmail(request.getGmail());
+        user.setStudentNumber(request.getStudentNumber());
+        user.setFullName(request.getFullName());
+        user.setVerified(true);
         userRepository.save(user);
         return convertUserInfoToDTO(user);
     }
@@ -228,6 +253,20 @@ public class UserServiceImpl implements UserService {
                 response.getTotalPages(),
                 response.getContent()
         );
+    }
+
+    @Override
+    public void initiateEmailVerification(String gmail) {
+        User user = handleGetUserByGmail(gmail);
+        Otp otp = otpService.createOtp(user, OtpType.EMAIL_VERIFICATION);
+        otpService.sendOtpEmail(user.getGmail(), otp.getCode());
+    }
+
+    @Override
+    public void resetPasswordVerification(String gmail) {
+        User user = handleGetUserByGmail(gmail);
+        Otp otp = otpService.createOtp(user, OtpType.PASSWORD_RESET);
+        otpService.sendOtpEmail(user.getGmail(), otp.getCode());
     }
 
 

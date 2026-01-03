@@ -1,8 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.request.GoogleLoginRequest;
-import com.example.backend.dto.request.LoginRequest;
-import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.request.*;
 import com.example.backend.dto.response.LoginResponse;
 
 public interface AuthService {
@@ -12,7 +10,17 @@ public interface AuthService {
 
     void logout();
 
-    LoginResponse register(UserRequest request);
+    void register(RegisterRequest request);
+
+    LoginResponse verifyOtp(OtpVerificationRequest request);
+
+    void changePassWord(ChangePasswordRequest request);
+
+    void resetPassword(ResetPasswordRequest request);
+
+    void resendRegisterOtp(String gmail);
+
+    void resendResetPasswordOtp(String gmail);
 
     LoginResponse googleLogin(GoogleLoginRequest request);
 }

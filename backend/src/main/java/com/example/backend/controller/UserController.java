@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.request.UserRequest;
+import com.example.backend.dto.request.RegisterRequest;
+import com.example.backend.dto.request.UserCreateRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
@@ -33,14 +34,14 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @PutMapping("/users/{id}")
-    public ResponseEntity<UserInfoResponse> updateUser(@PathVariable Long id, @RequestBody UserRequest request) {
+    public ResponseEntity<UserInfoResponse> updateUser(@PathVariable Long id, @RequestBody RegisterRequest request) {
         UserInfoResponse updatedUser = userService.updateUser(id, request);
         return ResponseEntity.ok(updatedUser);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
-    public ResponseEntity<UserInfoResponse> createUser(@RequestBody UserRequest request) {
+    public ResponseEntity<UserInfoResponse> createUser(@RequestBody UserCreateRequest request) {
         UserInfoResponse newUser = userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
