@@ -11,6 +11,7 @@ import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.Otp;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.RoleRepository;
@@ -39,7 +40,6 @@ public class UserServiceImpl implements UserService {
     private final CloudinaryService cloudinaryService;
     private final OtpService otpService;
 
-
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, CloudinaryService cloudinaryService, OtpService otpService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -50,13 +50,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User handleGetUserByGmail(String email) {
-        return userRepository.findByGmail(email);
+        User user = userRepository.findByGmail(email); // trả về User, có thể null
+        if (user == null) {
+            throw new BusinessException("Người dùng không tồn tại");
+        }
+        return user;
     }
 
     @Override
-    public User handleGetUserByUserName(String name) {
-        return userRepository.findByUserName(name);
+    public User handleGetUserByUserName(String username) {
+        User user = userRepository.findByUserName(username); // trả về User, có thể null
+        if (user == null) {
+            throw new BusinessException("Người dùng không tồn tại");
+        }
+        return user;
     }
+
 
     @Override
     public boolean isCurrentUser(Long userId) {

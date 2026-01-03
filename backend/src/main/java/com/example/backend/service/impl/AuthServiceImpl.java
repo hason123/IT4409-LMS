@@ -3,7 +3,6 @@ package com.example.backend.service.impl;
 import com.example.backend.constant.OtpType;
 import com.example.backend.dto.request.*;
 import com.example.backend.dto.response.LoginResponse;
-import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.repository.UserRepository;
@@ -151,6 +150,12 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
+
+    @Override
+    public void resetPasswordVerification(String gmail) {
+        userService.resetPasswordVerification(gmail);
+    }
+
 
     @Override
     public void resendRegisterOtp(String gmail) {

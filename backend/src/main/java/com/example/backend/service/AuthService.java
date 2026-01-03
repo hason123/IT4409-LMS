@@ -18,6 +18,8 @@ public interface AuthService {
 
     void resetPassword(ResetPasswordRequest request);
 
+    void resetPasswordVerification(String gmail);
+
     void resendRegisterOtp(String gmail);
 
     void resendResetPasswordOtp(String gmail);

@@ -2,7 +2,6 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.request.*;
 import com.example.backend.dto.response.LoginResponse;
-import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -126,6 +125,12 @@ public class AuthController {
     @PostMapping("/resend-reset-password-otp")
     public ResponseEntity<Void> resendResetPasswordOtp(@RequestParam String gmail) {
         authService.resendResetPasswordOtp(gmail);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password/request")
+    public ResponseEntity<Void> resetPasswordRequest(@RequestParam String gmail) {
+        authService.resetPasswordVerification(gmail);
         return ResponseEntity.ok().build();
     }
 
