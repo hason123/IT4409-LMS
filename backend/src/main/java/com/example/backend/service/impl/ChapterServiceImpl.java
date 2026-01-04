@@ -117,7 +117,10 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public void updateOrder(Long courseId, List<Integer> orderedChapterIds) {
         for (int i = 0; i < orderedChapterIds.size(); i++) {
-            chapterRepository.updateOrderIndex(orderedChapterIds.get(i), i + 1);
+            int updated = chapterRepository.updateOrderIndex(orderedChapterIds.get(i), courseId, i + 1);
+            if (updated == 0) {
+                throw new ResourceNotFoundException("Chapter id " + orderedChapterIds.get(i) + " không thuộc course " + courseId);
+            }
         }
     }
 }

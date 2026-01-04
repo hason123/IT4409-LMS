@@ -15,8 +15,8 @@ public interface ChapterRepository extends JpaRepository<Chapter,Integer> {
 
     // Cập nhật orderIndex khi drag & drop
     @Modifying
-    @Query("UPDATE Chapter c SET c.orderIndex = :orderIndex WHERE c.id = :id")
-    void updateOrderIndex(@Param("id") Integer id, @Param("orderIndex") Integer orderIndex);
+    @Query("UPDATE Chapter c SET c.orderIndex = :orderIndex WHERE c.id = :id AND c.course.id = :courseId")
+    int updateOrderIndex(@Param("id") Integer id, @Param("courseId") Long courseId, @Param("orderIndex") Integer orderIndex);
 
 }
 
