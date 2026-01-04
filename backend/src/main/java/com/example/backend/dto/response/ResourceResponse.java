@@ -12,7 +12,6 @@ public class ResourceResponse {
     private String title;
     private String url;
     private ResourceType type;
-    private String orderIndex;
     private String lessonTitle;
     private Integer lessonId;
 }

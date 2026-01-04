@@ -12,6 +12,6 @@ public class QuizResponse {
     private String description;
     private Integer minPassScore;
     private Integer maxPassScore;
-    private String chapterTitle;
+    //private String chapterTitle;
     private Integer chapterId;
 }

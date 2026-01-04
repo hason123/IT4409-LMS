@@ -31,7 +31,7 @@ public class Chapter extends BaseEntity{
             CascadeType.MERGE
     })
     @OrderBy("orderIndex ASC")
-    private List<ChapterItem> items;
+    private List<ChapterItem> chapterItems;
 
 /*    @OneToMany(mappedBy = "chapter")
     private List<Lesson> lessons;

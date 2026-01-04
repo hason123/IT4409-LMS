@@ -9,7 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 public class ResourceRequest {
     private String title;
-    private String orderIndex;
+    private String description;
+    private String url;
     private Integer lessonId;
     private ResourceType type;
 

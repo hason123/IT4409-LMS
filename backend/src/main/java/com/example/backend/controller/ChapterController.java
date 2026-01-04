@@ -1,4 +1,5 @@
 package com.example.backend.controller;
+import com.example.backend.dto.request.ChapterOrderRequest;
 import com.example.backend.dto.request.ChapterRequest;
 import com.example.backend.dto.response.ChapterResponse;
 import com.example.backend.dto.response.PageResponse;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/lms/chapters")
+@RequestMapping("/api/v1/lms")
 public class ChapterController {
     private final ChapterService chapterService;
 
@@ -22,9 +23,9 @@ public class ChapterController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @PostMapping
-    public ResponseEntity<ChapterResponse> createChapter(@RequestBody ChapterRequest request) {
-        return ResponseEntity.ok(chapterService.createChapter(request));
+    @PostMapping("/courses/{courseId}/chapters")
+    public ResponseEntity<ChapterResponse> createChapter(@PathVariable Long courseId, @RequestBody ChapterRequest request) {
+        return ResponseEntity.ok(chapterService.createChapter(courseId, request));
     }
 
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
@@ -51,7 +52,7 @@ public class ChapterController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @PutMapping("/{id}")
+    @PutMapping("/chapters/{id}")
     public ResponseEntity<ChapterResponse> updateChapter(
             @PathVariable Integer id,
             @RequestBody ChapterRequest request
@@ -60,9 +61,19 @@ public class ChapterController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/chapters/{id}")
     public ResponseEntity<Void> deleteChapter(@PathVariable Integer id) {
         chapterService.deleteChapter(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PutMapping("/course/{courseId}/order-chapters")
+    public ResponseEntity<Void> updateChapterOrder(
+            @PathVariable Long courseId,
+            @RequestBody ChapterOrderRequest request
+    ) {
+        chapterService.updateOrder(courseId, request.getOrderedChapterIds());
+        return ResponseEntity.ok().build();
     }
 }

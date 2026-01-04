@@ -4,7 +4,7 @@ import com.example.backend.dto.response.ChapterResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.Chapter;
 import com.example.backend.entity.Course;
-import com.example.backend.repository.CategoryRepository;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.ChapterRepository;
 import com.example.backend.repository.CourseRepository;
 import com.example.backend.service.ChapterService;
@@ -31,13 +31,12 @@ public class ChapterServiceImpl implements ChapterService {
         ChapterResponse responseDTO = new ChapterResponse();
         responseDTO.setId(chapter.getId());
         responseDTO.setTitle(chapter.getTitle());
-        responseDTO.setOrderIndex(String.valueOf(chapter.getOrderIndex()));
+        responseDTO.setOrderIndex(chapter.getOrderIndex());
         responseDTO.setDescription(chapter.getDescription());
         if (chapter.getCourse() != null) {
             responseDTO.setCourseId(chapter.getCourse().getId());
             responseDTO.setCourseTitle(chapter.getCourse().getTitle());
         }
-        
         return responseDTO;
     }
 
@@ -45,7 +44,6 @@ public class ChapterServiceImpl implements ChapterService {
     public PageResponse<ChapterResponse> getChapterPage(Pageable pageable) {
         Page<Chapter> chapterPage = chapterRepository.findAll(pageable);
         Page<ChapterResponse> chapterResponsePage = chapterPage.map(this::convertChapterToDTO);
-
         return new PageResponse<>(
                 chapterResponsePage.getNumber() + 1,
                 chapterResponsePage.getTotalPages(),
@@ -61,19 +59,23 @@ public class ChapterServiceImpl implements ChapterService {
         return convertChapterToDTO(chapter);
     }
 
-    @Override
     @Transactional
-    public ChapterResponse createChapter(ChapterRequest request) {
+    @Override
+    public ChapterResponse createChapter(Long courseId, ChapterRequest request) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
         Chapter chapter = new Chapter();
         chapter.setTitle(request.getTitle());
         chapter.setOrderIndex(Integer.parseInt(request.getOrderIndex()));
         chapter.setDescription(request.getDescription());
+        Integer maxOrder = chapterRepository.findByCourse_IdOrderByOrderIndexAsc(courseId)
+                .stream()
+                .map(Chapter::getOrderIndex)
+                .max(Integer::compare)
+                .orElse(0);
+        chapter.setOrderIndex(maxOrder + 1);
+        chapter.setCourse(course);
         // Tìm Course tương ứng Chapter
-        if (request.getCourseId() != null) {
-            Course course = courseRepository.findById(request.getCourseId())
-                    .orElseThrow(() -> new RuntimeException("Course not found with id: " + request.getCourseId()));
-            chapter.setCourse(course);
-        }
         chapterRepository.save(chapter);
         return convertChapterToDTO(chapter);
     }
@@ -84,14 +86,13 @@ public class ChapterServiceImpl implements ChapterService {
         Chapter chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Chapter not found with id: " + id));
         chapter.setTitle(request.getTitle());
-        chapter.setOrderIndex(Integer.parseInt(request.getOrderIndex()));
         chapter.setDescription(request.getDescription());
         // Cập nhật lại Course khi courseId thay đổi
-        if (request.getCourseId() != null) {
-            Course course = courseRepository.findById(request.getCourseId())
-                    .orElseThrow(() -> new RuntimeException("Course not found with id: " + request.getCourseId()));
-            chapter.setCourse(course);
-        }
+//        if (request.getCourseId() != null) {
+//            Course course = courseRepository.findById(request.getCourseId())
+//                    .orElseThrow(() -> new RuntimeException("Course not found with id: " + request.getCourseId()));
+//            chapter.setCourse(course);
+//        }
         chapterRepository.save(chapter);
         return convertChapterToDTO(chapter);
     }
@@ -106,9 +107,17 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public List<ChapterResponse> getChaptersByCourseId(Long courseId) {
-        List<Chapter> chapters = chapterRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
+        List<Chapter> chapters = chapterRepository.findByCourse_IdOrderByOrderIndexAsc(courseId);
         return chapters.stream()
                 .map(this::convertChapterToDTO)
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public void updateOrder(Long courseId, List<Integer> orderedChapterIds) {
+        for (int i = 0; i < orderedChapterIds.size(); i++) {
+            chapterRepository.updateOrderIndex(orderedChapterIds.get(i), i + 1);
+        }
     }
 }

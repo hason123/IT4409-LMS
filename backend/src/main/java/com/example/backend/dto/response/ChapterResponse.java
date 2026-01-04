@@ -9,7 +9,7 @@ import lombok.*;
 public class ChapterResponse {
     private Integer id;
     private String title;
-    private String orderIndex;
+    private Integer orderIndex;
     private String courseTitle;
     private String description;
     private Long courseId;
