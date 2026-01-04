@@ -1,4 +1,5 @@
 package com.example.backend.dto.request;
+import com.example.backend.constant.ResourceSource;
 import com.example.backend.constant.ResourceType;
 
 import lombok.*;
@@ -10,8 +11,10 @@ import lombok.*;
 public class ResourceRequest {
     private String title;
     private String description;
-    private String url;
+    private String embedUrl;
     private Integer lessonId;
     private ResourceType type;
+    private ResourceSource source;
+    private String cloudinaryId;
 
 }

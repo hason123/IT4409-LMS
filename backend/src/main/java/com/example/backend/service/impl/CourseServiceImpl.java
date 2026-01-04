@@ -1,6 +1,7 @@
 package com.example.backend.service.impl;
 
 
+import com.example.backend.constant.ResourceType;
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.course.CourseRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
@@ -114,7 +115,7 @@ public class CourseServiceImpl implements CourseService {
         FileUploadUtil.assertAllowed(file, "image");
         final String cloudinaryImageId = uploadCourse.getCloudinaryImageId();
         if(StringUtils.hasText(cloudinaryImageId)) {
-            cloudinaryService.deleteFile(cloudinaryImageId);
+            cloudinaryService.deleteFile(cloudinaryImageId, ResourceType.IMAGE);
         }
         final String fileName = FileUploadUtil.getFileName(file.getOriginalFilename());
         final CloudinaryResponse response = this.cloudinaryService.uploadFile(file, fileName, "image");

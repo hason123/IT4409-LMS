@@ -1,6 +1,7 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.constant.OtpType;
+import com.example.backend.constant.ResourceType;
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.RegisterRequest;
 import com.example.backend.dto.request.UserCreateRequest;
@@ -180,7 +181,7 @@ public class UserServiceImpl implements UserService {
         FileUploadUtil.assertAllowed(file, "image");
         final String cloudinaryImageId = avatarUser.getCloudinaryImageId();
         if(StringUtils.hasText(cloudinaryImageId)) {
-            cloudinaryService.deleteFile(cloudinaryImageId);
+            cloudinaryService.deleteFile(cloudinaryImageId, ResourceType.IMAGE);
         }
         final String fileName = FileUploadUtil.getFileName(file.getOriginalFilename());
         final CloudinaryResponse response = this.cloudinaryService.uploadFile(file, fileName, "image");

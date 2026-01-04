@@ -1,6 +1,7 @@
 package com.example.backend.service.impl;
 
 import com.cloudinary.Cloudinary;
+import com.example.backend.constant.ResourceType;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.service.CloudinaryService;
@@ -43,9 +44,18 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     @Override
-    public void deleteFile(String publicId) {
+    public void deleteFile(String publicId, ResourceType type) {
         try {
-            cloudinary.uploader().destroy(publicId, Map.of());
+            Map<String, Object> options = new HashMap<>();
+
+            if (type == ResourceType.VIDEO) {
+                options.put("resource_type", "video");
+            } else if (type == ResourceType.PDF) {
+                options.put("resource_type", "raw");
+            } else {
+                options.put("resource_type", "image");
+            }
+            cloudinary.uploader().destroy(publicId, options);
         } catch (Exception e) {
             throw new BusinessException("Failed to delete file");
         }

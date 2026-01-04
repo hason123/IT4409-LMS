@@ -17,14 +17,14 @@ import org.hibernate.annotations.SQLRestriction;
 public class ChapterItem extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
     @Enumerated(EnumType.STRING)
     private ItemType type;
     @Column(name = "ref_id")
-    private Long refId;
+    private Integer refId;
     @Column(name = "order_index")
     private Integer orderIndex;
 }

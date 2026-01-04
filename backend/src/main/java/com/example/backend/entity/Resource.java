@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.ResourceSource;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -19,16 +20,14 @@ public class Resource extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
-    private String url;
+    private String fileUrl;
+    private String embedUrl;
+    private String cloudinaryId;
     private String description;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "filetype")
     private ResourceType type;
-
-    @Column(name = "orderindex")
-    private Integer orderIndex;
-
+    private ResourceSource source;
     @ManyToOne
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;

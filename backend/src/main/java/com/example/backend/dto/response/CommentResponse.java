@@ -1,18 +1,24 @@
 package com.example.backend.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentResponse {
-    private Integer id;
-    private String content;
-    private String createdAt;
-    private String updatedAt;
-    private String userName;
-    private String lessonTitle;
-    private String quizTitle;
-    private String parentUserName;
+    private Integer commentId;
+    private String commentDetail;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedAt;
+    private Integer lessonId;
+    private Long userId;
+    private Integer parentId;
+    private List<CommentResponse> replies;
 }

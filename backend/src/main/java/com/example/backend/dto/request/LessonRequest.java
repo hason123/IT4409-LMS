@@ -9,6 +9,4 @@ import lombok.*;
 public class LessonRequest {
     private String title;
     private String content;
-    private Integer orderIndex;
-    private Integer chapterId;
 }

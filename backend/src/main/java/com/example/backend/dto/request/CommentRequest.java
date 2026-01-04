@@ -6,11 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class CommentRequest {
     private String content;
-    private Long userId;
-    private Integer lessonId;
-    private Integer quizId;
     private Integer parentId;
 }

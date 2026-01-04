@@ -2,15 +2,15 @@ package com.example.backend.dto.response;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonResponse {
-    private Long id;
+    private Integer id;
     private String title;
     private String content;
-    private String chapterTitle;
-    private Integer chapterId;
-
+    private List<ResourceResponse> resources;
 }

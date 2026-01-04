@@ -30,8 +30,8 @@ public class Quiz extends BaseEntity {
     private Chapter chapter;*/
     @OneToMany(mappedBy = "quiz")
     private List<QuizQuestion> questions;
-    @OneToMany(mappedBy = "quiz")
-    private List<Comment> comments;
+/*    @OneToMany(mappedBy = "quiz")
+    private List<Comment> comments;*/
     @OneToMany(mappedBy = "quiz")
     private List<QuizAttempt> attempts;
 }

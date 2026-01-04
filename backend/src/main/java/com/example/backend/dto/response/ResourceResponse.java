@@ -10,8 +10,11 @@ import lombok.*;
 public class ResourceResponse {
     private Integer id;
     private String title;
-    private String url;
+    private String fileUrl;
+    private String embedUrl;
+    private String cloudinaryId;
     private ResourceType type;
     private String lessonTitle;
     private Integer lessonId;
+
 }
