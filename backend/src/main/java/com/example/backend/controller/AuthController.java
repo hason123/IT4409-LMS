@@ -78,13 +78,13 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(response);
     }*/
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/verify-otp")
+    @PostMapping("/auth/verify-otp")
     public ResponseEntity<LoginResponse> verifyOtp(@RequestBody OtpVerificationRequest request) {
         LoginResponse response = authService.verifyOtp(request);
 
@@ -104,31 +104,31 @@ public class AuthController {
                 .body(response);
     }
 
-    @PostMapping("/resend-register-otp")
+    @PostMapping("/auth/resend-register-otp")
     public ResponseEntity<Void> resendRegisterOtp(@RequestParam String gmail) {
         authService.resendRegisterOtp(gmail);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/change-password")
+    @PostMapping("/auth/change-password")
     public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request) {
         authService.changePassWord(request);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/reset-password/confirm")
+    @PostMapping("/auth/reset-password/confirm")
     public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/resend-reset-password-otp")
+    @PostMapping("/auth/resend-reset-password-otp")
     public ResponseEntity<Void> resendResetPasswordOtp(@RequestParam String gmail) {
         authService.resendResetPasswordOtp(gmail);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/reset-password/request")
+    @PostMapping("/auth/reset-password/request")
     public ResponseEntity<Void> resetPasswordRequest(@RequestParam String gmail) {
         authService.resetPasswordVerification(gmail);
         return ResponseEntity.ok().build();
