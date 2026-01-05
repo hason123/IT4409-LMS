@@ -3,10 +3,13 @@ package com.example.backend.service.impl;
 import com.example.backend.dto.request.QuizRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.QuizResponse;
+import com.example.backend.dto.response.QuizQuestionResponse;
 import com.example.backend.entity.Quiz;
-import com.example.backend.repository.ChapterRepository;
 import com.example.backend.repository.QuizRepository;
 import com.example.backend.service.QuizService;
+
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,10 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
-    private final ChapterRepository chapterRepository;
 
-    public QuizServiceImpl(QuizRepository quizRepository, ChapterRepository chapterRepository){
-        this.chapterRepository = chapterRepository;
+    public QuizServiceImpl(QuizRepository quizRepository){
         this.quizRepository = quizRepository;
     }
 
@@ -30,6 +31,18 @@ public class QuizServiceImpl implements QuizService {
         response.setTitle(quiz.getTitle());
         response.setDescription(quiz.getDescription());
         response.setMinPassScore(quiz.getMinPassScore());
+
+        if (quiz.getQuestions() != null) {
+            response.setQuestions(quiz.getQuestions().stream()
+                .map(question -> {
+                    QuizQuestionResponse qDto = new QuizQuestionResponse();
+                    qDto.setId(question.getId());
+                    qDto.setTitle(question.getTitle());
+                    qDto.setType(question.getType());
+                    return qDto;
+                })
+                .collect(Collectors.toList()));
+        }
         return response;
     }
 
@@ -72,7 +85,6 @@ public class QuizServiceImpl implements QuizService {
         quiz.setTitle(request.getTitle());
         quiz.setDescription(request.getDescription());
         quiz.setMinPassScore(request.getMinPassScore());
-
         return convertQuizToDTO(quizRepository.save(quiz));
     }
 

@@ -8,5 +8,4 @@ import lombok.*;
 public class QuizAnswerRequest {
     private String description;
     private Boolean isCorrect;
-    private Long quizQuesId;
 }
