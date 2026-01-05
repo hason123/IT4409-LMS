@@ -12,15 +12,6 @@ public class QuizQuestionResponse {
     private Long id;
     private String title;
     private QuestionType type;
-    private String quizTitle;
-    private List<QuizAnswerSummary> answers;
-    
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class QuizAnswerSummary {
-        private Long id;
-        private String description;
-    }
+    private List<QuizAnswerResponse> answers;
+
 }

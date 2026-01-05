@@ -12,10 +12,10 @@ public interface ChapterItemService {
     List<ChapterItemResponse> getItemsByChapter(Integer chapterId);
 
     @Transactional
-    ChapterItemResponse addLessonToChapter(Integer chapterId, Lesson lesson);
+    void updateOrder(Integer chapterId, List<Integer> orderedItemIds);
 
     @Transactional
-    void updateOrder(Integer chapterId, List<Integer> orderedItemIds);
+    ChapterItemResponse addLessonToChapter(Integer chapterId, Integer lessonId);
 
 //    @Transactional
 //   // ChapterItemResponse addQuizToChapter(Integer chapterId, Quiz quiz);

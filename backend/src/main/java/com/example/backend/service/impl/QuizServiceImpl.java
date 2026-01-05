@@ -30,7 +30,6 @@ public class QuizServiceImpl implements QuizService {
         response.setTitle(quiz.getTitle());
         response.setDescription(quiz.getDescription());
         response.setMinPassScore(quiz.getMinPassScore());
-        response.setMaxPassScore(quiz.getMaxPassScore());
         return response;
     }
 
@@ -61,7 +60,6 @@ public class QuizServiceImpl implements QuizService {
         quiz.setTitle(request.getTitle());
         quiz.setDescription(request.getDescription());
         quiz.setMinPassScore(request.getMinPassScore());
-        quiz.setMaxPassScore(request.getMaxPassScore());
         return convertQuizToDTO(quizRepository.save(quiz));
     }
 
@@ -74,7 +72,6 @@ public class QuizServiceImpl implements QuizService {
         quiz.setTitle(request.getTitle());
         quiz.setDescription(request.getDescription());
         quiz.setMinPassScore(request.getMinPassScore());
-        quiz.setMaxPassScore(request.getMaxPassScore());
 
         return convertQuizToDTO(quizRepository.save(quiz));
     }

@@ -10,5 +10,5 @@ public class QuizAnswerResponse {
     private Long id;
     private Boolean isCorrect;
     private String description;
-    private String questionTitle;
+
 }

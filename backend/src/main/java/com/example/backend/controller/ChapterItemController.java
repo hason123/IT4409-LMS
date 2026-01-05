@@ -39,13 +39,13 @@ public class ChapterItemController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @PostMapping("/chapters/{chapterId}/lessons")
+    @PostMapping("/chapters/{chapterId}/lessons/{lessonId}")
     public ResponseEntity<ChapterItemResponse> addLessonToChapter(
             @PathVariable Integer chapterId,
-            @RequestBody Lesson lesson
+            @PathVariable Integer lessonId
     ) {
         return ResponseEntity.ok(
-                chapterItemService.addLessonToChapter(chapterId, lesson)
+                chapterItemService.addLessonToChapter(chapterId, lessonId)
         );
     }
 

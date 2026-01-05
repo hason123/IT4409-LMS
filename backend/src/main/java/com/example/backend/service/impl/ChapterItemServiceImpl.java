@@ -7,6 +7,7 @@ import com.example.backend.entity.Chapter;
 import com.example.backend.entity.ChapterItem;
 import com.example.backend.entity.Lesson;
 import com.example.backend.entity.Quiz;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.ChapterItemRepository;
 import com.example.backend.repository.ChapterRepository;
 import com.example.backend.repository.LessonRepository;
@@ -102,15 +103,12 @@ public class ChapterItemServiceImpl implements ChapterItemService {
 
     @Transactional
     @Override
-    public ChapterItemResponse addLessonToChapter(Integer chapterId, Lesson lesson) {
+    public ChapterItemResponse addLessonToChapter(Integer chapterId, Integer lessonId) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new RuntimeException("Chapter not found"));
-        Lesson savedLesson = lesson;
-        if (lesson.getId() == null) {
-            savedLesson = lessonRepository.save(lesson);
-        }
-        ChapterItem ci = createChapterItem(chapter, ItemType.LESSON, savedLesson.getId());
-        LessonResponse lessonResponse = lessonService.convertEntityToDTO(savedLesson);
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+        ChapterItem ci = createChapterItem(chapter, ItemType.LESSON, lessonId);
+        LessonResponse lessonResponse = lessonService.convertEntityToDTO(lesson);
         return buildResponse(ci, lessonResponse);
     }
 
