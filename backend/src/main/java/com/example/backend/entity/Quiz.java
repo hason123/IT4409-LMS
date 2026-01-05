@@ -20,10 +20,8 @@ public class Quiz extends BaseEntity {
     private Integer id;
     private String title;
     private String description;
-    //private Short orderIndex;
     @Column(name = "min_pass_score")
     private Integer minPassScore;
-    private Integer maxPassScore;
     private Integer time;
 /*    @ManyToOne
     @JoinColumn(name = "chapter_id")

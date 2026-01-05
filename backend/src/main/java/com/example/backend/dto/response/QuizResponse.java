@@ -1,6 +1,7 @@
 package com.example.backend.dto.response;
 
 import lombok.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -11,7 +12,5 @@ public class QuizResponse {
     private String title;
     private String description;
     private Integer minPassScore;
-    private Integer maxPassScore;
-    //private String chapterTitle;
-    private Integer chapterId;
+    private List<QuizQuestionResponse> questions;
 }
