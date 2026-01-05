@@ -13,5 +13,4 @@ public class QuizQuestionResponse {
     private String title;
     private QuestionType type;
     private List<QuizAnswerResponse> answers;
-
 }
