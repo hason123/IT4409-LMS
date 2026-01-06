@@ -4,6 +4,7 @@ import com.example.backend.dto.request.QuizRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.QuizResponse;
 import com.example.backend.service.QuizService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/lms/quizzes")
-
 public class QuizController {
 
     private final QuizService quizService;
@@ -21,18 +21,21 @@ public class QuizController {
         this.quizService = quizService;
     }
 
+    @Operation(summary = "Tạo quiz mới")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<QuizResponse> createQuiz(@RequestBody QuizRequest request) {
         return ResponseEntity.ok(quizService.createQuiz(request));
     }
 
+    @Operation(summary = "Lấy thông tin quiz theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
     public ResponseEntity<QuizResponse> getQuizById(@PathVariable Integer id) {
         return ResponseEntity.ok(quizService.getQuizById(id));
     }
 
+    @Operation(summary = "Lấy danh sách quiz có phân trang")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping
     public ResponseEntity<PageResponse<QuizResponse>> getAllQuizzes(
@@ -44,6 +47,7 @@ public class QuizController {
         return ResponseEntity.ok(quizPage);
     }
 
+    @Operation(summary = "Cập nhật quiz")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizResponse> updateQuiz(
@@ -53,6 +57,7 @@ public class QuizController {
         return ResponseEntity.ok(quizService.updateQuiz(id, request));
     }
 
+    @Operation(summary = "Xóa quiz")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuiz(@PathVariable Integer id) {

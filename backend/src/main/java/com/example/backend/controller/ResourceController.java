@@ -5,6 +5,7 @@ import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.ResourceResponse;
 import com.example.backend.service.ResourceService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ public class ResourceController {
         this.resourceService = resourceService;
     }
 
+    @Operation(summary = "Tạo tài nguyên cho bài học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/lessons/{lessonId}/resources")
     public ResponseEntity<ResourceResponse> createResource(
@@ -35,6 +37,7 @@ public class ResourceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Cập nhật tài nguyên")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/resources/{id}")
     public ResponseEntity<ResourceResponse> updateResource(
@@ -45,6 +48,7 @@ public class ResourceController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Xóa tài nguyên")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/resources/{id}")
     public ResponseEntity<Void> deleteResource(@PathVariable Integer id) {
@@ -52,6 +56,7 @@ public class ResourceController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Lấy thông tin tài nguyên theo ID")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/resources/{id}")
     public ResponseEntity<ResourceResponse> getResourceById(@PathVariable Integer id) {
@@ -59,6 +64,7 @@ public class ResourceController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Lấy danh sách tài nguyên có phân trang")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/resources")
     public ResponseEntity<PageResponse<ResourceResponse>> getAllResources(
@@ -71,6 +77,7 @@ public class ResourceController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Lấy danh sách tài nguyên theo bài học")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/lessons/{lessonId}/resources")
     public ResponseEntity<List<ResourceResponse>> getResourcesByLesson(
@@ -81,6 +88,7 @@ public class ResourceController {
         return ResponseEntity.ok(responses);
     }
 
+    @Operation(summary = "Tải lên video cho tài nguyên")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/resources/{id}/video")
     public ResponseEntity<CloudinaryResponse> uploadVideo(
@@ -92,6 +100,7 @@ public class ResourceController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Tải lên slide cho tài nguyên")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/resources/{id}/slide")
     public ResponseEntity<CloudinaryResponse> uploadSlide(

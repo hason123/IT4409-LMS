@@ -7,6 +7,7 @@ import com.example.backend.dto.response.StudentProgressResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.service.StudentProgressService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class StudentProgressController {
         this.studentProgressService = studentProgressService;
     }
 
-    // Tìm và lấy danh sách sinh viên có trong khóa học
+    @Operation(summary = "Lấy danh sách sinh viên trong khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @GetMapping("/courses/{courseId}/students/available")
     public ResponseEntity<PageResponse<UserViewResponse>> getStudentsInCourse(
@@ -35,7 +36,7 @@ public class StudentProgressController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    // Tìm và láy danh sách sinh viên không có trong khóa học
+    @Operation(summary = "Lấy danh sách sinh viên không trong khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @GetMapping("/courses/{courseId}/students/not-available")
     public ResponseEntity<PageResponse<UserViewResponse>> getStudentsNotInCourse(
@@ -47,7 +48,7 @@ public class StudentProgressController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    // Thêm sinh viên vào khóa học
+    @Operation(summary = "Thêm sinh viên vào khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/courses/{courseId}/students")
     public ResponseEntity<String> addStudentsToCourse(@PathVariable Long courseId, @RequestBody StudentCourseRequest request) {
@@ -55,7 +56,7 @@ public class StudentProgressController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Students has been added");
     }
 
-    // Xóa sinh viên khỏi khóa học
+    @Operation(summary = "Xóa sinh viên khỏi khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/courses/{courseId}/students")
     public ResponseEntity<String> removeStudentsInCourse(@PathVariable Long courseId, @RequestBody StudentCourseRequest request) {

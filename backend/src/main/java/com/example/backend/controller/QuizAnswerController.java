@@ -3,6 +3,7 @@ import com.example.backend.dto.request.QuizAnswerRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.QuizAnswerResponse;
 import com.example.backend.service.QuizAnswerService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class QuizAnswerController {
         this.quizAnswerService = quizAnswerService;
     }
 
+    @Operation(summary = "Tạo câu trả lời cho câu hỏi quiz")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/question/{questionId}")
     public ResponseEntity<QuizAnswerResponse> createQuizAnswer(
@@ -26,12 +28,14 @@ public class QuizAnswerController {
         return ResponseEntity.ok(quizAnswerService.createQuizAnswer(questionId, request));
     }
 
+    @Operation(summary = "Lấy thông tin câu trả lời quiz theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
     public ResponseEntity<QuizAnswerResponse> getQuizAnswerById(@PathVariable Long id) {
         return ResponseEntity.ok(quizAnswerService.getQuizAnswerById(id));
     }
 
+    @Operation(summary = "Lấy danh sách câu trả lời quiz có phân trang")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping
     public ResponseEntity<PageResponse<QuizAnswerResponse>> getAllQuizAnswers(
@@ -42,6 +46,7 @@ public class QuizAnswerController {
         return ResponseEntity.ok(quizAnswerService.getQuizAnswerPage(pageable));
     }
 
+    @Operation(summary = "Cập nhật câu trả lời quiz")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizAnswerResponse> updateQuizAnswer(
@@ -51,6 +56,7 @@ public class QuizAnswerController {
         return ResponseEntity.ok(quizAnswerService.updateQuizAnswer(id, request));
     }
 
+    @Operation(summary = "Xóa câu trả lời quiz")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuizAnswer(@PathVariable Long id) {

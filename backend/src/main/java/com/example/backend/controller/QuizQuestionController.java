@@ -4,6 +4,7 @@ import com.example.backend.dto.request.QuizQuestionRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.QuizQuestionResponse;
 import com.example.backend.service.QuizQuestionService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ public class QuizQuestionController {
         this.quizQuestionService = quizQuestionService;
     }
 
+    @Operation(summary = "Tạo câu hỏi quiz mới")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/quiz/{quizId}")
     public ResponseEntity<QuizQuestionResponse> createQuizQuestion(
@@ -27,12 +29,14 @@ public class QuizQuestionController {
         return ResponseEntity.ok(quizQuestionService.createQuizQuestion(quizId, request));
     }
 
+    @Operation(summary = "Lấy thông tin câu hỏi quiz theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
     public ResponseEntity<QuizQuestionResponse> getQuizQuestionById(@PathVariable Long id) {
         return ResponseEntity.ok(quizQuestionService.getQuizQuestionById(id));
     }
 
+    @Operation(summary = "Lấy danh sách câu hỏi quiz có phân trang")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping
     public ResponseEntity<PageResponse<QuizQuestionResponse>> getAllQuizQuestions(
@@ -43,6 +47,7 @@ public class QuizQuestionController {
         return ResponseEntity.ok(quizQuestionService.getQuizQuestionPage(pageable));
     }
 
+    @Operation(summary = "Cập nhật câu hỏi quiz")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizQuestionResponse> updateQuizQuestion(
@@ -52,6 +57,7 @@ public class QuizQuestionController {
         return ResponseEntity.ok(quizQuestionService.updateQuizQuestion(id, request));
     }
 
+    @Operation(summary = "Xóa câu hỏi quiz")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuizQuestion(@PathVariable Long id) {

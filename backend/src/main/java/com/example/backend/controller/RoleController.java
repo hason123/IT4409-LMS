@@ -6,6 +6,7 @@ import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.RoleResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.service.RoleService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class RoleController {
         this.roleService = roleService;
     }
 
+    @Operation(summary = "Tạo vai trò mới")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoleResponse> createRole(@RequestBody RoleRequest request) {
@@ -31,6 +33,7 @@ public class RoleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRole);
     }
 
+    @Operation(summary = "Cập nhật vai trò")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoleResponse> updateRole(
@@ -40,6 +43,7 @@ public class RoleController {
         return ResponseEntity.ok(updatedRole);
     }
 
+    @Operation(summary = "Lấy thông tin vai trò theo ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoleResponse> getRole(@PathVariable Long id) {
@@ -47,6 +51,7 @@ public class RoleController {
         return ResponseEntity.ok(role);
     }
 
+    @Operation(summary = "Xóa vai trò")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> deleteRole(@PathVariable Long id) {
@@ -55,6 +60,7 @@ public class RoleController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Cập nhật vai trò cho người dùng")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update-users")
     public ResponseEntity<String> updateUserRole(@RequestBody UserRoleRequest request) {
@@ -62,6 +68,7 @@ public class RoleController {
         return ResponseEntity.ok("Role updated successfully");
     }
 
+    @Operation(summary = "Lấy danh sách vai trò có phân trang")
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponse<RoleResponse>> getPageRole(@RequestParam(value = "pageNumber", defaultValue = "1", required = false) Integer pageNumber,
@@ -70,5 +77,4 @@ public class RoleController {
         PageResponse<RoleResponse> rolePage = roleService.getPageRole(pageable);
         return ResponseEntity.ok(rolePage);
     }
-
 }

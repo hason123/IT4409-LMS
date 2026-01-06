@@ -4,6 +4,7 @@ import com.example.backend.dto.request.ChapterItemOrderRequest;
 import com.example.backend.dto.response.ChapterItemResponse;
 import com.example.backend.entity.Lesson;
 import com.example.backend.service.ChapterItemService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +19,7 @@ public class ChapterItemController {
 
     private final ChapterItemService chapterItemService;
 
+    @Operation(summary = "Lấy danh sách item trong chương")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/chapters/{chapterId}/items")
     public ResponseEntity<List<ChapterItemResponse>> getItemsByChapter(
@@ -28,6 +30,7 @@ public class ChapterItemController {
         );
     }
 
+    @Operation(summary = "Cập nhật thứ tự item trong chương")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/chapters/{chapterId}/order-items")
     public ResponseEntity<Void> updateItemOrder(
@@ -38,6 +41,7 @@ public class ChapterItemController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Thêm bài học vào chương")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/chapters/{chapterId}/lessons/{lessonId}")
     public ResponseEntity<ChapterItemResponse> addLessonToChapter(

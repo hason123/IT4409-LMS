@@ -1,10 +1,12 @@
 package com.example.backend.controller;
+
 import com.example.backend.dto.request.ChapterOrderRequest;
 import com.example.backend.dto.request.ChapterRequest;
 import com.example.backend.dto.response.ChapterResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.service.CategoryService;
 import com.example.backend.service.ChapterService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,18 +24,21 @@ public class ChapterController {
         this.chapterService = chapterService;
     }
 
+    @Operation(summary = "Tạo chương mới cho khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/courses/{courseId}/chapters")
     public ResponseEntity<ChapterResponse> createChapter(@PathVariable Long courseId, @RequestBody ChapterRequest request) {
         return ResponseEntity.ok(chapterService.createChapter(courseId, request));
     }
 
+    @Operation(summary = "Lấy thông tin chương theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
     public ResponseEntity<ChapterResponse> getChapterById(@PathVariable Integer id) {
         return ResponseEntity.ok(chapterService.getChapterById(id));
     }
 
+    @Operation(summary = "Lấy danh sách chương có phân trang")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping
     public ResponseEntity<PageResponse<ChapterResponse>> getAllChapters(
@@ -45,12 +50,14 @@ public class ChapterController {
         return ResponseEntity.ok(chapterPage);
     }
 
+    @Operation(summary = "Lấy danh sách chương theo khóa học")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/course/{courseId}")
     public ResponseEntity<List<ChapterResponse>> getChaptersByCourseId(@PathVariable Long courseId) {
         return ResponseEntity.ok(chapterService.getChaptersByCourseId(courseId));
     }
 
+    @Operation(summary = "Cập nhật thông tin chương")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/chapters/{id}")
     public ResponseEntity<ChapterResponse> updateChapter(
@@ -60,6 +67,7 @@ public class ChapterController {
         return ResponseEntity.ok(chapterService.updateChapter(id, request));
     }
 
+    @Operation(summary = "Xóa chương")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/chapters/{id}")
     public ResponseEntity<Void> deleteChapter(@PathVariable Integer id) {
@@ -67,6 +75,7 @@ public class ChapterController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Cập nhật thứ tự chương trong khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/course/{courseId}/order-chapters")
     public ResponseEntity<Void> updateChapterOrder(

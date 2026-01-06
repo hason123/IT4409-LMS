@@ -14,24 +14,28 @@ import java.util.List;
 public class PermissionController {
     private final PermissionService permissionService;
     
+    @Operation(summary = "Tạo quyền mới")  // ← THÊM VÀO ĐÂY
     @PostMapping
     public ResponseEntity<Permission> create(@RequestBody Permission permission) {
         Permission createdPermission = permissionService.create(permission);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPermission);
     }
     
+    @Operation(summary = "Lấy tất cả quyền")  // ← THÊM VÀO ĐÂY
     @GetMapping
     public ResponseEntity<List<Permission>> getAll() {
         List<Permission> permissions = permissionService.getAll();
         return ResponseEntity.ok(permissions);
     }
     
+    @Operation(summary = "Lấy quyền theo ID")  // ← THÊM VÀO ĐÂY
     @GetMapping("/{id}")
     public ResponseEntity<Permission> getById(@PathVariable Long id) {
         Permission permission = permissionService.getById(id);
         return ResponseEntity.ok(permission);
     }
 
+    @Operation(summary = "Cập nhật quyền")  // ← THÊM VÀO ĐÂY
     @PutMapping("/{id}")
     public ResponseEntity<Permission> update(
             @PathVariable Long id,
@@ -40,6 +44,7 @@ public class PermissionController {
         return ResponseEntity.ok(updatedPermission);
     }
 
+    @Operation(summary = "Xóa quyền")  // ← THÊM VÀO ĐÂY
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         permissionService.delete(id);

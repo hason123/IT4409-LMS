@@ -4,6 +4,7 @@ import com.example.backend.dto.request.CommentRequest;
 import com.example.backend.dto.response.CommentResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.service.CommentService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    @Operation(summary = "Thêm bình luận vào bài học")
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/lessons/{lessonId}/comments")
     public ResponseEntity<CommentResponse> addComment(@PathVariable Integer lessonId, @RequestBody CommentRequest request) {
@@ -28,6 +30,7 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Cập nhật bình luận")
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/comments/{id}")
     public ResponseEntity<CommentResponse> updateComment(@PathVariable Integer id, @RequestBody CommentRequest request) {
@@ -35,6 +38,7 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Xóa bình luận")
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/comments/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable Integer id) {
@@ -42,6 +46,7 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Lấy thông tin bình luận theo ID")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/comments/{id}")
     public ResponseEntity<CommentResponse> getCommentById(@PathVariable Integer id) {
@@ -49,6 +54,7 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Lấy danh sách bình luận theo bài học")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/lessons/{lessonId}/comments")
     public ResponseEntity<PageResponse<CommentResponse>> getCommentsByLesson(
@@ -62,4 +68,3 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 }
-

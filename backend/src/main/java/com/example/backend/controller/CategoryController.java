@@ -4,6 +4,7 @@ import com.example.backend.dto.request.CategoryRequest;
 import com.example.backend.dto.response.CategoryResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.service.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.PageRequest;
@@ -23,18 +24,21 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    @Operation(summary = "Tạo danh mục mới")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public CategoryResponse createCategory(@RequestBody CategoryRequest request) {
         return categoryService.createCategory(request);
     }
 
+    @Operation(summary = "Lấy thông tin danh mục theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
     public CategoryResponse getCategoryById(@PathVariable Long id) {
         return categoryService.getCategoryById(id);
     }
 
+    @Operation(summary = "Cập nhật danh mục")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public CategoryResponse updateCategory(
@@ -44,12 +48,14 @@ public class CategoryController {
         return categoryService.updateCategory(id, request);
     }
 
+    @Operation(summary = "Xóa danh mục")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
     }
 
+    @Operation(summary = "Lấy danh sách danh mục có phân trang")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping
     public ResponseEntity<PageResponse<CategoryResponse>> getAllCategories(

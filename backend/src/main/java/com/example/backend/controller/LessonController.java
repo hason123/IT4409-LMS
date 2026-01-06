@@ -4,6 +4,7 @@ import com.example.backend.dto.request.LessonRequest;
 import com.example.backend.dto.response.LessonResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.service.LessonService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ public class LessonController {
         this.lessonService = lessonService;
     }
 
+    @Operation(summary = "Tạo bài học mới")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/lessons")
     public ResponseEntity<LessonResponse> createLesson(
@@ -30,6 +32,7 @@ public class LessonController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Cập nhật bài học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/lessons/{id}")
     public ResponseEntity<LessonResponse> updateLesson(
@@ -40,6 +43,7 @@ public class LessonController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Xóa bài học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/lessons/{id}")
     public ResponseEntity<Void> deleteLesson(@PathVariable Integer id) {
@@ -47,6 +51,7 @@ public class LessonController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Lấy thông tin bài học theo ID")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/lessons/{id}")
     public ResponseEntity<LessonResponse> getLessonById(@PathVariable Integer id) {
@@ -68,4 +73,3 @@ public class LessonController {
     }
     */
 }
-

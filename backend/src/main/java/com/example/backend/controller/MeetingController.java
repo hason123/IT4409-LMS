@@ -4,6 +4,7 @@ import com.example.backend.dto.request.MeetingRequest;
 import com.example.backend.dto.response.MeetingResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.service.MeetingService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,18 +20,21 @@ public class MeetingController {
         this.meetingService = meetingService;
     }
 
+    @Operation(summary = "Tạo cuộc họp mới")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<MeetingResponse> createMeeting(@RequestBody MeetingRequest request) {
         return ResponseEntity.ok(meetingService.createMeeting(request));
     }
 
+    @Operation(summary = "Lấy thông tin cuộc họp theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
     public ResponseEntity<MeetingResponse> getMeetingById(@PathVariable Long id) {
         return ResponseEntity.ok(meetingService.getMeetingById(id));
     }
 
+    @Operation(summary = "Lấy danh sách cuộc họp có phân trang")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping
     public ResponseEntity<PageResponse<MeetingResponse>> getAllMeetings(
@@ -42,6 +46,7 @@ public class MeetingController {
         return ResponseEntity.ok(meetingPage);
     }
 
+    @Operation(summary = "Cập nhật cuộc họp")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<MeetingResponse> updateMeeting(
@@ -51,6 +56,7 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.updateMeeting(id, request));
     }
 
+    @Operation(summary = "Xóa cuộc họp")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMeeting(@PathVariable Long id) {
