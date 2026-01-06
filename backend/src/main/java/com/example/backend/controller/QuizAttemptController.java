@@ -53,7 +53,7 @@ public class QuizAttemptController {
         );
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/chapterItem/{chapterItemId}")
     public ResponseEntity<Integer> getStudentBestScoreOnQuizAttempt(
             @PathVariable Integer chapterItemId
@@ -63,7 +63,7 @@ public class QuizAttemptController {
         );
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{attemptId}")
     public ResponseEntity<QuizAttemptResponse> getAttemptDetail(
             @PathVariable Integer attemptId
@@ -73,7 +73,7 @@ public class QuizAttemptController {
         );
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/chapterItem/{chapterItemId}/my-attempts")
     public ResponseEntity<List<QuizAttemptResponse>> getStudentAttemptsHistory(
             @PathVariable Integer chapterItemId
