@@ -87,6 +87,9 @@ public class QuizServiceImpl implements QuizService {
         if(request.getMinPassScore() != null){
             quiz.setMinPassScore(request.getMinPassScore());
         }
+        if(request.getTimeLimitMinutes() != null){
+            quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
+        }
         return convertQuizToDTO(quizRepository.save(quiz));
     }
 
