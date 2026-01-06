@@ -6,6 +6,7 @@ import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.service.EnrollmentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;  // ← ADD THIS IMPORT
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/lms")
+@Tag(name = "Enrollment Management", description = "APIs for managing course enrollments and student registrations")  // ← ADD THIS LINE
 public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
@@ -22,7 +24,7 @@ public class EnrollmentController {
         this.enrollmentService = enrollmentService;
     }
 
-    @Operation(summary = "Lấy danh sách sinh viên trong khóa học")
+    @Operation(summary = "Lấy danh sách sinh viên trong khóa học", description = "Retrieve paginated list of students currently enrolled in a course with search filtering")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @GetMapping("/courses/{courseId}/students/available")
     public ResponseEntity<PageResponse<UserViewResponse>> getStudentsInCourse(
@@ -34,7 +36,7 @@ public class EnrollmentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Operation(summary = "Lấy danh sách sinh viên không trong khóa học")
+    @Operation(summary = "Lấy danh sách sinh viên không trong khóa học", description = "Retrieve paginated list of students NOT enrolled in a course with search filtering")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @GetMapping("/courses/{courseId}/students/not-available")
     public ResponseEntity<PageResponse<UserViewResponse>> getStudentsNotInCourse(
@@ -46,7 +48,7 @@ public class EnrollmentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Operation(summary = "Thêm sinh viên vào khóa học")
+    @Operation(summary = "Thêm sinh viên vào khóa học", description = "Add one or multiple students to a course enrollment")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/courses/{courseId}/students")
     public ResponseEntity<String> addStudentsToCourse(@PathVariable Long courseId, @RequestBody StudentCourseRequest request) {
@@ -54,7 +56,7 @@ public class EnrollmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Students has been added");
     }
 
-    @Operation(summary = "Xóa sinh viên khỏi khóa học")
+    @Operation(summary = "Xóa sinh viên khỏi khóa học", description = "Remove one or multiple students from course enrollment")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/courses/{courseId}/students")
     public ResponseEntity<String> removeStudentsInCourse(@PathVariable Long courseId, @RequestBody StudentCourseRequest request) {

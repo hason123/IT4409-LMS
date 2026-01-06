@@ -5,6 +5,7 @@ import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.QuizQuestionResponse;
 import com.example.backend.service.QuizQuestionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;  // ← ADD THIS IMPORT
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/lms/quiz-questions")
+@Tag(name = "Quiz Question Management", description = "APIs for managing quiz questions and question configurations")  // ← ADD THIS LINE
 public class QuizQuestionController {
     private final QuizQuestionService quizQuestionService;
 
@@ -20,7 +22,7 @@ public class QuizQuestionController {
         this.quizQuestionService = quizQuestionService;
     }
 
-    @Operation(summary = "Tạo câu hỏi quiz mới")
+    @Operation(summary = "Tạo câu hỏi quiz mới", description = "Create a new question for a quiz with answer options")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/quiz/{quizId}")
     public ResponseEntity<QuizQuestionResponse> createQuizQuestion(
@@ -29,14 +31,14 @@ public class QuizQuestionController {
         return ResponseEntity.ok(quizQuestionService.createQuizQuestion(quizId, request));
     }
 
-    @Operation(summary = "Lấy thông tin câu hỏi quiz theo ID")
+    @Operation(summary = "Lấy thông tin câu hỏi quiz theo ID", description = "Retrieve detailed information about a specific quiz question by ID")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
     public ResponseEntity<QuizQuestionResponse> getQuizQuestionById(@PathVariable Long id) {
         return ResponseEntity.ok(quizQuestionService.getQuizQuestionById(id));
     }
 
-    @Operation(summary = "Lấy danh sách câu hỏi quiz có phân trang")
+    @Operation(summary = "Lấy danh sách câu hỏi quiz có phân trang", description = "Retrieve paginated list of all quiz questions with filtering options")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping
     public ResponseEntity<PageResponse<QuizQuestionResponse>> getAllQuizQuestions(
@@ -47,7 +49,7 @@ public class QuizQuestionController {
         return ResponseEntity.ok(quizQuestionService.getQuizQuestionPage(pageable));
     }
 
-    @Operation(summary = "Cập nhật câu hỏi quiz")
+    @Operation(summary = "Cập nhật câu hỏi quiz", description = "Update an existing quiz question and its answer options")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizQuestionResponse> updateQuizQuestion(
@@ -57,7 +59,7 @@ public class QuizQuestionController {
         return ResponseEntity.ok(quizQuestionService.updateQuizQuestion(id, request));
     }
 
-    @Operation(summary = "Xóa câu hỏi quiz")
+    @Operation(summary = "Xóa câu hỏi quiz", description = "Delete a quiz question and all associated answer options")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuizQuestion(@PathVariable Long id) {
