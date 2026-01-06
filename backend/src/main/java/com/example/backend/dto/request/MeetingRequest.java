@@ -10,5 +10,5 @@ public class MeetingRequest {
     private String title;
     private String startTime;
     private String endTime;
-    private Long courseId;
+    private Integer courseId;
 }

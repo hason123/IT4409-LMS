@@ -38,7 +38,7 @@ public class SecurityUtil {
         Instant now = Instant.now();
         Instant validity = now.plus(accessTokenExpiration, ChronoUnit.SECONDS);
 
-        Long userId = loginResponse.getUser().getId();
+        Integer userId = loginResponse.getUser().getId();
         String role = loginResponse.getUser().getRole();
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -57,7 +57,7 @@ public class SecurityUtil {
         Instant now = Instant.now();
         Instant validity = now.plus(refreshTokenExpiration, ChronoUnit.SECONDS);
 
-        Long userId = loginResponse.getUser().getId();
+        Integer userId = loginResponse.getUser().getId();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(validity)

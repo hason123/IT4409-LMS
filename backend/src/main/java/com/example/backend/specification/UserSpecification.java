@@ -36,9 +36,9 @@ public class UserSpecification {
         };
     }
 
-    public static Specification<User> notInCourse(Long courseId) {
+    public static Specification<User> notInCourse(Integer courseId) {
         return (root, query, cb) -> {
-            var subQuery = query.subquery(Long.class);
+            var subQuery = query.subquery(Integer.class);
             var enrollment = subQuery.from(Enrollment.class);
 
             subQuery.select(enrollment.get("id"))
@@ -55,9 +55,9 @@ public class UserSpecification {
         };
     }
 
-    public static Specification<User> inCourse(Long courseId) {
+    public static Specification<User> inCourse(Integer courseId) {
         return (root, query, cb) -> {
-            var subQuery = query.subquery(Long.class);
+            var subQuery = query.subquery(Integer.class);
             var enrollment = subQuery.from(Enrollment.class);
 
             subQuery.select(enrollment.get("id"))

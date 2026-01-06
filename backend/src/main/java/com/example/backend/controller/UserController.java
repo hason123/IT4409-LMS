@@ -30,14 +30,14 @@ public class UserController {
     @Operation(summary = "Lấy thông tin người dùng theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserInfoResponse> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserInfoResponse> getUserById(@PathVariable Integer id) {
         return ResponseEntity.ok((UserInfoResponse) userService.getUserById(id));
     }
 
     @Operation(summary = "Cập nhật thông tin người dùng")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @PutMapping("/users/{id}")
-    public ResponseEntity<UserInfoResponse> updateUser(@PathVariable Long id, @RequestBody RegisterRequest request) {
+    public ResponseEntity<UserInfoResponse> updateUser(@PathVariable Integer id, @RequestBody RegisterRequest request) {
         UserInfoResponse updatedUser = userService.updateUser(id, request);
         return ResponseEntity.ok(updatedUser);
     }
@@ -53,7 +53,7 @@ public class UserController {
     @Operation(summary = "Xóa người dùng (Admin)")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
@@ -82,7 +82,7 @@ public class UserController {
     @Operation(summary = "Tải lên ảnh đại diện người dùng")
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/users/{id}/avatar")
-    public ResponseEntity<CloudinaryResponse> uploadImage(@PathVariable final Long id, @RequestPart final MultipartFile file) {
+    public ResponseEntity<CloudinaryResponse> uploadImage(@PathVariable final Integer id, @RequestPart final MultipartFile file) {
         CloudinaryResponse response = userService.uploadImage(id, file);
         return ResponseEntity.ok(response);
     }

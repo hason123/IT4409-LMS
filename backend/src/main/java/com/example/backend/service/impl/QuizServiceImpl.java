@@ -2,8 +2,8 @@ package com.example.backend.service.impl;
 
 import com.example.backend.dto.request.QuizRequest;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.dto.response.QuizResponse;
-import com.example.backend.dto.response.QuizQuestionResponse;
+import com.example.backend.dto.response.quiz.QuizResponse;
+import com.example.backend.dto.response.quiz.QuizQuestionResponse;
 import com.example.backend.entity.Quiz;
 import com.example.backend.repository.QuizRepository;
 import com.example.backend.service.QuizService;
@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class QuizServiceImpl implements QuizService {
@@ -30,6 +29,7 @@ public class QuizServiceImpl implements QuizService {
         response.setDescription(quiz.getDescription());
         response.setMinPassScore(quiz.getMinPassScore());
         response.setTimeLimitMinutes(quiz.getTimeLimitMinutes());
+        response.setMaxAttempts(quiz.getMaxAttempts());
         if (quiz.getQuestions() != null) {
             response.setQuestions(quiz.getQuestions().stream()
                 .map(question -> {
@@ -71,6 +71,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setDescription(request.getDescription());
         quiz.setMinPassScore(request.getMinPassScore());
         quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
+        quiz.setMaxAttempts(request.getMaxAttempts());
         return convertQuizToDTO(quizRepository.save(quiz));
     }
 
@@ -89,6 +90,9 @@ public class QuizServiceImpl implements QuizService {
         }
         if(request.getTimeLimitMinutes() != null){
             quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
+        }
+        if(request.getMaxAttempts() != null){
+            quiz.setMaxAttempts(request.getMaxAttempts());
         }
         return convertQuizToDTO(quizRepository.save(quiz));
     }

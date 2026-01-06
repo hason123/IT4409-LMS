@@ -17,7 +17,7 @@ import java.util.List;
 public class Course extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String title;
     private String description;
     @Column(name = "image_url", columnDefinition = "MEDIUMTEXT")
@@ -36,6 +36,6 @@ public class Course extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-
+    private String classCode;
 }
 

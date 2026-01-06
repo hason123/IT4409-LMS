@@ -2,7 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.request.QuizQuestionRequest;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.dto.response.QuizQuestionResponse;
+import com.example.backend.dto.response.quiz.QuizQuestionResponse;
 import com.example.backend.service.QuizQuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;  // ← ADD THIS IMPORT
@@ -34,7 +34,7 @@ public class QuizQuestionController {
     @Operation(summary = "Lấy thông tin câu hỏi quiz theo ID", description = "Retrieve detailed information about a specific quiz question by ID")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
-    public ResponseEntity<QuizQuestionResponse> getQuizQuestionById(@PathVariable Long id) {
+    public ResponseEntity<QuizQuestionResponse> getQuizQuestionById(@PathVariable Integer id) {
         return ResponseEntity.ok(quizQuestionService.getQuizQuestionById(id));
     }
 
@@ -53,7 +53,7 @@ public class QuizQuestionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizQuestionResponse> updateQuizQuestion(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody QuizQuestionRequest request
     ) {
         return ResponseEntity.ok(quizQuestionService.updateQuizQuestion(id, request));
@@ -62,7 +62,7 @@ public class QuizQuestionController {
     @Operation(summary = "Xóa câu hỏi quiz", description = "Delete a quiz question and all associated answer options")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteQuizQuestion(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteQuizQuestion(@PathVariable Integer id) {
         quizQuestionService.deleteQuizQuestion(id);
         return ResponseEntity.noContent().build();
     }

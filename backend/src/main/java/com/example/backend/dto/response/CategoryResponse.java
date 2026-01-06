@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryResponse {
-    private Long id;
+    private Integer id;
     private String title;
     private String description;
 }

@@ -1,4 +1,4 @@
-package com.example.backend.dto.response;
+package com.example.backend.dto.response.quiz;
 
 import lombok.*;
 import java.util.List;
@@ -13,5 +13,6 @@ public class QuizResponse {
     private String description;
     private Integer minPassScore;
     private Integer timeLimitMinutes;
+    private Integer maxAttempts;
     private List<QuizQuestionResponse> questions;
 }

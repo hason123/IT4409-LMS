@@ -10,6 +10,7 @@ import java.util.List;
 
 public class QuizAttemptRequest {
     private Integer quizId;
-    private Long studentId;
+    private Integer studentId;
+    private Integer chapterItemId;
     private List<QuizAttemptAnswerRequest> answers;
 }

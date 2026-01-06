@@ -12,5 +12,5 @@ public class ChapterResponse {
     private Integer orderIndex;
     private String courseTitle;
     private String description;
-    private Long courseId;
+    private Integer courseId;
 }

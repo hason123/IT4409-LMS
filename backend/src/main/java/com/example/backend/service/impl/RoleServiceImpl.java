@@ -59,7 +59,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleResponse updateRole(RoleRequest request, Long roleId) {
+    public RoleResponse updateRole(RoleRequest request, Integer roleId) {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> {
                     log.error("Role with id {} not found", roleId);
@@ -78,7 +78,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public void deleteRole(Long roleId) {
+    public void deleteRole(Integer roleId) {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
         role.getPermissions().forEach(permission -> permission.getRoles().remove(role));
@@ -106,7 +106,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleResponse getRole(Long roleId) {
+    public RoleResponse getRole(Integer roleId) {
         log.info("Get role with id {}", roleId);
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
@@ -132,7 +132,7 @@ public class RoleServiceImpl implements RoleService {
         response.setRoleName(role.getRoleName().name());
         response.setRoleID(role.getRoleID());
         response.setRoleDesc(role.getRoleDesc());
-        List<Long> permissionIds = role.getPermissions()
+        List<Integer> permissionIds = role.getPermissions()
                 .stream()
                 .map(Permission::getId)
                 .toList();

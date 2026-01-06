@@ -14,16 +14,16 @@ public interface ChapterService {
     ChapterResponse getChapterById(Integer id);
 
     @Transactional
-    ChapterResponse createChapter(Long courseId, ChapterRequest request);
+    ChapterResponse createChapter(Integer courseId, ChapterRequest request);
 
     ChapterResponse updateChapter(Integer id, ChapterRequest request);
     void deleteChapter(Integer id);
     
     PageResponse<ChapterResponse> getChapterPage(Pageable pageable);
-    List<ChapterResponse> getChaptersByCourseId(Long courseId);
+    List<ChapterResponse> getChaptersByCourseId(Integer courseId);
     ChapterResponse convertChapterToDTO(Chapter chapter);
 
     @Transactional
-    void updateOrder(Long courseId, List<Integer> orderedChapterIds);
+    void updateOrder(Integer courseId, List<Integer> orderedChapterIds);
 }
 

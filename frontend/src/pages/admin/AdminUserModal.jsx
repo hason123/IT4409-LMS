@@ -48,7 +48,7 @@ export default function AdminUserModal({
     try {
       setLoading(true);
       // Gửi data theo cấu trúc UserRequest của backend
-      // ID được truyền riêng để khớp với @PathVariable Long id
+      // ID được truyền riêng để khớp với @PathVariable Integer id
       await onSave(user?.id, {
         fullName: formData.fullName,
         email: formData.email,

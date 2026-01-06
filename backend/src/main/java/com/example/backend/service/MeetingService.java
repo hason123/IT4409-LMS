@@ -8,9 +8,9 @@ import org.springframework.data.domain.Pageable;
 
 public interface MeetingService {
     MeetingResponse createMeeting(MeetingRequest request);
-    MeetingResponse getMeetingById(Long id);
-    MeetingResponse updateMeeting(Long id, MeetingRequest request);
-    void deleteMeeting (Long id);
+    MeetingResponse getMeetingById(Integer id);
+    MeetingResponse updateMeeting(Integer id, MeetingRequest request);
+    void deleteMeeting (Integer id);
     
     PageResponse<MeetingResponse> getMeetingPage(Pageable pageable);
     MeetingResponse convertMeetingToDTO(Meeting meeting);

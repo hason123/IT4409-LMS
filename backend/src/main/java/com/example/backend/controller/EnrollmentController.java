@@ -28,7 +28,7 @@ public class EnrollmentController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @GetMapping("/courses/{courseId}/students/available")
     public ResponseEntity<PageResponse<UserViewResponse>> getStudentsInCourse(
-            @PathVariable Long courseId, SearchUserRequest request,
+            @PathVariable Integer courseId, SearchUserRequest request,
             @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
@@ -40,7 +40,7 @@ public class EnrollmentController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @GetMapping("/courses/{courseId}/students/not-available")
     public ResponseEntity<PageResponse<UserViewResponse>> getStudentsNotInCourse(
-            @PathVariable Long courseId, SearchUserRequest request,
+            @PathVariable Integer courseId, SearchUserRequest request,
             @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
@@ -51,7 +51,7 @@ public class EnrollmentController {
     @Operation(summary = "Thêm sinh viên vào khóa học", description = "Add one or multiple students to a course enrollment")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/courses/{courseId}/students")
-    public ResponseEntity<String> addStudentsToCourse(@PathVariable Long courseId, @RequestBody StudentCourseRequest request) {
+    public ResponseEntity<String> addStudentsToCourse(@PathVariable Integer courseId, @RequestBody StudentCourseRequest request) {
         enrollmentService.addStudentsToCourse(courseId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body("Students has been added");
     }
@@ -59,7 +59,7 @@ public class EnrollmentController {
     @Operation(summary = "Xóa sinh viên khỏi khóa học", description = "Remove one or multiple students from course enrollment")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/courses/{courseId}/students")
-    public ResponseEntity<String> removeStudentsInCourse(@PathVariable Long courseId, @RequestBody StudentCourseRequest request) {
+    public ResponseEntity<String> removeStudentsInCourse(@PathVariable Integer courseId, @RequestBody StudentCourseRequest request) {
         enrollmentService.removeStudentsInCourse(courseId, request);
         return ResponseEntity.status(HttpStatus.OK).body("Students has been deleted");
     }

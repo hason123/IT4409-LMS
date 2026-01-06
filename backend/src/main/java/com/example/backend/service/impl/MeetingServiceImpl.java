@@ -55,7 +55,7 @@ public class MeetingServiceImpl implements MeetingService{
     }
 
     @Override
-    public MeetingResponse getMeetingById(Long id) {
+    public MeetingResponse getMeetingById(Integer id) {
         Meeting meeting = meetingRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Meeting not found with id: " + id));
         return convertMeetingToDTO(meeting);
@@ -82,7 +82,7 @@ public class MeetingServiceImpl implements MeetingService{
 
     @Override
     @Transactional
-    public MeetingResponse updateMeeting(Long id, MeetingRequest request) {
+    public MeetingResponse updateMeeting(Integer id, MeetingRequest request) {
         Meeting meeting = meetingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
         
@@ -101,7 +101,7 @@ public class MeetingServiceImpl implements MeetingService{
 
     @Override
     @Transactional
-    public void deleteMeeting(Long id) {
+    public void deleteMeeting(Integer id) {
         Meeting meeting = meetingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
         meetingRepository.delete(meeting);

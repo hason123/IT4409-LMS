@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 import com.example.backend.dto.request.QuizAnswerRequest;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.dto.response.QuizAnswerResponse;
+import com.example.backend.dto.response.quiz.QuizAnswerResponse;
 import com.example.backend.service.QuizAnswerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;  // ← ADD THIS IMPORT
@@ -25,7 +25,7 @@ public class QuizAnswerController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/question/{questionId}")
     public ResponseEntity<QuizAnswerResponse> createQuizAnswer(
-            @PathVariable Long questionId,
+            @PathVariable Integer questionId,
             @RequestBody QuizAnswerRequest request) {
         return ResponseEntity.ok(quizAnswerService.createQuizAnswer(questionId, request));
     }
@@ -33,7 +33,7 @@ public class QuizAnswerController {
     @Operation(summary = "Lấy thông tin câu trả lời quiz theo ID", description = "Retrieve specific quiz answer details by ID")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
-    public ResponseEntity<QuizAnswerResponse> getQuizAnswerById(@PathVariable Long id) {
+    public ResponseEntity<QuizAnswerResponse> getQuizAnswerById(@PathVariable Integer id) {
         return ResponseEntity.ok(quizAnswerService.getQuizAnswerById(id));
     }
 
@@ -52,7 +52,7 @@ public class QuizAnswerController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizAnswerResponse> updateQuizAnswer(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody QuizAnswerRequest request
     ) {
         return ResponseEntity.ok(quizAnswerService.updateQuizAnswer(id, request));
@@ -61,7 +61,7 @@ public class QuizAnswerController {
     @Operation(summary = "Xóa câu trả lời quiz", description = "Delete a quiz answer option by ID")  // ← ENHANCED
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteQuizAnswer(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteQuizAnswer(@PathVariable Integer id) {
         quizAnswerService.deleteQuizAnswer(id);
         return ResponseEntity.noContent().build();
     }

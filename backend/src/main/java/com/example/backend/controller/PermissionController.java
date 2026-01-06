@@ -30,7 +30,7 @@ public class PermissionController {
     
     @Operation(summary = "Lấy quyền theo ID")  // ← THÊM VÀO ĐÂY
     @GetMapping("/{id}")
-    public ResponseEntity<Permission> getById(@PathVariable Long id) {
+    public ResponseEntity<Permission> getById(@PathVariable Integer id) {
         Permission permission = permissionService.getById(id);
         return ResponseEntity.ok(permission);
     }
@@ -38,7 +38,7 @@ public class PermissionController {
     @Operation(summary = "Cập nhật quyền")  // ← THÊM VÀO ĐÂY
     @PutMapping("/{id}")
     public ResponseEntity<Permission> update(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody Permission permissionDetails) {
         Permission updatedPermission = permissionService.update(id, permissionDetails);
         return ResponseEntity.ok(updatedPermission);
@@ -46,7 +46,7 @@ public class PermissionController {
 
     @Operation(summary = "Xóa quyền")  // ← THÊM VÀO ĐÂY
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
         permissionService.delete(id);
         return ResponseEntity.noContent().build();
     }

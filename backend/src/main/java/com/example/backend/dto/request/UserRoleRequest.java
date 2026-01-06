@@ -11,6 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRoleRequest {
-    private List<Long> userIds;
+    private List<Integer> userIds;
     private String roleName;
 }

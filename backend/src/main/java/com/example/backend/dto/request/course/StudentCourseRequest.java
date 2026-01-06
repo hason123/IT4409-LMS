@@ -9,5 +9,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentCourseRequest {
-    List<Long> studentIds;
+    List<Integer> studentIds;
 }

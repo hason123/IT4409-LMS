@@ -27,7 +27,7 @@ public class ChapterController {
     @Operation(summary = "Tạo chương mới cho khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/courses/{courseId}/chapters")
-    public ResponseEntity<ChapterResponse> createChapter(@PathVariable Long courseId, @RequestBody ChapterRequest request) {
+    public ResponseEntity<ChapterResponse> createChapter(@PathVariable Integer courseId, @RequestBody ChapterRequest request) {
         return ResponseEntity.ok(chapterService.createChapter(courseId, request));
     }
 
@@ -53,7 +53,7 @@ public class ChapterController {
     @Operation(summary = "Lấy danh sách chương theo khóa học")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<ChapterResponse>> getChaptersByCourseId(@PathVariable Long courseId) {
+    public ResponseEntity<List<ChapterResponse>> getChaptersByCourseId(@PathVariable Integer courseId) {
         return ResponseEntity.ok(chapterService.getChaptersByCourseId(courseId));
     }
 
@@ -79,7 +79,7 @@ public class ChapterController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/course/{courseId}/order-chapters")
     public ResponseEntity<Void> updateChapterOrder(
-            @PathVariable Long courseId,
+            @PathVariable Integer courseId,
             @RequestBody ChapterOrderRequest request
     ) {
         chapterService.updateOrder(courseId, request.getOrderedChapterIds());

@@ -8,11 +8,11 @@ import java.util.List;
 public interface PermissionService {
     PermissionInfoResponse createPermission(PermissionRequest request);
     
-    PermissionInfoResponse updatePermission(Long id, PermissionRequest request);
+    PermissionInfoResponse updatePermission(Integer id, PermissionRequest request);
     
-    void deletePermissionById(Long id);
+    void deletePermissionById(Integer id);
     
-    PermissionInfoResponse getPermissionById(Long id);
+    PermissionInfoResponse getPermissionById(Integer id);
     
     List<PermissionInfoResponse> getAllPermissions();
     

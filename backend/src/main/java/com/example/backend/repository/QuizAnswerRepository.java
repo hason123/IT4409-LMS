@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface QuizAnswerRepository extends JpaRepository<QuizAnswer,Long> {
-    boolean existsByQuizQuestion_Id(Long id);
+public interface QuizAnswerRepository extends JpaRepository<QuizAnswer,Integer> {
+    boolean existsByQuizQuestion_Id(Integer id);
 }

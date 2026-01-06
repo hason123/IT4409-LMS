@@ -69,10 +69,10 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public boolean isCurrentUser(Long userId) {
+    public boolean isCurrentUser(Integer userId) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof Jwt jwt) {
-            Long currentUserId = Long.valueOf(jwt.getSubject()); // sub = userId
+            Integer currentUserId = Integer.valueOf(jwt.getSubject()); // sub = userId
             return userId.equals(currentUserId);
         }
         return false;
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
     public User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof Jwt jwt) {
-            Long currentUserId = Long.valueOf(jwt.getSubject()); // sub = userId
+            Integer currentUserId = Integer.valueOf(jwt.getSubject()); // sub = userId
             return userRepository.findById(currentUserId)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         }
@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserById(Long id) {
+    public void deleteUserById(Integer id) {
         User user = userRepository.findById(id).orElse(null);
         if(user == null){
             throw new ResourceNotFoundException("User not found");
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserInfoResponse updateUser(Long id, RegisterRequest request) {
+    public UserInfoResponse updateUser(Integer id, RegisterRequest request) {
         User updatedUser = userRepository.findById(id).orElse(null);
 
         if(!isCurrentUser(id) ){
@@ -166,7 +166,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Object getUserById(Long id){
+    public Object getUserById(Integer id){
         User user = userRepository.findById(id).orElse(null);
         if(user == null){
             throw new ResourceNotFoundException("User not found");
@@ -175,7 +175,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public CloudinaryResponse uploadImage(final Long id, final MultipartFile file) {
+    public CloudinaryResponse uploadImage(final Integer id, final MultipartFile file) {
         final User avatarUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         FileUploadUtil.assertAllowed(file, "image");

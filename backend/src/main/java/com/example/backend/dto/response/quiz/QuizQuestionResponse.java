@@ -1,4 +1,4 @@
-package com.example.backend.dto.response;
+package com.example.backend.dto.response.quiz;
 
 import com.example.backend.constant.QuestionType;
 import lombok.*;
@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizQuestionResponse {
-    private Long id;
+    private Integer id;
     private String title;
     private QuestionType type;
     private String fileUrl;

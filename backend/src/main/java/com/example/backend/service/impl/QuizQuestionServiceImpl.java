@@ -2,8 +2,8 @@ package com.example.backend.service.impl;
 
 import com.example.backend.dto.request.QuizQuestionRequest;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.dto.response.QuizAnswerResponse;
-import com.example.backend.dto.response.QuizQuestionResponse;
+import com.example.backend.dto.response.quiz.QuizAnswerResponse;
+import com.example.backend.dto.response.quiz.QuizQuestionResponse;
 import com.example.backend.entity.Quiz;
 import com.example.backend.entity.QuizQuestion;
 import com.example.backend.repository.QuizQuestionRepository;
@@ -63,7 +63,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
     }
 
     @Override
-    public QuizQuestionResponse getQuizQuestionById(Long id) {
+    public QuizQuestionResponse getQuizQuestionById(Integer id) {
         QuizQuestion question = quizQuestionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
         return convertQuizQuestionToDTO(question);
@@ -85,7 +85,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
 
     @Override
     @Transactional
-    public QuizQuestionResponse updateQuizQuestion(Long id, QuizQuestionRequest request) {
+    public QuizQuestionResponse updateQuizQuestion(Integer id, QuizQuestionRequest request) {
         QuizQuestion question = quizQuestionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
         if(request.getTitle() != null){
@@ -99,7 +99,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
 
     @Override
     @Transactional
-    public void deleteQuizQuestion(Long id) {
+    public void deleteQuizQuestion(Integer id) {
         QuizQuestion question = quizQuestionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
         quizQuestionRepository.delete(question);

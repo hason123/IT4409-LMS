@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OtpRepository extends CrudRepository<Otp, Long> {
+public interface OtpRepository extends CrudRepository<Otp, Integer> {
     Optional<Otp> findByCodeAndUser_IdAndTypeAndVerifiedIsFalseAndExpiresAtAfter(
-            String code, Long userId, OtpType type, LocalDateTime now);
+            String code, Integer userId, OtpType type, LocalDateTime now);
 
-    List<Otp> findByUser_IdAndVerifiedIsFalseAndExpiresAtBefore(Long userId, LocalDateTime now);
+    List<Otp> findByUser_IdAndVerifiedIsFalseAndExpiresAtBefore(Integer userId, LocalDateTime now);
 
     Optional<Otp> findTopByUser_IdAndTypeAndVerifiedFalseOrderByCreatedAtDesc(
-            Long userId,
+            Integer userId,
             OtpType type
     );
 }

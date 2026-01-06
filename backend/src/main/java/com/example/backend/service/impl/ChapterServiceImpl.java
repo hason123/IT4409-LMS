@@ -61,7 +61,7 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Transactional
     @Override
-    public ChapterResponse createChapter(Long courseId, ChapterRequest request) {
+    public ChapterResponse createChapter(Integer courseId, ChapterRequest request) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
         Chapter chapter = new Chapter();
@@ -106,7 +106,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public List<ChapterResponse> getChaptersByCourseId(Long courseId) {
+    public List<ChapterResponse> getChaptersByCourseId(Integer courseId) {
         List<Chapter> chapters = chapterRepository.findByCourse_IdOrderByOrderIndexAsc(courseId);
         return chapters.stream()
                 .map(this::convertChapterToDTO)
@@ -115,7 +115,7 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Transactional
     @Override
-    public void updateOrder(Long courseId, List<Integer> orderedChapterIds) {
+    public void updateOrder(Integer courseId, List<Integer> orderedChapterIds) {
         for (int i = 0; i < orderedChapterIds.size(); i++) {
             int updated = chapterRepository.updateOrderIndex(orderedChapterIds.get(i), courseId, i + 1);
             if (updated == 0) {

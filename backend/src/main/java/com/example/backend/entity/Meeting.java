@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Meeting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String roomCode;
     private String title;
     private LocalDateTime startTime;

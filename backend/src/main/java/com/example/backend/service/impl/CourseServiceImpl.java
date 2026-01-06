@@ -62,7 +62,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseResponse updateCourse(Long id, CourseRequest request) {
+    public CourseResponse updateCourse(Integer id, CourseRequest request) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         if (request.getTitle() != null) {
@@ -81,7 +81,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public void deleteCourseById(Long id) {
+    public void deleteCourseById(Integer id) {
         Course deletedCourse = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         User currentUser = userService.getCurrentUser();
         if(currentUser.getRole().getRoleName().equals(RoleType.ADMIN) || deletedCourse.getTeacher().getId().equals(currentUser.getId())) {
@@ -90,7 +90,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseResponse getCourseById(Long id) {
+    public CourseResponse getCourseById(Integer id) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         return convertEntityToDto(course);
     }
@@ -109,7 +109,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CloudinaryResponse uploadImage(Long id, MultipartFile file) {
+    public CloudinaryResponse uploadImage(Integer id, MultipartFile file) {
         final Course uploadCourse = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         FileUploadUtil.assertAllowed(file, "image");

@@ -32,7 +32,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public PermissionInfoResponse updatePermission(Long id, PermissionRequest request) {
+    public PermissionInfoResponse updatePermission(Integer id, PermissionRequest request) {
         Permission permission = permissionRepository.findById(id).orElse(null);
         
         if (permission == null) {
@@ -57,7 +57,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public void deletePermissionById(Long id) {
+    public void deletePermissionById(Integer id) {
         Permission permission = permissionRepository.findById(id).orElse(null);
         if (permission == null) {
             throw new ResourceNotFoundException("Permission not found");
@@ -66,7 +66,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public PermissionInfoResponse getPermissionById(Long id) {
+    public PermissionInfoResponse getPermissionById(Integer id) {
         Permission permission = permissionRepository.findById(id).orElse(null);
         if (permission == null) {
             throw new ResourceNotFoundException("Permission not found");

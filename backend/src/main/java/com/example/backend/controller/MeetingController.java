@@ -30,7 +30,7 @@ public class MeetingController {
     @Operation(summary = "Lấy thông tin cuộc họp theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
-    public ResponseEntity<MeetingResponse> getMeetingById(@PathVariable Long id) {
+    public ResponseEntity<MeetingResponse> getMeetingById(@PathVariable Integer id) {
         return ResponseEntity.ok(meetingService.getMeetingById(id));
     }
 
@@ -50,7 +50,7 @@ public class MeetingController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<MeetingResponse> updateMeeting(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody MeetingRequest request
     ) {
         return ResponseEntity.ok(meetingService.updateMeeting(id, request));
@@ -59,7 +59,7 @@ public class MeetingController {
     @Operation(summary = "Xóa cuộc họp")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMeeting(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMeeting(@PathVariable Integer id) {
         meetingService.deleteMeeting(id);
         return ResponseEntity.noContent().build();
     }

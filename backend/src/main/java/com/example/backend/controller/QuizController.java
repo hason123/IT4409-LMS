@@ -2,7 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.request.QuizRequest;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.dto.response.QuizResponse;
+import com.example.backend.dto.response.quiz.QuizResponse;
 import com.example.backend.service.QuizService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;  // ← ADD THIS IMPORT

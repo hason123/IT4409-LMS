@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CategoryService {
     CategoryResponse createCategory(CategoryRequest request);
-    CategoryResponse getCategoryById(Long id);
+    CategoryResponse getCategoryById(Integer id);
 
     PageResponse<CategoryResponse> getCategoryPage(Pageable pageable);
 
@@ -18,7 +18,7 @@ public interface CategoryService {
 
     List<CategoryResponse> getAllCategories();
 
-    CategoryResponse updateCategory(Long id, CategoryRequest request);
+    CategoryResponse updateCategory(Integer id, CategoryRequest request);
 
-    void deleteCategory(Long id);
+    void deleteCategory(Integer id);
 }

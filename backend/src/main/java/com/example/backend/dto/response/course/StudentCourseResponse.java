@@ -9,6 +9,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentCourseResponse {
-    private Long courseId;
-    private List<Long> userIds;
+    private Integer courseId;
+    private List<Integer> userIds;
 }

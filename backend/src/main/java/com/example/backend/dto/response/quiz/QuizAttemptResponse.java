@@ -1,4 +1,4 @@
-package com.example.backend.dto.response;
+package com.example.backend.dto.response.quiz;
 
 import lombok.*;
 
@@ -10,14 +10,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class QuizAttemptResponse {
-    private Long id;
+    private Integer id;
     private LocalDateTime completedTime;
     private Integer grade;
     private Boolean isPassed;
     private Integer quizId;
-    private Long studentId;
+    private Integer studentId;
     private Integer totalQuestions;
     private Integer correctAnswers;
     private Integer incorrectAnswers;
     private Integer unansweredQuestions;
+    private Integer chapterItemId;
 }

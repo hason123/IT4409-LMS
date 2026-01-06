@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PermissionResponse {
-    private Long id;
+    private Integer id;
     private String name;
     private String apiPath;
     private String method;

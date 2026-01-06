@@ -9,12 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface EnrollmentService {
     @Transactional
-    void addStudentsToCourse(Long courseId, StudentCourseRequest request);
+    void addStudentsToCourse(Integer courseId, StudentCourseRequest request);
 
     @Transactional
-    void removeStudentsInCourse(Long courseId, StudentCourseRequest request);
+    void removeStudentsInCourse(Integer courseId, StudentCourseRequest request);
 
-    PageResponse<UserViewResponse> searchStudentsInCourse(Long courseId, SearchUserRequest request, Pageable pageable);
+    PageResponse<UserViewResponse> searchStudentsInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
 
-    PageResponse<UserViewResponse> searchStudentsNotInCourse(Long courseId, SearchUserRequest request, Pageable pageable);
+    PageResponse<UserViewResponse> searchStudentsNotInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
 }

@@ -17,6 +17,9 @@ public interface ChapterItemService {
     @Transactional
     ChapterItemResponse addLessonToChapter(Integer chapterId, Integer lessonId);
 
+    @Transactional
+    ChapterItemResponse addQuizToChapter(Integer chapterId, Integer lessonId);
+
 //    @Transactional
 //   // ChapterItemResponse addQuizToChapter(Integer chapterId, Quiz quiz);
 }

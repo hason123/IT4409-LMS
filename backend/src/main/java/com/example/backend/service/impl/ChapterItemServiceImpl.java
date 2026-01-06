@@ -3,6 +3,7 @@ package com.example.backend.service.impl;
 import com.example.backend.constant.ItemType;
 import com.example.backend.dto.response.ChapterItemResponse;
 import com.example.backend.dto.response.LessonResponse;
+import com.example.backend.dto.response.quiz.QuizResponse;
 import com.example.backend.entity.Chapter;
 import com.example.backend.entity.ChapterItem;
 import com.example.backend.entity.Lesson;
@@ -85,7 +86,6 @@ public class ChapterItemServiceImpl implements ChapterItemService {
         // Map sang DTO Response
         return items.stream().map(ci -> {
             Object detail = null;
-
             if (ci.getType() == ItemType.LESSON) {
                 Lesson lesson = lessonMap.get(ci.getRefId());
                 if (lesson != null) {
@@ -112,6 +112,17 @@ public class ChapterItemServiceImpl implements ChapterItemService {
         ChapterItem ci = createChapterItem(chapter, ItemType.LESSON, lessonId);
         LessonResponse lessonResponse = lessonService.convertEntityToDTO(lesson);
         return buildResponse(ci, lessonResponse);
+    }
+
+    @Transactional
+    @Override
+    public ChapterItemResponse addQuizToChapter(Integer chapterId, Integer quizId) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new RuntimeException("Chapter not found"));
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+        ChapterItem ci = createChapterItem(chapter, ItemType.QUIZ, quizId);
+        QuizResponse quizResponse = quizService.convertQuizToDTO(quiz);
+        return buildResponse(ci, quizResponse);
     }
 
     private ChapterItem createChapterItem(Chapter chapter, ItemType type, Integer refId) {

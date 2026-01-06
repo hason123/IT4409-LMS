@@ -8,13 +8,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseResponse {
-    private Long id;
+    private Integer id;
     private String title;
     private String description;
-    private Long teacherId;
+    private Integer teacherId;
     private String teacherName;
-    private Long categoryId;
+    private Integer categoryId;
     private String categoryName;
     private String imageUrl;
     private String cloudinaryImageId;
+    private String classCode;
 }

@@ -22,7 +22,7 @@ import java.util.Set;
 public class QuizAttempt extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @Column(name = "completed_time")
     private LocalDateTime completedTime;
     private LocalDateTime startTime;
@@ -33,6 +33,7 @@ public class QuizAttempt extends BaseEntity {
     private Integer correctAnswers;
     private Integer incorrectAnswers;
     private Integer unansweredQuestions;
+    private Integer attemptNumber;
     @Enumerated(EnumType.STRING)
     private AttemptStatus status;
     @ManyToOne
@@ -42,6 +43,10 @@ public class QuizAttempt extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "student_id")
     private User student;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chapter_item_id")
+    private ChapterItem chapterItem;
 
     @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
     List<QuizAttemptAnswer> attemptAnswers;

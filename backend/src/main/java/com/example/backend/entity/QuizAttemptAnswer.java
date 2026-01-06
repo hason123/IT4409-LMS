@@ -19,7 +19,7 @@ import java.util.List;
 public class QuizAttemptAnswer extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private LocalDateTime completedAt;
     private String textAnswer;
     private Boolean isCorrect;

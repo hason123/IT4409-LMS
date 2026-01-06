@@ -41,7 +41,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Transactional
     @Override
-    public void addStudentsToCourse(Long courseId, StudentCourseRequest request){
+    public void addStudentsToCourse(Integer courseId, StudentCourseRequest request){
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
@@ -59,7 +59,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Transactional
     @Override
-    public void removeStudentsInCourse(Long courseId, StudentCourseRequest request){
+    public void removeStudentsInCourse(Integer courseId, StudentCourseRequest request){
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
         if (request.getStudentIds() == null || request.getStudentIds().isEmpty()) {
@@ -83,7 +83,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public PageResponse<UserViewResponse> searchStudentsInCourse(Long courseId, SearchUserRequest request, Pageable pageable) {
+    public PageResponse<UserViewResponse> searchStudentsInCourse(Integer courseId, SearchUserRequest request, Pageable pageable) {
         Specification<User> spec = buildBaseUserSearchSpec(request);
         spec = spec.and(UserSpecification.hasRole(RoleType.STUDENT));
         spec = spec.and(UserSpecification.inCourse(courseId));
@@ -98,7 +98,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public PageResponse<UserViewResponse> searchStudentsNotInCourse(Long courseId, SearchUserRequest request, Pageable pageable) {
+    public PageResponse<UserViewResponse> searchStudentsNotInCourse(Integer courseId, SearchUserRequest request, Pageable pageable) {
         Specification<User> spec = buildBaseUserSearchSpec(request);
         spec = spec.and(UserSpecification.hasRole(RoleType.STUDENT));
         spec = spec.and(UserSpecification.notInCourse(courseId));

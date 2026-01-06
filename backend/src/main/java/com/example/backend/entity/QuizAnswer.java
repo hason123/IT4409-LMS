@@ -16,11 +16,16 @@ import org.hibernate.annotations.SQLRestriction;
 public class QuizAnswer extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @Column(name = "is_correct")
     private Boolean isCorrect;
     private String description; //text answer
+
     @ManyToOne
     @JoinColumn(name = "quiz_question_id")
     private QuizQuestion quizQuestion;
+
+    private String fileUrl;
+    private String embedUrl;
+    private String cloudinaryId;
 }

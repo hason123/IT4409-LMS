@@ -18,7 +18,7 @@ import org.hibernate.annotations.SQLRestriction;
 public class Enrollment extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @ManyToOne
     @JoinColumn(name = "student_id")
     private User student;

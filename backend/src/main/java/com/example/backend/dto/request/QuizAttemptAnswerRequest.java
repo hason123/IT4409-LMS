@@ -9,8 +9,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class QuizAttemptAnswerRequest {
-    private Long questionId;
-    private List<Long> selectedAnswerIds;
-    //private Long selectedAnswerId;
+    private Integer questionId;
+    private List<Integer> selectedAnswerIds;
+    //private Integer selectedAnswerId;
     private String textAnswer;
 }

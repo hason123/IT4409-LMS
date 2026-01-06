@@ -9,6 +9,7 @@ import lombok.*;
 public class CourseRequest {
     private String title;
     private String description;
-    private Long teacherId;
-    private Long categoryId;
+    private Integer teacherId;
+    private Integer categoryId;
+    private String classCode;
 }

@@ -1,4 +1,4 @@
-package com.example.backend.dto.response;
+package com.example.backend.dto.response.quiz;
 
 import lombok.*;
 
@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class QuizAttemptAnswerResponse {
-    private Long id;
+    private Integer id;
     private QuizQuestionResponse quizQuestion;
     private List<QuizAnswerResponse> selectedAnswers;
     private String textAnswer;

@@ -10,5 +10,5 @@ public class QuizRequest {
     private String description;
     private Integer minPassScore;
     private Integer timeLimitMinutes;
-
+    private Integer maxAttempts;
 }

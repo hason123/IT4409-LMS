@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificationExecutor<User> {
+public interface UserRepository extends JpaRepository<User,Integer>, JpaSpecificationExecutor<User> {
     User findByGmail(String gmail);
 
     User findByUserName(String userName);
@@ -30,7 +30,7 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
         )
     """)
     List<User> findUsersNotInCourseByRole(
-            @Param("courseId") Long courseId,
+            @Param("courseId") Integer courseId,
             @Param("roleName") RoleType roleType
     );
 

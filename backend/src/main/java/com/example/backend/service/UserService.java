@@ -16,7 +16,7 @@ public interface UserService {
 
     User handleGetUserByUserName(String name);
 
-    boolean isCurrentUser(Long userId);
+    boolean isCurrentUser(Integer userId);
 
     User getCurrentUser();
 
@@ -24,13 +24,13 @@ public interface UserService {
 
     void updateUserToken(String refreshToken, String userName);
 
-    void deleteUserById(Long id);
+    void deleteUserById(Integer id);
 
     User createGoogleUser(String email, String name);
 
-    UserInfoResponse updateUser(Long id, RegisterRequest request);
+    UserInfoResponse updateUser(Integer id, RegisterRequest request);
 
-    Object getUserById(Long id);
+    Object getUserById(Integer id);
 
     PageResponse<UserInfoResponse> getUserPage(Pageable pageable);
 
@@ -46,11 +46,11 @@ public interface UserService {
 
     UserInfoResponse convertUserInfoToDTO(User user);
 
-    CloudinaryResponse uploadImage(final Long id, final MultipartFile file);
+    CloudinaryResponse uploadImage(final Integer id, final MultipartFile file);
 
     UserViewResponse convertUserViewToDTO(User user);
 
-    // Object getUserById(Long id);
+    // Object getUserById(Integer id);
 
-    //UserInfoResponse updateUser(Long id, UserRequest userRequest);
+    //UserInfoResponse updateUser(Integer id, UserRequest userRequest);
 }

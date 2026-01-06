@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MeetingResponse {
-    private Long id;
+    private Integer id;
     private String roomCode;
     private String title;
     private LocalDateTime startTime;

@@ -18,7 +18,7 @@ public class CommentResponse {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
     private Integer lessonId;
-    private Long userId;
+    private Integer userId;
     private Integer parentId;
     private List<CommentResponse> replies;
 }

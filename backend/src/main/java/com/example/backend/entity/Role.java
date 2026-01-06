@@ -22,7 +22,7 @@ public class Role extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
-    private Long roleID;
+    private Integer roleID;
     @Column(name = "role_name", columnDefinition = "VARCHAR(20)")
     @Enumerated(EnumType.STRING) //luu data vao DB dang String
     private RoleType roleName;

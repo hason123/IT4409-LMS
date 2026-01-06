@@ -1,12 +1,11 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.constant.AttemptStatus;
+import com.example.backend.constant.ItemType;
 import com.example.backend.constant.QuestionType;
+import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.QuizAttemptAnswerRequest;
-import com.example.backend.dto.response.QuizAnswerResponse;
-import com.example.backend.dto.response.QuizAttemptAnswerResponse;
-import com.example.backend.dto.response.QuizAttemptResponse;
-import com.example.backend.dto.response.QuizQuestionResponse;
+import com.example.backend.dto.response.quiz.*;
 import com.example.backend.entity.*;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
@@ -18,9 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,20 +37,44 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private final EnrollmentRepository enrollmentRepository;
     private final ChapterItemRepository chapterItemRepository;
 
-    // Taking quizz
+    // Taking quiz
     @Override
-    public QuizAttemptResponse startQuizAttempt(Integer quizId) {
-        Quiz chosenQuiz = quizRepository.findById(quizId).orElseThrow(() -> new RuntimeException("Quiz not found"));
+    public QuizAttemptResponse startQuizAttempt(Integer quizId, Integer chapterItemId) {
         User currentUser = userService.getCurrentUser();
         if(!userService.isCurrentUser(currentUser.getId())) {
-            throw new UnauthorizedException("You have no permission");
+            throw new UnauthorizedException("Chỉ học sinh đăng ký khóa học mới được truy cập vào nội dung này");
         }
-//        ChapterItem quizItem = chapterItemRepository.findByRefId(quizId);
-//        Enrollment progress = enrollmentRepository.findByStudent_IdAndCourse_Id(currentUser.getId(),
-//                quizItem.getChapter().getCourse().getId());
+
+        // 2. Tìm ChapterItem và Validate
+        ChapterItem chapterItem = chapterItemRepository.findById(chapterItemId)
+                .orElseThrow(() -> new BusinessException("Quiz chưa được thêm vào chương tương ứng"));
+
+        // Validate: Đảm bảo chapterItem này trỏ đúng tới quizId đang request
+        if (chapterItem.getType() != ItemType.QUIZ || !chapterItem.getRefId().equals(quizId)) {
+            throw new BusinessException("Quiz không tồn tại");
+        }
+
+        // 3. Tìm Quiz
+        Quiz chosenQuiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Quiz không tồn tại"));
+
+        Optional<QuizAttempt> inProgressAttempt = quizAttemptRepository.findByChapterItem_IdAndStudent_IdAndStatus(
+                chapterItem.getId(), currentUser.getId(), AttemptStatus.IN_PROGRESS);
+
+        if(inProgressAttempt.isPresent()){
+            return convertQuizAttemptToDTO(inProgressAttempt.get());
+        }
+
+        int currentAttempt = quizAttemptRepository.countByChapterItem_IdAndStudent_Id(chapterItem.getId(), currentUser.getId());
+        if(chosenQuiz.getMaxAttempts() != null && currentAttempt >= chosenQuiz.getMaxAttempts()){
+            throw new BusinessException("Đã vượt quá số lần làm bài!");
+        }
+
         QuizAttempt attempt = QuizAttempt.builder()
                 .quiz(chosenQuiz)
                 .student(currentUser)
+                .chapterItem(chapterItem)
+                .attemptNumber(currentAttempt + 1)
                 .grade(0)
                 .isPassed(false)
                 .totalQuestions(chosenQuiz.getQuestions().size())
@@ -58,6 +82,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .incorrectAnswers(0)
                 .correctAnswers(0)
                 .startTime(LocalDateTime.now())
+                .status(AttemptStatus.IN_PROGRESS)
                 .build();
 
         quizAttemptRepository.save(attempt);
@@ -75,7 +100,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
     @Override
     @Transactional
-    public QuizAttemptAnswerResponse answerQuestion(Long attemptId, Long questionId, QuizAttemptAnswerRequest request) {
+    public void answerQuestion(Integer attemptId, Integer questionId, QuizAttemptAnswerRequest request) {
         log.info("Answering question {} in attempt {}", questionId, attemptId);
 
         QuizAttempt attempt = quizAttemptRepository.findById((attemptId))
@@ -83,13 +108,13 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         User currentUser = userService.getCurrentUser();
         if (!attempt.getStudent().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedException("You are not owner of this attempt");
+            throw new UnauthorizedException("Chỉ học sinh đăng ký khóa học mới được truy cập vào nội dung này");
         }
 
         // Check time limit
         if (isAttemptExpired(attempt)) {
             expireAttempt(attempt);
-            throw new BusinessException("Time's out!");
+            throw new BusinessException("Đã hết thời gian làm bài!");
         }
         // Find attempt answer
         QuizAttemptAnswer attemptAnswer = quizAttemptAnswerRepository
@@ -98,16 +123,16 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         QuizQuestion question = attemptAnswer.getQuestion();
 
-/*        boolean wasAnswered =
-                attemptAnswer.getSelectedAnswer() != null
+/*       boolean wasAnswered =
+                attemptAnswer.getSelectedAnswers() != null
                         || attemptAnswer.getTextAnswer() != null;*/
 
         // ===== MULTIPLE CHOICE (MULTI ANSWER) =====
         if (question.getType() == QuestionType.MULTIPLE_CHOICE) {
 
-            if (request.getSelectedAnswerIds() == null || request.getSelectedAnswerIds().isEmpty()) {
-                throw new BusinessException("Selected answers are required");
-            }
+/*            if (request.getSelectedAnswerIds() == null || request.getSelectedAnswerIds().isEmpty()) {
+                throw new BusinessException("Bạn cần chọn ít nhất một phương án");
+            }*/
 
             List<QuizAnswer> selectedAnswers =
                     quizAnswerRepository.findAllById(request.getSelectedAnswerIds());
@@ -123,30 +148,55 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 }
             }
 
+            // ===== CHECK CORRECT =====
+/*            Set<Integer> correctIds = question.getAnswers()
+                    .stream()
+                    .filter(QuizAnswer::getIsCorrect)
+                    .map(QuizAnswer::getId)
+                    .collect(Collectors.toSet());
+
+            Set<Integer> selectedIds = selectedAnswers
+                    .stream()
+                    .map(QuizAnswer::getId)
+                    .collect(Collectors.toSet());
+
+
+            boolean isCorrect = correctIds.equals(selectedIds);*/
+
             attemptAnswer.setSelectedAnswers(selectedAnswers);
             attemptAnswer.setTextAnswer(null);
+           // attemptAnswer.setIsCorrect(isCorrect);
         }
+
 
         // ===== TEXT =====
         else if (question.getType() == QuestionType.TEXT) {
 
-            if (request.getTextAnswer() == null || request.getTextAnswer().trim().isEmpty()) {
-                throw new BusinessException("Text answer is required");
-            }
+/*            if (request.getTextAnswer() == null || request.getTextAnswer().trim().isEmpty()) {
+                throw new BusinessException("Bạn cần trả lời câu hỏi này");
+            }*/
 
-            attemptAnswer.setTextAnswer(request.getTextAnswer().trim());
+            String userAnswer = request.getTextAnswer().trim();
+/*            QuizAnswer correctAnswer = question.getAnswers().get(0); // only 1 correct
+
+            boolean isCorrect = correctAnswer.getDescription()
+                    .trim()
+                    .equalsIgnoreCase(userAnswer);*/
+
+            attemptAnswer.setTextAnswer(userAnswer);
             attemptAnswer.setSelectedAnswers(null);
+            //attemptAnswer.setIsCorrect(isCorrect);
         }
 
         attemptAnswer.setCompletedAt(LocalDateTime.now());
         quizAttemptAnswerRepository.save(attemptAnswer);
 
-//        if (!wasAnswered) {
-//            updateAttemptStatistics(attempt);
-//        }
+      /*  if (!wasAnswered) {
+            updateAttemptStatistics(attempt);
+        }*/
 
         log.info("Question answered successfully");
-        return convertQuizAttemptAnswerToDTO(attemptAnswer);
+        //return convertQuizAttemptAnswerToDTO(attemptAnswer);
     }
 
     @Override
@@ -154,29 +204,28 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     public QuizAttemptResponse submitQuiz(Integer attemptId) {
         log.info("Submitting quiz attempt {}", attemptId);
 
-        QuizAttempt attempt = quizAttemptRepository.findById(Long.valueOf(attemptId))
+        QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attempt not found"));
 
         User currentUser = userService.getCurrentUser();
         if (!attempt.getStudent().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedException("You are not owner of this attempt");
+            throw new UnauthorizedException("Chỉ học sinh đăng ký khóa học mới được truy cập vào nội dung này");
         }
         // Check if already submitted
         if (attempt.getCompletedTime() != null) {
-            throw new BusinessException("Quiz attempt already submitted");
+            throw new BusinessException("Bạn đã nộp bài rồi!");
         }
         // Check time limit
         if (isAttemptExpired(attempt)) {
             expireAttempt(attempt);
             return convertQuizAttemptToDTO(attempt);
         }
+
         updateAttemptStatistics(attempt);
         attempt.setCompletedTime(LocalDateTime.now());
-        Integer passingScore = attempt.getQuiz().getMinPassScore(); // nếu có
-//        if (passingScore == null) {
-//            passingScore = 50; // default
-//        }
+        Integer passingScore = attempt.getQuiz().getMinPassScore();
         attempt.setIsPassed(attempt.getGrade() >= passingScore);
+        attempt.setStatus(AttemptStatus.COMPLETED);
         quizAttemptRepository.save(attempt);
         log.info("Quiz submitted successfully. Grade = {}, Passed = {}",
                 attempt.getGrade(), attempt.getIsPassed());
@@ -251,6 +300,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             attempt.setGrade(0);
         }
         quizAttemptRepository.save(attempt);
+        quizAttemptAnswerRepository.saveAll(attemptAnswers);
     }
 
 
@@ -266,13 +316,91 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private void expireAttempt(QuizAttempt attempt) {
         updateAttemptStatistics(attempt);
         attempt.setCompletedTime(LocalDateTime.now());
+        attempt.setStatus(AttemptStatus.EXPIRED);
         Integer passingScore = attempt.getQuiz().getMinPassScore();
-//        if (passingScore == null) {
-//            passingScore = 50; // default
-//        }
         attempt.setIsPassed(attempt.getGrade() >= passingScore);
         quizAttemptRepository.save(attempt);
     }
+
+    @Override
+    public List<QuizAttemptResponse> getStudentAttemptsHistory(Integer chapterItemId) {
+        User currentUser = userService.getCurrentUser();
+        ChapterItem chapterItem = chapterItemRepository.findById(chapterItemId).orElse(null);
+        if (chapterItem == null) {
+            throw new RuntimeException("Chapter Item not found");
+        }
+        Integer teacherCourseId = chapterItem.getChapter().getCourse().getTeacher().getId();
+        if (!(currentUser.getRole().getRoleName() == RoleType.ADMIN) ||
+                !teacherCourseId.equals(currentUser.getId())) {
+            throw new UnauthorizedException("Bạn không có quyền xem bài làm này");
+        }
+        List<QuizAttempt> attempts =
+                quizAttemptRepository.findByChapterItem_IdAndStudent_Id(
+                        chapterItemId, currentUser.getId()
+                );
+        return attempts.stream()
+                .filter(attempt ->
+                        attempt.getStatus() == AttemptStatus.COMPLETED
+                                || attempt.getStatus() == AttemptStatus.EXPIRED
+                )
+                .map(this::convertQuizAttemptToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public Integer getStudentBestScore(Integer chapterItemId) {
+        User currentUser = userService.getCurrentUser();
+
+        Integer maxGrade = quizAttemptRepository.findMaxGradeByChapterItemAndStudent(
+                chapterItemId,
+                currentUser.getId()
+        );
+
+        return maxGrade == null ? 0 : maxGrade;
+    }
+
+    @Override
+    public QuizAttemptDetailResponse getAttemptDetail(Integer attemptId) {
+
+        QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attempt not found"));
+
+        Integer teacherCourseId = attempt.getChapterItem().getChapter().getCourse().getTeacher().getId();
+        User currentUser = userService.getCurrentUser();
+
+        if (!attempt.getStudent().getId().equals(currentUser.getId())
+                || !(currentUser.getRole().getRoleName() == RoleType.ADMIN) ||
+        !teacherCourseId.equals(currentUser.getId())) {
+            throw new UnauthorizedException("Bạn không có quyền xem bài làm này");
+        }
+
+        QuizAttemptDetailResponse response = new QuizAttemptDetailResponse();
+        // dùng lại mapper cũ
+        QuizAttemptResponse base = convertQuizAttemptToDTO(attempt);
+
+        // copy field từ parent
+        response.setId(base.getId());
+        response.setCompletedTime(base.getCompletedTime());
+        response.setGrade(base.getGrade());
+        response.setIsPassed(base.getIsPassed());
+        response.setQuizId(base.getQuizId());
+        response.setStudentId(base.getStudentId());
+        response.setChapterItemId(base.getChapterItemId());
+        response.setTotalQuestions(base.getTotalQuestions());
+        response.setCorrectAnswers(base.getCorrectAnswers());
+        response.setIncorrectAnswers(base.getIncorrectAnswers());
+        response.setUnansweredQuestions(base.getUnansweredQuestions());
+
+        response.setAnswers(
+                attempt.getAttemptAnswers()
+                        .stream()
+                        .map(this::convertQuizAttemptAnswerToDTO)
+                        .toList()
+        );
+        return response;
+    }
+
 
     private QuizAttemptAnswerResponse convertQuizAttemptAnswerToDTO(QuizAttemptAnswer entity) {
         if (entity == null) return null;
@@ -280,7 +408,6 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         QuizAttemptAnswerResponse response = new QuizAttemptAnswerResponse();
         response.setId(entity.getId());
         response.setQuizQuestion(convertQuizQuestionToDTO(entity.getQuestion()));
-
         if (entity.getQuestion().getType() == QuestionType.TEXT) {
             response.setTextAnswer(entity.getTextAnswer());
             response.setSelectedAnswers(null);
@@ -316,7 +443,6 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private QuizAnswerResponse convertQuizAnswerToDTO(QuizAnswer quizAnswer) {
         QuizAnswerResponse response = new QuizAnswerResponse();
         response.setId(quizAnswer.getId());
-        response.setIsCorrect(quizAnswer.getIsCorrect());
         response.setDescription(quizAnswer.getDescription());
         return response;
     }
@@ -338,6 +464,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                                 ? attempt.getStudent().getId()
                                 : null
                 )
+                .chapterItemId(attempt.getChapterItem().getId())
                 .totalQuestions(attempt.getTotalQuestions())
                 .correctAnswers(attempt.getCorrectAnswers())
                 .incorrectAnswers(attempt.getIncorrectAnswers())

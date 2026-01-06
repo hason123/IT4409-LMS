@@ -7,12 +7,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EnrollmentResponse {
-    private Long id;
+    private Integer id;
     //private String userName;
     private String fullName;
     private String studentNumber;
     private String courseTitle;
-    private Long courseId;
+    private Integer courseId;
     private Integer progress;
     private String approvalStatus;
 }

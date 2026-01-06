@@ -34,7 +34,7 @@ public class CategoryController {
     @Operation(summary = "Lấy thông tin danh mục theo ID")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/{id}")
-    public CategoryResponse getCategoryById(@PathVariable Long id) {
+    public CategoryResponse getCategoryById(@PathVariable Integer id) {
         return categoryService.getCategoryById(id);
     }
 
@@ -42,7 +42,7 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public CategoryResponse updateCategory(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody CategoryRequest request
     ) {
         return categoryService.updateCategory(id, request);
@@ -51,7 +51,7 @@ public class CategoryController {
     @Operation(summary = "Xóa danh mục")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable Long id) {
+    public void deleteCategory(@PathVariable Integer id) {
         categoryService.deleteCategory(id);
     }
 

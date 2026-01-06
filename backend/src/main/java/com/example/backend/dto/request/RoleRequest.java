@@ -12,5 +12,5 @@ import lombok.*;
 public class RoleRequest {
     private String roleName;
     private String roleDesc;
-    private List<Long> permissionIds;
+    private List<Integer> permissionIds;
 }

@@ -35,7 +35,7 @@ public class CourseController {
     @Operation(summary = "Cập nhật thông tin khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/courses/{id}")
-    public ResponseEntity<CourseResponse> updateCourse(@PathVariable Long id, @RequestBody CourseRequest request) {
+    public ResponseEntity<CourseResponse> updateCourse(@PathVariable Integer id, @RequestBody CourseRequest request) {
         CourseResponse response = courseService.updateCourse(id, request);
         return ResponseEntity.ok(response);
     }
@@ -43,7 +43,7 @@ public class CourseController {
     @Operation(summary = "Xóa khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/courses/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCourse(@PathVariable Integer id) {
         courseService.deleteCourseById(id);
         return ResponseEntity.noContent().build();
     }
@@ -51,7 +51,7 @@ public class CourseController {
     @Operation(summary = "Lấy thông tin khóa học theo ID")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/courses/{id}")
-    public ResponseEntity<CourseResponse> getCourseById(@PathVariable Long id) {
+    public ResponseEntity<CourseResponse> getCourseById(@PathVariable Integer id) {
         CourseResponse response = courseService.getCourseById(id);
         return ResponseEntity.ok(response);
     }
@@ -72,7 +72,7 @@ public class CourseController {
     @Operation(summary = "Tải lên ảnh đại diện khóa học")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
     @PostMapping("/courses/{id}/avatar")
-    public ResponseEntity<CloudinaryResponse> uploadImage(@PathVariable final Long id, @RequestPart final MultipartFile file) {
+    public ResponseEntity<CloudinaryResponse> uploadImage(@PathVariable final Integer id, @RequestPart final MultipartFile file) {
         CloudinaryResponse response = courseService.uploadImage(id, file);
         return ResponseEntity.ok(response);
     }

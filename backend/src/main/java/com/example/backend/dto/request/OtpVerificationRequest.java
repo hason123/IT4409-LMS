@@ -10,5 +10,5 @@ import lombok.*;
 public class OtpVerificationRequest {
     @NotBlank
     private String code;
-    private Long userId;
+    private Integer userId;
 }

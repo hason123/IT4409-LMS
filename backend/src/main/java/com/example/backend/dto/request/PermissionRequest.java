@@ -12,5 +12,5 @@ public class PermissionRequest {
     private String method;
     private String description;
     private String apiPath;
-    private List<Long> roleIds;
+    private List<Integer> roleIds;
 }

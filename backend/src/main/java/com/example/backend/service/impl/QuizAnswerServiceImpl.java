@@ -3,7 +3,7 @@ package com.example.backend.service.impl;
 import com.example.backend.constant.QuestionType;
 import com.example.backend.dto.request.QuizAnswerRequest;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.dto.response.QuizAnswerResponse;
+import com.example.backend.dto.response.quiz.QuizAnswerResponse;
 import com.example.backend.entity.QuizAnswer;
 import com.example.backend.entity.QuizQuestion;
 import com.example.backend.repository.QuizAnswerRepository;
@@ -47,7 +47,7 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
     }
 
     @Override
-    public QuizAnswerResponse getQuizAnswerById(Long id) {
+    public QuizAnswerResponse getQuizAnswerById(Integer id) {
         QuizAnswer answer = quizAnswerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz Answer not found with id: " + id));
         return convertQuizAnswerToDTO(answer);
@@ -55,7 +55,7 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
 
     @Override
     @Transactional
-    public QuizAnswerResponse createQuizAnswer(Long questionId, QuizAnswerRequest request) {
+    public QuizAnswerResponse createQuizAnswer(Integer questionId, QuizAnswerRequest request) {
         QuizQuestion question = quizQuestionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Quiz Question not found with id: " + questionId));
 
@@ -79,7 +79,7 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
 
     @Override
     @Transactional
-    public QuizAnswerResponse updateQuizAnswer(Long id, QuizAnswerRequest request) {
+    public QuizAnswerResponse updateQuizAnswer(Integer id, QuizAnswerRequest request) {
         QuizAnswer answer = quizAnswerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz Answer not found with id: " + id));
 
@@ -103,7 +103,7 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
 
     @Override
     @Transactional
-    public void deleteQuizAnswer(Long id) {
+    public void deleteQuizAnswer(Integer id) {
         QuizAnswer answer = quizAnswerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz Answer not found with id: " + id));
         

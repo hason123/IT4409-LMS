@@ -21,7 +21,7 @@ public class Permission extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "permission_id")
-    private Long id;
+    private Integer id;
     @Column(name = "permission_name")
     private String name;
     @Column(name = "api_path")

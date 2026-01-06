@@ -105,7 +105,7 @@ public class OtpServiceImpl implements OtpService {
     }
 
 
-    private void cleanUpExpiredOtps(Long userId) {
+    private void cleanUpExpiredOtps(Integer userId) {
         LocalDateTime now = LocalDateTime.now();
         List<Otp> expiredOtps = otpRepository.findByUser_IdAndVerifiedIsFalseAndExpiresAtBefore(userId, now);
         otpRepository.deleteAll(expiredOtps);

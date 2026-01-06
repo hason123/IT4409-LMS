@@ -10,8 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleResponse {
-    private Long roleID;
+    private Integer roleID;
     private String roleName;
     private String roleDesc;
-    private List<Long> permissionIds;
+    private List<Integer> permissionIds;
 }

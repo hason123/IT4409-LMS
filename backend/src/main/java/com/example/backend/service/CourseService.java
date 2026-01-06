@@ -16,17 +16,17 @@ import java.util.List;
 public interface CourseService {
     CourseResponse createCourse(CourseRequest courseRequest);
 
-    CourseResponse updateCourse(Long id, CourseRequest courseRequest);
+    CourseResponse updateCourse(Integer id, CourseRequest courseRequest);
 
-    void deleteCourseById(Long id);
+    void deleteCourseById(Integer id);
 
-    CourseResponse getCourseById(Long id);
+    CourseResponse getCourseById(Integer id);
 
     PageResponse<CourseResponse> getAllCourses(Pageable pageable);
 
-    CloudinaryResponse uploadImage(final Long id, final MultipartFile file);
+    CloudinaryResponse uploadImage(final Integer id, final MultipartFile file);
 
-   // PageResponse<UserViewResponse> searchStudentsInCourse(Long courseId, SearchUserRequest request, Pageable pageable);
+   // PageResponse<UserViewResponse> searchStudentsInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
 
-   // PageResponse<UserViewResponse> searchStudentsNotInCourse(Long courseId, SearchUserRequest request, Pageable pageable);
+   // PageResponse<UserViewResponse> searchStudentsNotInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
 }
