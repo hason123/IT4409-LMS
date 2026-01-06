@@ -14,6 +14,7 @@ import com.example.backend.repository.LessonRepository;
 import com.example.backend.repository.QuizRepository;
 import com.example.backend.service.ChapterItemService;
 import com.example.backend.service.LessonService;
+import com.example.backend.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class ChapterItemServiceImpl implements ChapterItemService {
     private final LessonService lessonService;
     private final QuizRepository quizRepository;
     private final ChapterRepository chapterRepository;
+    private final QuizService quizService;
 
     @Transactional
     @Override
@@ -87,15 +89,15 @@ public class ChapterItemServiceImpl implements ChapterItemService {
             if (ci.getType() == ItemType.LESSON) {
                 Lesson lesson = lessonMap.get(ci.getRefId());
                 if (lesson != null) {
-                    detail = lessonService.convertEntityToDTO(lesson); // Hàm convert ở dưới cùng
+                    detail = lessonService.convertEntityToDTO(lesson);
                 }
             }
-                /*else if (ci.getType() == ItemType.QUIZ) {
+            else if (ci.getType() == ItemType.QUIZ) {
                     Quiz quiz = quizMap.get(ci.getRefId());
                     if (quiz != null) {
-                        detail = quiz; // Hoặc convertQuizToDTO(quiz) nếu cần
+                        detail = quizService.convertQuizToDTO(quiz);
                     }
-                }*/
+                }
 
             return buildResponse(ci, detail);
         }).toList();
@@ -111,19 +113,6 @@ public class ChapterItemServiceImpl implements ChapterItemService {
         LessonResponse lessonResponse = lessonService.convertEntityToDTO(lesson);
         return buildResponse(ci, lessonResponse);
     }
-
-/*    @Transactional
-    @Override
-    public ChapterItemResponse addQuizToChapter(Integer chapterId, Quiz quiz) {
-        Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new RuntimeException("Chapter not found"));
-
-        if (quiz.getId() == null) quiz = quizRepository.save(quiz);
-
-        ChapterItem ci = createChapterItem(chapter, ItemType.QUIZ, quiz.getId());
-
-        return buildResponse(ci, quiz);
-    }*/
 
     private ChapterItem createChapterItem(Chapter chapter, ItemType type, Integer refId) {
         ChapterItem ci = new ChapterItem();

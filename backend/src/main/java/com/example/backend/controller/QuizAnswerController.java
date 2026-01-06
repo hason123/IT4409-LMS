@@ -20,7 +20,7 @@ public class QuizAnswerController {
     }
 
     @Operation(summary = "Tạo câu trả lời cho câu hỏi quiz")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/question/{questionId}")
     public ResponseEntity<QuizAnswerResponse> createQuizAnswer(
             @PathVariable Long questionId,
@@ -47,7 +47,7 @@ public class QuizAnswerController {
     }
 
     @Operation(summary = "Cập nhật câu trả lời quiz")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizAnswerResponse> updateQuizAnswer(
             @PathVariable Long id,
@@ -57,7 +57,7 @@ public class QuizAnswerController {
     }
 
     @Operation(summary = "Xóa câu trả lời quiz")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuizAnswer(@PathVariable Long id) {
         quizAnswerService.deleteQuizAnswer(id);

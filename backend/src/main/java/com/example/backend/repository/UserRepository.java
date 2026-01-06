@@ -24,7 +24,7 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
         WHERE u.role.roleName = :roleName
         AND NOT EXISTS (
             SELECT sp.id
-            FROM StudentProgress sp
+            FROM Enrollment sp
             WHERE sp.student = u
             AND sp.course.id = :courseId
         )

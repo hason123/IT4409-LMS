@@ -12,7 +12,7 @@ import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.Category;
 import com.example.backend.entity.Course;
-import com.example.backend.entity.StudentProgress;
+import com.example.backend.entity.Enrollment;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.CategoryRepository;

@@ -11,4 +11,5 @@ import lombok.*;
 public class QuizQuestionRequest {
     private String title;
     private QuestionType type;
+
 }

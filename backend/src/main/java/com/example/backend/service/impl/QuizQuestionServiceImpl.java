@@ -88,10 +88,12 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
     public QuizQuestionResponse updateQuizQuestion(Long id, QuizQuestionRequest request) {
         QuizQuestion question = quizQuestionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
-        
-        question.setTitle(request.getTitle());
-        question.setType(request.getType());
-
+        if(request.getTitle() != null){
+            question.setTitle(request.getTitle());
+        }
+        if(request.getType() != null){
+            question.setType(request.getType());
+        }
         return convertQuizQuestionToDTO(quizQuestionRepository.save(question));
     }
 

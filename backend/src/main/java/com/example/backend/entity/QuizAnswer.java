@@ -14,16 +14,12 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLDelete(sql = "UPDATE quiz_answer SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 public class QuizAnswer extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "is_correct")
     private Boolean isCorrect;
-
-    private String description;
-
+    private String description; //text answer
     @ManyToOne
     @JoinColumn(name = "quiz_question_id")
     private QuizQuestion quizQuestion;

@@ -1,18 +1,19 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.constant.EnrollmentStatus;
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.dto.response.StudentProgressResponse;
+import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.Course;
-import com.example.backend.entity.StudentProgress;
+import com.example.backend.entity.Enrollment;
 import com.example.backend.entity.User;
 import com.example.backend.repository.CourseRepository;
-import com.example.backend.repository.StudentProgressRepository;
+import com.example.backend.repository.EnrollmentRepository;
 import com.example.backend.repository.UserRepository;
-import com.example.backend.service.StudentProgressService;
+import com.example.backend.service.EnrollmentService;
 import com.example.backend.service.UserService;
 import com.example.backend.specification.UserSpecification;
 import org.springframework.data.domain.Page;
@@ -25,15 +26,15 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 @Service
-public class StudentProgressServiceImpl implements StudentProgressService {
+public class EnrollmentServiceImpl implements EnrollmentService {
     private final CourseRepository courseRepository;
-    private final StudentProgressRepository studentProgressRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final UserService userService;
 
-    public StudentProgressServiceImpl(CourseRepository courseRepository, StudentProgressRepository studentProgressRepository, UserRepository userRepository, UserService userService) {
+    public EnrollmentServiceImpl(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, UserRepository userRepository, UserService userService) {
         this.courseRepository = courseRepository;
-        this.studentProgressRepository = studentProgressRepository;
+        this.enrollmentRepository = enrollmentRepository;
         this.userRepository = userRepository;
         this.userService = userService;
     }
@@ -45,15 +46,15 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
         List<User> users = userRepository.findAllById(request.getStudentIds());
-        List<StudentProgress> progresses = users.stream()
-                .map(user -> StudentProgress.builder()
+        List<Enrollment> progresses = users.stream()
+                .map(user -> Enrollment.builder()
                         .student(user)
                         .course(course)
-                        .lessonProgress("0%")
-                        .quizProgress("0%")
+                        .progress(0)
+                        .approvalStatus(EnrollmentStatus.APPROVED)
                         .build())
                 .toList();
-        studentProgressRepository.saveAll(progresses);
+        enrollmentRepository.saveAll(progresses);
     }
 
     @Transactional
@@ -64,18 +65,18 @@ public class StudentProgressServiceImpl implements StudentProgressService {
         if (request.getStudentIds() == null || request.getStudentIds().isEmpty()) {
             return;
         }
-        List<StudentProgress> progresses = studentProgressRepository.findByCourse_IdAndStudent_IdIn(courseId, request.getStudentIds());
-        studentProgressRepository.deleteAll(progresses);
+        List<Enrollment> progresses = enrollmentRepository.findByCourse_IdAndStudent_IdIn(courseId, request.getStudentIds());
+        enrollmentRepository.deleteAll(progresses);
     }
 
-    public PageResponse<StudentProgressResponse> getStudentProgressPage(Pageable pageable){
-        Page<StudentProgress> studentProgressPage = studentProgressRepository.findAll(pageable);
-        Page<StudentProgressResponse> studentProgressResponse = studentProgressPage.map(this::convertStudentProgressToDTO);
-        PageResponse<StudentProgressResponse> response = new PageResponse<>(
-                studentProgressResponse.getNumber() + 1,
-                studentProgressResponse.getTotalPages(),
-                studentProgressResponse.getNumberOfElements(),
-                studentProgressResponse.getContent()
+    public PageResponse<EnrollmentResponse> getEnrollmentPage(Pageable pageable){
+        Page<Enrollment> enrollmentPage = enrollmentRepository.findAll(pageable);
+        Page<EnrollmentResponse> enrollmentResponse = enrollmentPage.map(this::convertEnrollmentToDTO);
+        PageResponse<EnrollmentResponse> response = new PageResponse<>(
+                enrollmentResponse.getNumber() + 1,
+                enrollmentResponse.getTotalPages(),
+                enrollmentResponse.getNumberOfElements(),
+                enrollmentResponse.getContent()
         );
         return response;
 
@@ -129,14 +130,15 @@ public class StudentProgressServiceImpl implements StudentProgressService {
         return spec;
     }
 
-    private StudentProgressResponse convertStudentProgressToDTO(StudentProgress studentProgress) {
-        StudentProgressResponse response = new StudentProgressResponse();
-        response.setLessonProgress(studentProgress.getLessonProgress());
-        response.setQuizProgress(studentProgress.getQuizProgress());
-        response.setStudentNumber(studentProgress.getStudent().getFullName());
-        response.setCourseTitle(studentProgress.getCourse().getTitle());
-        response.setFullName(studentProgress.getStudent().getFullName());
-        response.setId(studentProgress.getId());
+    private EnrollmentResponse convertEnrollmentToDTO(Enrollment enrollment) {
+        EnrollmentResponse response = new EnrollmentResponse();
+        response.setProgress(enrollment.getProgress());
+        response.setStudentNumber(enrollment.getStudent().getFullName());
+        response.setCourseTitle(enrollment.getCourse().getTitle());
+        response.setFullName(enrollment.getStudent().getFullName());
+        response.setId(enrollment.getId());
+        response.setApprovalStatus(enrollment.getApprovalStatus().toString());
+        response.setCourseId(enrollment.getCourse().getId());
         return response;
     }
 }

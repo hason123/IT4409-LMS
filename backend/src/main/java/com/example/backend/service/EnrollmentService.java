@@ -7,7 +7,7 @@ import com.example.backend.dto.response.user.UserViewResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface StudentProgressService {
+public interface EnrollmentService {
     @Transactional
     void addStudentsToCourse(Long courseId, StudentCourseRequest request);
 

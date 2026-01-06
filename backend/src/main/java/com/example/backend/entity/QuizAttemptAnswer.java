@@ -5,6 +5,9 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -17,6 +20,9 @@ public class QuizAttemptAnswer extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private LocalDateTime completedAt;
+    private String textAnswer;
+    private Boolean isCorrect;
 
     @ManyToOne
     @JoinColumn(name = "attempt_id")
@@ -26,12 +32,15 @@ public class QuizAttemptAnswer extends BaseEntity {
     @JoinColumn(name = "question_id")
     private QuizQuestion question;
 
-    @ManyToOne
-    @JoinColumn(name = "selected_answer_id")
-    private QuizAnswer selectedAnswer;
+//    @ManyToOne
+//    @JoinColumn(name = "selected_answer_id")
+//    private QuizAnswer selectedAnswer;
 
-    private String textAnswer;
-
-    private Boolean isCorrect;
+    @ManyToMany
+    @JoinTable(
+            name = "quiz_attempt_selected_answers",
+            joinColumns = @JoinColumn(name = "attempt_answer_id"),
+            inverseJoinColumns = @JoinColumn(name = "quiz_answer_id")
+    )
+    private List<QuizAnswer> selectedAnswers;
 }
-

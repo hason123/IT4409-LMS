@@ -27,7 +27,7 @@ public class Course extends BaseEntity{
     @OneToMany(mappedBy = "course")
     private List<Chapter> chapters;
     @OneToMany(mappedBy = "course")
-    private List<StudentProgress> studentProgress;
+    private List<Enrollment> enrollment;
     @ManyToOne
     @JoinColumn(name = "teacher_id")
     private User teacher;

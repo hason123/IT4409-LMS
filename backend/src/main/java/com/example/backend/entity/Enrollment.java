@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.EnrollmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -14,7 +15,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name= "student_progress")
 @SQLDelete(sql = "UPDATE student_progress SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
-public class StudentProgress extends BaseEntity{
+public class Enrollment extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,9 +25,8 @@ public class StudentProgress extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
-    @Column(name = "lesson_progress")
-    private String lessonProgress;
-    @Column(name = "quiz_progress")
-    private String quizProgress;
+    private Integer progress;
+    @Enumerated(EnumType.STRING)
+    private EnrollmentStatus approvalStatus;
 
 }

@@ -3,8 +3,6 @@ package com.example.backend.dto.response;
 import lombok.*;
 import java.util.List;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,5 +12,6 @@ public class QuizResponse {
     private String title;
     private String description;
     private Integer minPassScore;
+    private Integer timeLimitMinutes;
     private List<QuizQuestionResponse> questions;
 }

@@ -50,7 +50,7 @@ public class User extends BaseEntity {
     @JoinColumn(name = "role_id")
     private Role role;
     @OneToMany(mappedBy = "student")
-    private List<StudentProgress> studentProgress;
+    private List<Enrollment> enrollment;
     @OneToMany(mappedBy = "teacher")
     private List<Course> taughtCourses;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

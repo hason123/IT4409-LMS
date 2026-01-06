@@ -6,12 +6,13 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentProgressResponse {
+public class EnrollmentResponse {
     private Long id;
     //private String userName;
     private String fullName;
     private String studentNumber;
     private String courseTitle;
-    private String lessonProgress;
-    private String quizProgress;
+    private Long courseId;
+    private Integer progress;
+    private String approvalStatus;
 }

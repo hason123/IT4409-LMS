@@ -1,9 +1,17 @@
 package com.example.backend.repository;
 
+import com.example.backend.entity.Quiz;
 import com.example.backend.entity.QuizAttemptAnswer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface QuizAttemptAnswerRepository extends JpaRepository<QuizAttemptAnswer,Long> {
+    Optional<QuizAttemptAnswer> findByAttempt_IdAndQuestion_Id(
+            Long attemptId, Long questionId);
+
+    List<QuizAttemptAnswer> findByAttempt_Id(Long attemptId);
 }

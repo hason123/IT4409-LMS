@@ -5,7 +5,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentProgressRequest {
+public class EnrollmentRequest {
     private Long studentId;
     private Long courseId;
 }

@@ -22,7 +22,7 @@ public class QuizController {
     }
 
     @Operation(summary = "Tạo quiz mới")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping
     public ResponseEntity<QuizResponse> createQuiz(@RequestBody QuizRequest request) {
         return ResponseEntity.ok(quizService.createQuiz(request));
@@ -48,7 +48,7 @@ public class QuizController {
     }
 
     @Operation(summary = "Cập nhật quiz")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizResponse> updateQuiz(
             @PathVariable Integer id,
@@ -58,7 +58,7 @@ public class QuizController {
     }
 
     @Operation(summary = "Xóa quiz")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuiz(@PathVariable Integer id) {
         quizService.deleteQuiz(id);

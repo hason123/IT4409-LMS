@@ -22,7 +22,7 @@ public class Quiz extends BaseEntity {
     private String description;
     @Column(name = "min_pass_score")
     private Integer minPassScore;
-    private Integer time;
+    private Integer timeLimitMinutes;
 /*    @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;*/

@@ -1,8 +1,9 @@
 package com.example.backend.specification;
 
+import com.example.backend.constant.EnrollmentStatus;
 import com.example.backend.constant.RoleType;
 import com.example.backend.entity.Role;
-import com.example.backend.entity.StudentProgress;
+import com.example.backend.entity.Enrollment;
 import com.example.backend.entity.User;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
@@ -38,12 +39,16 @@ public class UserSpecification {
     public static Specification<User> notInCourse(Long courseId) {
         return (root, query, cb) -> {
             var subQuery = query.subquery(Long.class);
-            var sp = subQuery.from(StudentProgress.class);
+            var enrollment = subQuery.from(Enrollment.class);
 
-            subQuery.select(sp.get("id"))
+            subQuery.select(enrollment.get("id"))
                     .where(
-                            cb.equal(sp.get("student"), root),
-                            cb.equal(sp.get("course").get("id"), courseId)
+                            cb.equal(enrollment.get("student"), root),
+                            cb.equal(enrollment.get("course").get("id"), courseId),
+                            cb.equal(
+                                    enrollment.get("approvalStatus"),
+                                    EnrollmentStatus.APPROVED
+                            )
                     );
 
             return cb.not(cb.exists(subQuery));
@@ -53,12 +58,16 @@ public class UserSpecification {
     public static Specification<User> inCourse(Long courseId) {
         return (root, query, cb) -> {
             var subQuery = query.subquery(Long.class);
-            var sp = subQuery.from(StudentProgress.class);
+            var enrollment = subQuery.from(Enrollment.class);
 
-            subQuery.select(sp.get("id"))
+            subQuery.select(enrollment.get("id"))
                     .where(
-                            cb.equal(sp.get("student"), root),
-                            cb.equal(sp.get("course").get("id"), courseId)
+                            cb.equal(enrollment.get("student"), root),
+                            cb.equal(enrollment.get("course").get("id"), courseId),
+                            cb.equal(
+                                    enrollment.get("approvalStatus"),
+                                    EnrollmentStatus.APPROVED
+                            )
                     );
 
             return cb.exists(subQuery);

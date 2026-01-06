@@ -1,12 +1,10 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.request.StudentProgressRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
-import com.example.backend.dto.response.StudentProgressResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
-import com.example.backend.service.StudentProgressService;
+import com.example.backend.service.EnrollmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,11 +15,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/lms")
-public class StudentProgressController {
-    private final StudentProgressService studentProgressService;
+public class EnrollmentController {
+    private final EnrollmentService enrollmentService;
 
-    public StudentProgressController(StudentProgressService studentProgressService) {
-        this.studentProgressService = studentProgressService;
+    public EnrollmentController(EnrollmentService enrollmentService) {
+        this.enrollmentService = enrollmentService;
     }
 
     @Operation(summary = "Lấy danh sách sinh viên trong khóa học")
@@ -32,7 +30,7 @@ public class StudentProgressController {
             @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
-        PageResponse<UserViewResponse> response = studentProgressService.searchStudentsInCourse(courseId, request, pageable);
+        PageResponse<UserViewResponse> response = enrollmentService.searchStudentsInCourse(courseId, request, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -44,7 +42,7 @@ public class StudentProgressController {
             @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
-        PageResponse<UserViewResponse> response = studentProgressService.searchStudentsNotInCourse(courseId, request, pageable);
+        PageResponse<UserViewResponse> response = enrollmentService.searchStudentsNotInCourse(courseId, request, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -52,7 +50,7 @@ public class StudentProgressController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/courses/{courseId}/students")
     public ResponseEntity<String> addStudentsToCourse(@PathVariable Long courseId, @RequestBody StudentCourseRequest request) {
-        studentProgressService.addStudentsToCourse(courseId, request);
+        enrollmentService.addStudentsToCourse(courseId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body("Students has been added");
     }
 
@@ -60,7 +58,7 @@ public class StudentProgressController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/courses/{courseId}/students")
     public ResponseEntity<String> removeStudentsInCourse(@PathVariable Long courseId, @RequestBody StudentCourseRequest request) {
-        studentProgressService.removeStudentsInCourse(courseId, request);
+        enrollmentService.removeStudentsInCourse(courseId, request);
         return ResponseEntity.status(HttpStatus.OK).body("Students has been deleted");
     }
 }

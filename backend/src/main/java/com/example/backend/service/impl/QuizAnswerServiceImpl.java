@@ -1,5 +1,6 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.constant.QuestionType;
 import com.example.backend.dto.request.QuizAnswerRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.QuizAnswerResponse;
@@ -59,9 +60,19 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
                 .orElseThrow(() -> new RuntimeException("Quiz Question not found with id: " + questionId));
 
         QuizAnswer answer = new QuizAnswer();
-        answer.setDescription(request.getDescription());
-        answer.setIsCorrect(request.getIsCorrect());
         answer.setQuizQuestion(question);
+        if(question.getType().equals(QuestionType.MULTIPLE_CHOICE)){
+            answer.setDescription(request.getDescription());
+            answer.setIsCorrect(request.getIsCorrect());
+        }
+        if(question.getType().equals(QuestionType.TEXT)){
+            boolean exists = quizAnswerRepository.existsByQuizQuestion_Id(questionId);
+            if (exists) {
+                throw new RuntimeException("TEXT question can only have one answer");
+            }
+            answer.setDescription(request.getDescription());
+            answer.setIsCorrect(true);
+        }
 
         return convertQuizAnswerToDTO(quizAnswerRepository.save(answer));
     }
@@ -71,9 +82,21 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
     public QuizAnswerResponse updateQuizAnswer(Long id, QuizAnswerRequest request) {
         QuizAnswer answer = quizAnswerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz Answer not found with id: " + id));
-        
-        answer.setDescription(request.getDescription());
-        answer.setIsCorrect(request.getIsCorrect());
+
+        if(answer.getQuizQuestion().getType().equals(QuestionType.MULTIPLE_CHOICE)){
+            if(request.getDescription() != null){
+                answer.setDescription(request.getDescription());
+            }
+            if(request.getIsCorrect() != null){
+                answer.setIsCorrect(request.getIsCorrect());
+            }
+        }
+        if(answer.getQuizQuestion().getType().equals(QuestionType.TEXT)){
+            if(request.getDescription() != null){
+                answer.setDescription(request.getDescription());
+            }
+            answer.setIsCorrect(true);
+        }
 
         return convertQuizAnswerToDTO(quizAnswerRepository.save(answer));
     }

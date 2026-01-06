@@ -7,9 +7,7 @@ import com.example.backend.dto.response.QuizQuestionResponse;
 import com.example.backend.entity.Quiz;
 import com.example.backend.repository.QuizRepository;
 import com.example.backend.service.QuizService;
-
 import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,7 +29,7 @@ public class QuizServiceImpl implements QuizService {
         response.setTitle(quiz.getTitle());
         response.setDescription(quiz.getDescription());
         response.setMinPassScore(quiz.getMinPassScore());
-
+        response.setTimeLimitMinutes(quiz.getTimeLimitMinutes());
         if (quiz.getQuestions() != null) {
             response.setQuestions(quiz.getQuestions().stream()
                 .map(question -> {
@@ -67,29 +65,32 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    @Transactional
     public QuizResponse createQuiz(QuizRequest request) {
         Quiz quiz = new Quiz();
         quiz.setTitle(request.getTitle());
         quiz.setDescription(request.getDescription());
         quiz.setMinPassScore(request.getMinPassScore());
+        quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
         return convertQuizToDTO(quizRepository.save(quiz));
     }
 
     @Override
-    @Transactional
     public QuizResponse updateQuiz(Integer id, QuizRequest request) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
-        
-        quiz.setTitle(request.getTitle());
-        quiz.setDescription(request.getDescription());
-        quiz.setMinPassScore(request.getMinPassScore());
+        if(request.getTitle() != null){
+            quiz.setTitle(request.getTitle());
+        }
+        if(request.getDescription() != null){
+            quiz.setDescription(request.getDescription());
+        }
+        if(request.getMinPassScore() != null){
+            quiz.setMinPassScore(request.getMinPassScore());
+        }
         return convertQuizToDTO(quizRepository.save(quiz));
     }
 
     @Override
-    @Transactional
     public void deleteQuiz(Integer id) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));

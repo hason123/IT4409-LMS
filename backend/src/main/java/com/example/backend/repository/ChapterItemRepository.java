@@ -19,4 +19,8 @@ public interface ChapterItemRepository extends JpaRepository<ChapterItem,Integer
 
     // Tìm tất cả item thuộc chapter (dùng cho việc update order)
     List<ChapterItem> findByChapter_Id(Integer chapterId);
+
+    ChapterItem findByRefId(Integer refId);
+
+    Integer refId(Integer refId);
 }

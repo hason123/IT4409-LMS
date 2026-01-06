@@ -12,5 +12,8 @@ public class QuizQuestionResponse {
     private Long id;
     private String title;
     private QuestionType type;
+    private String fileUrl;
+    private String embedUrl;
+    private String cloudinaryId;
     private List<QuizAnswerResponse> answers;
 }
