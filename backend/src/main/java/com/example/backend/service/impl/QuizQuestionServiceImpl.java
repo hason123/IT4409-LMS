@@ -31,7 +31,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
     public QuizQuestionResponse convertQuizQuestionToDTO(QuizQuestion question) {
         QuizQuestionResponse response = new QuizQuestionResponse();
         response.setId(question.getId());
-        response.setTitle(question.getTitle());
+        response.setContent(question.getContent());
         response.setType(question.getType());
 
         if (question.getAnswers() != null) {
@@ -39,7 +39,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
                 QuizAnswerResponse aDto = new QuizAnswerResponse();
                 aDto.setId(answer.getId());
                 aDto.setIsCorrect(answer.getIsCorrect());
-                aDto.setDescription(answer.getDescription());
+                aDto.setContent(answer.getContent());
                 return aDto;
             }).collect(Collectors.toList()));
         } else {
@@ -76,7 +76,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
                 .orElseThrow(() -> new RuntimeException("Quiz not found with id: " + quizId));
 
         QuizQuestion question = new QuizQuestion();
-        question.setTitle(request.getTitle());
+        question.setContent(request.getContent());
         question.setType(request.getType());
         question.setQuiz(quiz);
 
@@ -88,8 +88,8 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
     public QuizQuestionResponse updateQuizQuestion(Integer id, QuizQuestionRequest request) {
         QuizQuestion question = quizQuestionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
-        if(request.getTitle() != null){
-            question.setTitle(request.getTitle());
+        if(request.getContent() != null){
+            question.setContent(request.getContent());
         }
         if(request.getType() != null){
             question.setType(request.getType());

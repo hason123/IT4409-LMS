@@ -19,7 +19,7 @@ public class QuizQuestion extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String title;
+    private String content;
 
     private String fileUrl;
     private String embedUrl;
@@ -29,8 +29,9 @@ public class QuizQuestion extends BaseEntity {
     private Quiz quiz;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private QuestionType type;
 
-    @OneToMany(mappedBy = "quizQuestion")
+    @OneToMany(mappedBy = "quizQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuizAnswer> answers;
 }

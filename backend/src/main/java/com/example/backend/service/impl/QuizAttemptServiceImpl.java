@@ -151,8 +151,8 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             attemptAnswer.setSelectedAnswers(selectedAnswers);
             attemptAnswer.setTextAnswer(null);
         }
-        // Xử lý Text
-        else if (question.getType() == QuestionType.TEXT) {
+        // Xử lý Essay
+        else if (question.getType() == QuestionType.ESSAY) {
             String userAnswer = request.getTextAnswer() != null ? request.getTextAnswer().trim() : "";
             attemptAnswer.setTextAnswer(userAnswer);
             attemptAnswer.setSelectedAnswers(null);
@@ -236,12 +236,12 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         for (QuizAttemptAnswer submitAnswer : attemptAnswers) {
             QuizQuestion question = submitAnswer.getQuestion();
 
-            if (question.getType() == QuestionType.TEXT) {
+            if (question.getType() == QuestionType.ESSAY) {
                 String userAnswer = submitAnswer.getTextAnswer();
                 if (userAnswer != null && !userAnswer.trim().isEmpty()) {
                     answered++;
                     QuizAnswer correctAnswer = question.getAnswers().get(0);
-                    boolean isCorrect = correctAnswer.getDescription().trim().equalsIgnoreCase(userAnswer.trim());
+                    boolean isCorrect = correctAnswer.getContent().trim().equalsIgnoreCase(userAnswer.trim());
                     submitAnswer.setIsCorrect(isCorrect);
                     if (isCorrect) correct++; else incorrect++;
                 }
@@ -395,7 +395,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             response.setIsCorrect(null); // Ẩn khi đang làm
         }
 
-        if (entity.getQuestion().getType() == QuestionType.TEXT) {
+        if (entity.getQuestion().getType() == QuestionType.ESSAY) {
             response.setTextAnswer(entity.getTextAnswer());
             response.setSelectedAnswers(null);
         } else {
@@ -416,7 +416,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         if (question == null) return null;
         QuizQuestionResponse response = new QuizQuestionResponse();
         response.setId(question.getId());
-        response.setTitle(question.getTitle());
+        response.setContent(question.getContent());
         response.setType(question.getType());
         // response.setFileUrl(question.getFileUrl()); // Uncomment nếu có
 
@@ -433,7 +433,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private QuizAnswerResponse convertQuizAnswerToDTO(QuizAnswer quizAnswer, boolean showCorrectAnswer) {
         QuizAnswerResponse response = new QuizAnswerResponse();
         response.setId(quizAnswer.getId());
-        response.setDescription(quizAnswer.getDescription());
+        response.setContent(quizAnswer.getContent());
 
         // LOGIC BẢO MẬT: Chỉ hiện true/false nếu showCorrectAnswer = true
         if (showCorrectAnswer) {

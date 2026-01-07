@@ -29,7 +29,7 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
         QuizAnswerResponse response = new QuizAnswerResponse();
         response.setId(quizAnswer.getId());
         response.setIsCorrect(quizAnswer.getIsCorrect());
-        response.setDescription(quizAnswer.getDescription());
+        response.setContent(quizAnswer.getContent());
         return response;
     }
 
@@ -62,15 +62,15 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
         QuizAnswer answer = new QuizAnswer();
         answer.setQuizQuestion(question);
         if(question.getType().equals(QuestionType.MULTIPLE_CHOICE)){
-            answer.setDescription(request.getDescription());
+            answer.setContent(request.getContent());
             answer.setIsCorrect(request.getIsCorrect());
         }
-        if(question.getType().equals(QuestionType.TEXT)){
+        if(question.getType().equals(QuestionType.ESSAY)){
             boolean exists = quizAnswerRepository.existsByQuizQuestion_Id(questionId);
             if (exists) {
-                throw new RuntimeException("TEXT question can only have one answer");
+                throw new RuntimeException("ESSAY question can only have one answer");
             }
-            answer.setDescription(request.getDescription());
+            answer.setContent(request.getContent());
             answer.setIsCorrect(true);
         }
 
@@ -84,16 +84,16 @@ public class QuizAnswerServiceImpl implements QuizAnswerService{
                 .orElseThrow(() -> new RuntimeException("Quiz Answer not found with id: " + id));
 
         if(answer.getQuizQuestion().getType().equals(QuestionType.MULTIPLE_CHOICE)){
-            if(request.getDescription() != null){
-                answer.setDescription(request.getDescription());
+            if(request.getContent() != null){
+                answer.setContent(request.getContent());
             }
             if(request.getIsCorrect() != null){
                 answer.setIsCorrect(request.getIsCorrect());
             }
         }
-        if(answer.getQuizQuestion().getType().equals(QuestionType.TEXT)){
-            if(request.getDescription() != null){
-                answer.setDescription(request.getDescription());
+        if(answer.getQuizQuestion().getType().equals(QuestionType.ESSAY)){
+            if(request.getContent() != null){
+                answer.setContent(request.getContent());
             }
             answer.setIsCorrect(true);
         }

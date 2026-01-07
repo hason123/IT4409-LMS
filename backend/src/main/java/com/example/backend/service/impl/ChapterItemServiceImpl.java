@@ -10,11 +10,14 @@ import com.example.backend.entity.Chapter;
 import com.example.backend.entity.ChapterItem;
 import com.example.backend.entity.Lesson;
 import com.example.backend.entity.Quiz;
+import com.example.backend.entity.QuizQuestion;
+import com.example.backend.entity.QuizAnswer;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.ChapterItemRepository;
 import com.example.backend.repository.ChapterRepository;
 import com.example.backend.repository.LessonRepository;
 import com.example.backend.repository.QuizRepository;
+import com.example.backend.repository.QuizQuestionRepository;
 import com.example.backend.service.ChapterItemService;
 import com.example.backend.service.LessonService;
 import com.example.backend.service.QuizService;
@@ -37,6 +40,7 @@ public class ChapterItemServiceImpl implements ChapterItemService {
     private final QuizRepository quizRepository;
     private final ChapterRepository chapterRepository;
     private final QuizService quizService;
+    private final QuizQuestionRepository quizQuestionRepository;
 
     @Transactional
     @Override
@@ -152,13 +156,39 @@ public class ChapterItemServiceImpl implements ChapterItemService {
         quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
         quiz.setMaxAttempts(request.getMaxAttempts());
         quizRepository.save(quiz);
-        // 3. Tạo chapter item
+        
+        // 3. Tạo questions và answers nếu có
+        if (request.getQuestions() != null && !request.getQuestions().isEmpty()) {
+            for (var questionReq : request.getQuestions()) {
+                QuizQuestion question = new QuizQuestion();
+                question.setContent(questionReq.getContent());
+                question.setType(questionReq.getType());
+                question.setQuiz(quiz);
+                
+                // Tạo answers nếu có
+                if (questionReq.getAnswers() != null && !questionReq.getAnswers().isEmpty()) {
+                    var answers = questionReq.getAnswers().stream().map(answerReq -> {
+                        QuizAnswer answer = new QuizAnswer();
+                        answer.setContent(answerReq.getContent());
+                        answer.setIsCorrect(answerReq.getIsCorrect());
+                        answer.setQuizQuestion(question);
+                        return answer;
+                    }).toList();
+                    question.setAnswers(answers);
+                }
+                
+                // Lưu question với answers (cascade)
+                quizService.createQuestionForQuiz(quiz.getId(), question);
+            }
+        }
+        
+        // 4. Tạo chapter item
         ChapterItem ci = createChapterItem(
                 chapter,
                 ItemType.QUIZ,
                 quiz.getId()
         );
-        // 4. Build response
+        // 5. Build response
         return buildResponse(
                 ci,
                 quizService.convertQuizToDTO(quiz)

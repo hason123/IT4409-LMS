@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class QuizQuestionResponse {
     private Integer id;
-    private String title;
+    private String content;
     private QuestionType type;
     private String fileUrl;
     private String embedUrl;

@@ -4,9 +4,11 @@ import com.example.backend.dto.request.quiz.QuizRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.quiz.QuizResponse;
 import com.example.backend.dto.response.quiz.QuizQuestionResponse;
+import com.example.backend.dto.response.quiz.QuizAnswerResponse;
 import com.example.backend.entity.Quiz;
 import com.example.backend.entity.QuizQuestion;
 import com.example.backend.repository.QuizRepository;
+import com.example.backend.repository.QuizQuestionRepository;
 import com.example.backend.service.QuizService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,9 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
+    private final QuizQuestionRepository quizQuestionRepository;
 
-    public QuizServiceImpl(QuizRepository quizRepository){
+    public QuizServiceImpl(QuizRepository quizRepository, QuizQuestionRepository quizQuestionRepository){
         this.quizRepository = quizRepository;
+        this.quizQuestionRepository = quizQuestionRepository;
     }
 
     @Override
@@ -38,13 +42,29 @@ public class QuizServiceImpl implements QuizService {
                 .map(question -> {
                     QuizQuestionResponse qDto = new QuizQuestionResponse();
                     qDto.setId(question.getId());
-                    qDto.setTitle(question.getTitle());
+                    qDto.setContent(question.getContent());
                     qDto.setType(question.getType());
+                    if (question.getAnswers() != null) {
+                        qDto.setAnswers(question.getAnswers().stream()
+                            .map(answer -> {
+                                var aDto = new QuizAnswerResponse();
+                                aDto.setId(answer.getId());
+                                aDto.setContent(answer.getContent());
+                                aDto.setIsCorrect(answer.getIsCorrect());
+                                return aDto;
+                            })
+                            .collect(Collectors.toList()));
+                    }
                     return qDto;
                 })
                 .collect(Collectors.toList()));
         }
         return response;
+    }
+    
+    @Transactional
+    public void createQuestionForQuiz(Integer quizId, QuizQuestion question) {
+        quizQuestionRepository.save(question);
     }
 
     @Override

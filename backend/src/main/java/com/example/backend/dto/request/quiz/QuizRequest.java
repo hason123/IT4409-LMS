@@ -1,5 +1,6 @@
 package com.example.backend.dto.request.quiz;
 import lombok.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -11,4 +12,5 @@ public class QuizRequest {
     private Integer minPassScore;
     private Integer timeLimitMinutes;
     private Integer maxAttempts;
+    private List<QuizQuestionRequest> questions;
 }

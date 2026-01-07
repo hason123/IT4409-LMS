@@ -14,4 +14,5 @@ public interface QuizService {
     
     PageResponse<QuizResponse> getQuizPage(Pageable pageable);
     QuizResponse convertQuizToDTO(Quiz quiz);
+    void createQuestionForQuiz(Integer quizId, com.example.backend.entity.QuizQuestion question);
 }

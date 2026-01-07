@@ -11,5 +11,5 @@ public class QuizAnswerResponse {
     private Integer id;
     @JsonProperty("isCorrect")
     private Boolean isCorrect;
-    private String description;
+    private String content;
 }

@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Select, DatePicker, Form, Input, Button, Checkbox, Radio } from "antd";
+import { Select, DatePicker, Form, Input, Button, Checkbox, Radio, message, Spin, Alert } from "antd";
+import dayjs from "dayjs";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
+import { createQuiz, createQuizInChapter, getQuizById } from "../../api/quiz";
 import {
   TrashIcon,
   PlusCircleIcon,
@@ -12,29 +14,86 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function QuizDetail() {
-  const { courseId, quizId } = useParams();
+  const { courseId, quizId, chapterId } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!quizId;
   const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(isEditMode);
+  const [error, setError] = useState(null);
 
   const [quizData, setQuizData] = useState({
-    title: isEditMode ? "Mid-term Review: Cell Structure" : "",
+    title: "",
     description: "",
-    timeLimit: "30",
-    deadline: "",
+    timeLimitMinutes: 30,
+    minPassScore: null,
+    maxAttempts: null,
     questions: [
       {
         id: 1,
-        type: "single_choice",
-        text: "",
-        options: [
-          { id: 1, text: "", isCorrect: true },
-          { id: 2, text: "", isCorrect: false },
-          { id: 3, text: "", isCorrect: false },
+        type: "SINGLE_CHOICE",
+        content: "",
+        answers: [
+          { id: 1, content: "", isCorrect: true },
+          { id: 2, content: "", isCorrect: false },
+          { id: 3, content: "", isCorrect: false },
         ],
       },
     ],
   });
+
+  useEffect(() => {
+    if (isEditMode && quizId) {
+      fetchQuizData();
+    } else {
+      setLoading(false);
+    }
+  }, [quizId]);
+
+  const fetchQuizData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getQuizById(quizId);
+      const quiz = response.data || response;
+      
+      // Update form initial values
+      form.setFieldsValue({
+        title: quiz.title || "",
+        description: quiz.description || "",
+        timeLimitMinutes: quiz.timeLimitMinutes ? String(quiz.timeLimitMinutes) : "30",
+        minPassScore: quiz.minPassScore || undefined,
+        maxAttempts: quiz.maxAttempts || undefined,
+      });
+
+      // Update quiz data with questions from backend
+      const transformedQuestions = (quiz.questions || []).map(q => ({
+        id: q.id,
+        type: q.type || "SINGLE_CHOICE",
+        content: q.content || "",
+        answers: (q.answers || []).map(a => ({
+          id: a.id,
+          content: a.content || "",
+          isCorrect: a.isCorrect || false,
+        })),
+      }));
+
+      setQuizData({
+        title: quiz.title || "",
+        description: quiz.description || "",
+        timeLimitMinutes: quiz.timeLimitMinutes || 30,
+        minPassScore: quiz.minPassScore || null,
+        maxAttempts: quiz.maxAttempts || null,
+        questions: transformedQuestions.length > 0 ? transformedQuestions : quizData.questions,
+      });
+    } catch (err) {
+      setError(err.message || "Lỗi khi tải dữ liệu bài kiểm tra");
+      console.error("Error fetching quiz:", err);
+      message.error("Lỗi khi tải dữ liệu bài kiểm tra");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddQuestion = () => {
     setQuizData({
@@ -43,11 +102,11 @@ export default function QuizDetail() {
         ...quizData.questions,
         {
           id: Date.now(),
-          type: "single_choice",
-          text: "",
-          options: [
-            { id: 1, text: "", isCorrect: false },
-            { id: 2, text: "", isCorrect: false },
+          type: "SINGLE_CHOICE",
+          content: "",
+          answers: [
+            { id: 1, content: "", isCorrect: false },
+            { id: 2, content: "", isCorrect: false },
           ],
         },
       ],
@@ -70,24 +129,24 @@ export default function QuizDetail() {
     });
   };
 
-  const handleQuestionChange = (questionId, text) => {
+  const handleQuestionChange = (questionId, content) => {
     setQuizData({
       ...quizData,
       questions: quizData.questions.map((q) =>
-        q.id === questionId ? { ...q, text } : q
+        q.id === questionId ? { ...q, content } : q
       ),
     });
   };
 
-  const handleOptionChange = (questionId, optionId, text) => {
+  const handleOptionChange = (questionId, optionId, content) => {
     setQuizData({
       ...quizData,
       questions: quizData.questions.map((q) =>
         q.id === questionId
           ? {
               ...q,
-              options: q.options.map((o) =>
-                o.id === optionId ? { ...o, text } : o
+              answers: q.answers.map((o) =>
+                o.id === optionId ? { ...o, content } : o
               ),
             }
           : q
@@ -101,18 +160,18 @@ export default function QuizDetail() {
       questions: quizData.questions.map((q) => {
         if (q.id !== questionId) return q;
 
-        if (q.type === "single_choice") {
+        if (q.type === "SINGLE_CHOICE") {
           return {
             ...q,
-            options: q.options.map((o) => ({
+            answers: q.answers.map((o) => ({
               ...o,
               isCorrect: o.id === optionId,
             })),
           };
-        } else if (q.type === "multiple_choice") {
+        } else if (q.type === "MULTIPLE_CHOICE") {
           return {
             ...q,
-            options: q.options.map((o) =>
+            answers: q.answers.map((o) =>
               o.id === optionId ? { ...o, isCorrect: !o.isCorrect } : o
             ),
           };
@@ -129,9 +188,9 @@ export default function QuizDetail() {
         q.id === questionId
           ? {
               ...q,
-              options: [
-                ...q.options,
-                { id: Date.now(), text: "", isCorrect: false },
+              answers: [
+                ...q.answers,
+                { id: Date.now(), content: "", isCorrect: false },
               ],
             }
           : q
@@ -146,7 +205,7 @@ export default function QuizDetail() {
         q.id === questionId
           ? {
               ...q,
-              options: q.options.filter((o) => o.id !== optionId),
+              answers: q.answers.filter((o) => o.id !== optionId),
             }
           : q
       ),
@@ -155,14 +214,99 @@ export default function QuizDetail() {
 
   const handleFormSubmit = async (values) => {
     try {
+      setSubmitting(true);
+      
+      // Validate form fields
+      if (!values.title || values.title.trim() === "") {
+        message.error("Vui lòng nhập tiêu đề bài kiểm tra");
+        setSubmitting(false);
+        return;
+      }
+
+      if (!values.timeLimitMinutes || values.timeLimitMinutes === "") {
+        message.error("Vui lòng nhập thời gian làm bài");
+        setSubmitting(false);
+        return;
+      }
+
+      // Validate questions
+      if (!quizData.questions || quizData.questions.length === 0) {
+        message.error("Vui lòng thêm ít nhất 1 câu hỏi");
+        setSubmitting(false);
+        return;
+      }
+
+      // Validate each question
+      for (let q of quizData.questions) {
+        if (!q.content || q.content.trim() === "") {
+          message.error(`Câu hỏi ${quizData.questions.indexOf(q) + 1} không có nội dung`);
+          setSubmitting(false);
+          return;
+        }
+        if (q.type !== "ESSAY") {
+          if (!q.answers || q.answers.length === 0) {
+            message.error(`Câu hỏi ${quizData.questions.indexOf(q) + 1} không có đáp án`);
+            setSubmitting(false);
+            return;
+          }
+          // Validate at least one correct answer
+          const hasCorrect = q.answers.some(a => a.isCorrect);
+          if (!hasCorrect) {
+            message.error(`Câu hỏi ${quizData.questions.indexOf(q) + 1} phải có ít nhất 1 đáp án đúng`);
+            setSubmitting(false);
+            return;
+          }
+          // Validate answer content
+          for (let a of q.answers) {
+            if (!a.content || a.content.trim() === "") {
+              message.error(`Câu hỏi ${quizData.questions.indexOf(q) + 1} có đáp án không có nội dung`);
+              setSubmitting(false);
+              return;
+            }
+          }
+        }
+      }
+
       const formData = {
         ...values,
+        timeLimitMinutes: parseInt(values.timeLimitMinutes) || 30,
+        minPassScore: values.minPassScore ? parseInt(values.minPassScore) : 0,
+        maxAttempts: values.maxAttempts ? parseInt(values.maxAttempts) : null,
         questions: quizData.questions,
       };
-      console.log("Quiz Form Data:", formData);
-      // TODO: Gửi dữ liệu tới backend
+
+      let response;
+      if (isEditMode) {
+        // Update existing quiz
+        // TODO: Implement update
+        message.info("Chức năng cập nhật đang được phát triển");
+        return;
+      } else {
+        // Create new quiz
+        if (chapterId) {
+          // Create quiz in chapter
+          response = await createQuizInChapter(chapterId, formData);
+          message.success("Tạo bài kiểm tra thành công");
+        } else {
+          // Create quiz directly to course
+          response = await createQuiz(formData);
+          message.success("Tạo bài kiểm tra thành công");
+        }
+        
+        // Navigate back after success
+        setTimeout(() => {
+          if (chapterId) {
+            navigate(`/teacher/courses/${courseId}`);
+          } else {
+            navigate(`/teacher/courses/${courseId}`);
+          }
+        }, 500);
+      }
     } catch (error) {
+      message.error(error.message || "Lỗi khi lưu bài kiểm tra");
       console.error("Form submission error:", error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -173,6 +317,19 @@ export default function QuizDetail() {
         <TeacherSidebar />
         <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 flex flex-col h-screen">
           <div className="flex-1 overflow-y-auto p-6 md:px-12 md:py-8">
+            {loading ? (
+              <div className="flex justify-center items-center h-full">
+                <Spin size="large" tip="Đang tải dữ liệu..." />
+              </div>
+            ) : error ? (
+              <Alert
+                message="Lỗi"
+                description={error}
+                type="error"
+                showIcon
+                className="mb-4"
+              />
+            ) : (
             <div className="mx-auto flex flex-col gap-4 pb-24">
               {/* Breadcrumbs */}
               <div className="flex flex-wrap gap-2 text-sm">
@@ -217,11 +374,11 @@ export default function QuizDetail() {
                 form={form}
                 onFinish={handleFormSubmit}
                 initialValues={{
-                  title: isEditMode ? "Mid-term Review: Cell Structure" : "",
+                  title: "",
                   description: "",
-                  timeLimit: "30",
-                  timeStart: null,
-                  deadline: null,
+                  timeLimitMinutes: "30",
+                  minPassScore: undefined,
+                  maxAttempts: undefined,
                 }}
               >
                 <div className="grid grid-cols-2 gap-x-4">
@@ -253,28 +410,55 @@ export default function QuizDetail() {
                   <Form.Item
                     label={
                       <span className="text-[#111418] dark:text-gray-200 text-base font-medium">
-                        Thời gian làm bài
+                        Thời gian làm bài (phút)
                       </span>
                     }
-                    name="timeLimit"
+                    name="timeLimitMinutes"
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng chọn thời gian làm bài",
+                        message: "Vui lòng nhập thời gian làm bài",
                       },
                     ]}
                   >
-                    <Select
-                      size="large"
+                    <Input
+                      placeholder="Nhập số phút (0 = không giới hạn)..."
+                      type="number"
                       className="h-12"
-                      options={[
-                        { value: "15", label: "15 Phút" },
-                        { value: "30", label: "30 Phút" },
-                        { value: "45", label: "45 Phút" },
-                        { value: "60", label: "60 Phút" },
-                        { value: "90", label: "90 Phút" },
-                        { value: "0", label: "Không giới hạn" },
-                      ]}
+                      min={0}
+                    />
+                  </Form.Item>
+                  {/* Min Pass Score */}
+                  <Form.Item
+                    label={
+                      <span className="text-[#111418] dark:text-gray-200 text-base font-medium">
+                        Điểm đạt (Tùy chọn)
+                      </span>
+                    }
+                    name="minPassScore"
+                  >
+                    <Input
+                      placeholder="Nhập điểm tối thiểu để đạt..."
+                      type="number"
+                      className="h-12"
+                      min={0}
+                      max={100}
+                    />
+                  </Form.Item>
+                  {/* Max Attempts */}
+                  <Form.Item
+                    label={
+                      <span className="text-[#111418] dark:text-gray-200 text-base font-medium">
+                        Số lần làm bài (Tùy chọn)
+                      </span>
+                    }
+                    name="maxAttempts"
+                  >
+                    <Input
+                      placeholder="Số lần tối đa (0 = không giới hạn)..."
+                      type="number"
+                      className="h-12"
+                      min={0}
                     />
                   </Form.Item>
                   {/* Description */}
@@ -294,52 +478,6 @@ export default function QuizDetail() {
                     />
                   </Form.Item>
 
-                  <Form.Item
-                    label={
-                      <span className="text-[#111418] dark:text-gray-200 text-base font-medium">
-                        Thời gian mở bài kiểm tra
-                      </span>
-                    }
-                    name="timeStart"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng chọn thời gian mở bài kiểm tra",
-                      },
-                    ]}
-                  >
-                    <DatePicker
-                      showTime
-                      format="YYYY-MM-DD HH:mm"
-                      placeholder="Chọn thời gian mở bài kiểm tra"
-                      style={{ width: "100%" }}
-                      className="h-12"
-                    />
-                  </Form.Item>
-
-                  {/* Deadline */}
-                  <Form.Item
-                    label={
-                      <span className="text-[#111418] dark:text-gray-200 text-base font-medium">
-                        Hạn nộp bài
-                      </span>
-                    }
-                    name="deadline"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng chọn hạn nộp bài",
-                      },
-                    ]}
-                  >
-                    <DatePicker
-                      showTime
-                      format="YYYY-MM-DD HH:mm"
-                      placeholder="Chọn hạn nộp bài"
-                      style={{ width: "100%" }}
-                      className="h-12"
-                    />
-                  </Form.Item>
                 </div>
               </Form>
 
@@ -374,14 +512,14 @@ export default function QuizDetail() {
                           className="min-w-[200px] font-semibold text-[#617589] dark:text-gray-400"
                           options={[
                             {
-                              value: "single_choice",
+                              value: "SINGLE_CHOICE",
                               label: "Trắc nghiệm (1 đáp án)",
                             },
                             {
-                              value: "multiple_choice",
+                              value: "MULTIPLE_CHOICE",
                               label: "Trắc nghiệm (Nhiều đáp án)",
                             },
-                            { value: "essay", label: "Tự luận" },
+                            { value: "ESSAY", label: "Tự luận" },
                           ]}
                         />
                       </div>
@@ -396,44 +534,31 @@ export default function QuizDetail() {
                       </div>
                     </div>
                     {/* Question Content */}
-                    <Form.Item
-                      label={
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#617589] dark:text-gray-400">
-                          Nội dung câu hỏi
-                        </span>
-                      }
-                      name="questionText"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Vui lòng nhập nội dung câu hỏi",
-                        },
-                        {
-                          min: 3,
-                          message: "Nội dung câu hỏi phải có ít nhất 3 ký tự",
-                        },
-                      ]}
-                      labelCol={{ span: 24 }}
-                      wrapperCol={{ span: 24 }}
-                    >
+                    <div className="mb-4">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#617589] dark:text-gray-400 mb-2">
+                        Nội dung câu hỏi
+                      </label>
                       <Input.TextArea
                         placeholder="Nhập nội dung câu hỏi..."
                         rows={3}
+                        value={question.content}
+                        onChange={(e) => handleQuestionChange(question.id, e.target.value)}
+                        className="border border-gray-300 dark:border-gray-600 rounded"
                       />
-                    </Form.Item>
+                    </div>
                     {/* Answer Options */}
-                    {question.type !== "essay" && (
+                    {question.type !== "ESSAY" && (
                       <div className="flex flex-col gap-3 mt-2">
                         <label className="block text-xs font-bold uppercase tracking-wider text-[#617589] dark:text-gray-400">
                           Các lựa chọn
                         </label>
-                        {question.options.map((option) => (
+                        {question.answers.map((option) => (
                           <div
                             key={option.id}
                             className="flex items-center gap-3 group"
                           >
                             <div className="shrink-0 flex items-center justify-center">
-                              {question.type === "single_choice" ? (
+                              {question.type === "SINGLE_CHOICE" ? (
                                 <Radio
                                   name={`q${question.id}_correct`}
                                   checked={option.isCorrect}
@@ -461,7 +586,7 @@ export default function QuizDetail() {
                             <div className="flex-1 relative">
                               <Input
                                 placeholder="Lựa chọn"
-                                value={option.text}
+                                value={option.content}
                                 onChange={(e) =>
                                   handleOptionChange(
                                     question.id,
@@ -516,13 +641,16 @@ export default function QuizDetail() {
                 <span className="font-bold">Thêm câu hỏi mới</span>
               </button>
             </div>
+            )}
           </div>
 
           {/* Sticky Bottom Actions */}
+          {!loading && (
           <div className="w-full bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between md:justify-end gap-4 shrink-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
             <Button
               onClick={() => navigate(-1)}
               className="px-6 py-2.5 rounded-lg w-full md:w-auto"
+              disabled={submitting}
             >
               Hủy
             </Button>
@@ -531,11 +659,14 @@ export default function QuizDetail() {
               htmlType="submit"
               onClick={() => form.submit()}
               className="px-8 py-2.5 h-10 rounded-lg w-full md:w-auto flex items-center justify-center gap-2"
-              icon={<CheckIcon className="h-5 w-5" />}
+              icon={submitting ? <Spin size="small" /> : <CheckIcon className="h-5 w-5" />}
+              disabled={submitting}
+              loading={submitting}
             >
-              Lưu & Xuất bản
+              {submitting ? "Đang lưu..." : "Lưu & Xuất bản"}
             </Button>
           </div>
+          )}
         </main>
       </div>
     </div>

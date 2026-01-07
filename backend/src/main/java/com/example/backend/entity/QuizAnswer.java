@@ -19,7 +19,7 @@ public class QuizAnswer extends BaseEntity {
     private Integer id;
     @Column(name = "is_correct")
     private Boolean isCorrect;
-    private String description; //text answer
+    private String content; // text answer
 
     @ManyToOne
     @JoinColumn(name = "quiz_question_id")
