@@ -1,11 +1,14 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.request.quiz.QuizAttemptAnswerRequest;
+import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.quiz.QuizAttemptDetailResponse;
 import com.example.backend.dto.response.quiz.QuizAttemptResponse;
 import com.example.backend.service.QuizAttemptService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;  // ← ADD THIS IMPORT
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,9 +32,33 @@ public class QuizAttemptController {
         return ResponseEntity.ok(quizAttemptService.startQuizAttempt(quizId, chapterItemId));
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/quiz-attempts/{attemptId}")
+    public ResponseEntity<QuizAttemptDetailResponse> getAttemptDetail(
+            @PathVariable Integer attemptId
+    ) {
+        return ResponseEntity.ok(
+                quizAttemptService.getAttemptDetail(attemptId)
+        );
+    }
+
+    @Operation(
+            summary = "Lấy bài quiz đang làm",
+            description = "Return current IN_PROGRESS quiz attempt for the logged-in student"
+    )
+    @PreAuthorize("hasRole('STUDENT')")
+    @GetMapping("/chapterItem/{chapterItemId}/quiz/current")
+    public ResponseEntity<QuizAttemptDetailResponse> getCurrentAttempt(
+            @PathVariable Integer chapterItemId
+    ) {
+        return ResponseEntity.ok(
+                quizAttemptService.getCurrentAttempt(chapterItemId)
+        );
+    }
+
     @Operation(summary = "Trả lời một câu hỏi trong quiz", description = "Submit an answer for a specific question within an ongoing quiz attempt.")  // ← ENHANCED DESCRIPTION
     @PreAuthorize("hasRole('STUDENT')")
-    @PostMapping("/{attemptId}/question/{questionId}/answer")
+    @PostMapping("/quiz-attempts/{attemptId}/question/{questionId}/answer")
     public ResponseEntity<Void> answerQuestion(
             @PathVariable Integer attemptId,
             @PathVariable Integer questionId,
@@ -43,7 +70,7 @@ public class QuizAttemptController {
 
     @Operation(summary = "Nộp bài quiz", description = "Finalize and submit a quiz attempt. Calculates final score and marks attempt as completed.")  // ← ENHANCED DESCRIPTION
     @PreAuthorize("hasRole('STUDENT')")
-    @PostMapping("/{attemptId}/submit")
+    @PostMapping("/quiz-attempts/{attemptId}/submit")
     public ResponseEntity<QuizAttemptResponse> submitQuiz(
             @PathVariable Integer attemptId
     ) {
@@ -63,16 +90,6 @@ public class QuizAttemptController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/{attemptId}")
-    public ResponseEntity<QuizAttemptResponse> getAttemptDetail(
-            @PathVariable Integer attemptId
-    ) {
-        return ResponseEntity.ok(
-                quizAttemptService.getAttemptDetail(attemptId)
-        );
-    }
-
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/chapterItem/{chapterItemId}/my-attempts")
     public ResponseEntity<List<QuizAttemptResponse>> getStudentAttemptsHistory(
             @PathVariable Integer chapterItemId
@@ -81,4 +98,20 @@ public class QuizAttemptController {
                 quizAttemptService.getStudentAttemptsHistory(chapterItemId)
         );
     }
+
+    @Operation(
+            summary = "Danh sách bài làm của học viên",
+            description = "Teacher/Admin xem danh sách bài làm của quiz"
+    )
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+    @GetMapping("/chapterItem/{chapterItemId}/attempts")
+    public ResponseEntity<PageResponse<QuizAttemptResponse>> getAttemptsForTeacherOrAdmin(
+            @PathVariable Integer chapterItemId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                quizAttemptService.getAttemptsForTeacherOrAdmin(chapterItemId, pageable)
+        );
+    }
+
 }
