@@ -59,17 +59,4 @@ public class LessonController {
         return ResponseEntity.ok(response);
     }
 
-    /*
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/lessons")
-    public ResponseEntity<PageResponse<LessonResponse>> getLessons(
-            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
-            @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize
-    ) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
-        PageResponse<LessonResponse> response =
-                lessonService.getLessonPage(pageable);
-        return ResponseEntity.ok(response);
-    }
-    */
 }

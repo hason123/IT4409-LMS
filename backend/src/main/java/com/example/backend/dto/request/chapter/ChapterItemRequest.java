@@ -1,4 +1,4 @@
-package com.example.backend.dto.request;
+package com.example.backend.dto.request.chapter;
 
 import com.example.backend.constant.ItemType;
 import lombok.Data;

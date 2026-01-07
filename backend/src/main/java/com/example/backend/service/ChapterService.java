@@ -1,7 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.request.ChapterRequest;
-import com.example.backend.dto.response.ChapterResponse;
+import com.example.backend.dto.request.chapter.ChapterRequest;
+import com.example.backend.dto.response.chapter.ChapterResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.Chapter;
 import org.springframework.data.domain.Pageable;

@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.request.QuizRequest;
+import com.example.backend.dto.request.quiz.QuizRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.quiz.QuizResponse;
 import com.example.backend.entity.Quiz;

@@ -24,6 +24,5 @@ public interface LessonService {
     //    }
     LessonResponse convertEntityToDTO(Lesson lesson);
 
-//    PageResponse<LessonResponse> getLessonPage(Pageable pageable);
 
 }

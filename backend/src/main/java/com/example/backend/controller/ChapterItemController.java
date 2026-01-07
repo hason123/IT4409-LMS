@@ -1,8 +1,9 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.request.ChapterItemOrderRequest;
-import com.example.backend.dto.response.ChapterItemResponse;
-import com.example.backend.entity.Lesson;
+import com.example.backend.dto.request.LessonRequest;
+import com.example.backend.dto.request.chapter.ChapterItemOrderRequest;
+import com.example.backend.dto.request.quiz.QuizRequest;
+import com.example.backend.dto.response.chapter.ChapterItemResponse;
 import com.example.backend.service.ChapterItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ChapterItemController {
         );
     }
 
+
     @Operation(summary = "Cập nhật thứ tự item trong chương")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PutMapping("/chapters/{chapterId}/order-items")
@@ -41,9 +43,45 @@ public class ChapterItemController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Thêm bài học vào chương")
+    // ========== NEW API =============== //
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @PostMapping("/chapters/{chapterId}/lessons/{lessonId}")
+    @PostMapping("/chapters/{chapterId}/lessons")
+    public ResponseEntity<ChapterItemResponse> createLessonInChapter(
+            @PathVariable Integer chapterId,
+            @RequestBody LessonRequest lessonRequest
+    ) {
+        return ResponseEntity.ok(
+                chapterItemService.createLessonInChapter(chapterId, lessonRequest)
+        );
+    }
+
+    // ========== NEW API =============== //
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PostMapping("/chapters/{chapterId}/quizzes")
+    public ResponseEntity<ChapterItemResponse> createQuizInChapter(
+            @PathVariable Integer chapterId,
+            @RequestBody QuizRequest quizRequest
+    ) {
+        return ResponseEntity.ok(
+                chapterItemService.createQuizInChapter(chapterId, quizRequest)
+        );
+    }
+
+    // ========== NEW API =============== //
+    @Operation(summary = "Xóa nội dung trong 1 chương")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @DeleteMapping("/chaptersItems/{id}")
+    public ResponseEntity<Void> deleteChapterItem(@PathVariable Integer id) {
+        chapterItemService.deleteChapterItem(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
+    // ========== OLD API =============== //
+    @Operation(summary = "Thêm bài học sẵn có vào chương")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PostMapping("/chapters/{chapterId}/quizzes/{lessonId}")
     public ResponseEntity<ChapterItemResponse> addLessonToChapter(
             @PathVariable Integer chapterId,
             @PathVariable Integer lessonId
@@ -53,17 +91,16 @@ public class ChapterItemController {
         );
     }
 
-    /*
-    // ================= ADD QUIZ TO CHAPTER (OPTIONAL) =================
+    // ========== OLD API =============== //
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @PostMapping("/chapters/{chapterId}/quizzes")
+    @PostMapping("/chapters/{chapterId}/quizzes/{quizId}")
     public ResponseEntity<ChapterItemResponse> addQuizToChapter(
             @PathVariable Integer chapterId,
-            @RequestBody Quiz quiz
+            @PathVariable Integer quizId
     ) {
         return ResponseEntity.ok(
-                chapterItemService.addQuizToChapter(chapterId, quiz)
+                chapterItemService.addQuizToChapter(chapterId, quizId)
         );
     }
-    */
+
 }

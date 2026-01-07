@@ -1,16 +1,19 @@
 package com.example.backend.service.impl;
 
-import com.example.backend.dto.request.QuizRequest;
+import com.example.backend.dto.request.quiz.QuizRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.quiz.QuizResponse;
 import com.example.backend.dto.response.quiz.QuizQuestionResponse;
 import com.example.backend.entity.Quiz;
+import com.example.backend.entity.QuizQuestion;
 import com.example.backend.repository.QuizRepository;
 import com.example.backend.service.QuizService;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class QuizServiceImpl implements QuizService {
@@ -97,10 +100,17 @@ public class QuizServiceImpl implements QuizService {
         return convertQuizToDTO(quizRepository.save(quiz));
     }
 
+    @Transactional
     @Override
     public void deleteQuiz(Integer id) {
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Quiz not found"));
-        quizRepository.delete(quiz);
+                .orElseThrow();
+        quiz.getQuestions().forEach(q -> {
+            q.getAnswers().forEach(a -> a.set_deleted(true));
+            q.set_deleted(true);
+        });
+        quiz.getAttempts().forEach(a -> a.set_deleted(true));
+        quiz.set_deleted(true);
     }
+
 }

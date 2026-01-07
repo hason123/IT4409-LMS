@@ -139,18 +139,27 @@ public class UserServiceImpl implements UserService {
         if(updatedUser == null){
             throw new ResourceNotFoundException("User not found");
         }
+
         if (request.getUserName() != null) {
-            updatedUser.setUserName(request.getUserName());
-        }
-        else{
+            if(userRepository.findByUserName(request.getUserName()) != null){
+                throw new BusinessException("Tên người dùng đã được sử dụng, vui lòng chọn tên khác");
+            } else updatedUser.setUserName(request.getUserName());
+        } else{
             updatedUser.setUserName(updatedUser.getUserName());
         }
-        /*
-        if (request.getPassword() != null) {
-            updatedUser.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        if(request.getStudentNumber() != null) {
+            if(userRepository.findByStudentNumber(request.getStudentNumber()) != null){
+                throw new BusinessException("Mã số này đã được sử dụng");
+            } else updatedUser.setStudentNumber(request.getStudentNumber());
+        } else updatedUser.setStudentNumber(updatedUser.getStudentNumber());
+
+        if(request.getGmail() != null) {
+            if(userRepository.findByGmail(request.getGmail()) != null){
+                throw new BusinessException("Gmail này đã được sử dụng");
+            } else updatedUser.setGmail(request.getGmail());
         }
-        else updatedUser.setPassword(updatedUser.getPassword());
-        */
+
         if (request.getBirthday() != null) {
             updatedUser.setBirthday(request.getBirthday());
         }
@@ -159,8 +168,8 @@ public class UserServiceImpl implements UserService {
         }
         if (request.getPhoneNumber() != null) {
             updatedUser.setPhoneNumber(request.getPhoneNumber());
-        }
-        else updatedUser.setPhoneNumber(updatedUser.getPhoneNumber());
+        } else updatedUser.setPhoneNumber(updatedUser.getPhoneNumber());
+
         userRepository.save(updatedUser);
         return convertUserInfoToDTO(updatedUser);
     }
@@ -207,13 +216,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfoResponse registerUser(RegisterRequest request){
         User user = new User();
-        user.setUserName(request.getUserName());
+        if(userRepository.findByUserName(request.getUserName()) != null){
+            throw new BusinessException("Tên người dùng đã được sử dụng, vui lòng chọn tên khác");
+        } else user.setUserName(request.getUserName());
+
+        if(userRepository.findByGmail(request.getGmail()) != null){
+            throw new BusinessException("Gmail này đã được sử dụng");
+        } else user.setGmail(request.getGmail());
+
+        if(userRepository.findByStudentNumber(request.getStudentNumber()) != null){
+            throw new BusinessException("Mã số này đã được sử dụng");
+        } else user.setStudentNumber(request.getStudentNumber());
+
         user.setRole(roleRepository.findByRoleName(RoleType.valueOf(request.getRoleName())));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
-        user.setGmail(request.getGmail());
-        user.setStudentNumber(request.getStudentNumber());
         user.setFullName(request.getFullName());
         user.setVerified(false);
         userRepository.save(user);
@@ -223,13 +241,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfoResponse createUser(UserCreateRequest request){
         User user = new User();
-        user.setUserName(request.getUserName());
+        if(userRepository.findByUserName(request.getUserName()) != null){
+            throw new BusinessException("Tên người dùng đã được sử dụng, vui lòng chọn tên khác");
+        } else user.setUserName(request.getUserName());
+
+        if(userRepository.findByGmail(request.getGmail()) != null){
+            throw new BusinessException("Gmail này đã được sử dụng");
+        } else user.setGmail(request.getGmail());
+
+        if(userRepository.findByStudentNumber(request.getStudentNumber()) != null){
+            throw new BusinessException("Mã số này đã được sử dụng");
+        } else user.setStudentNumber(request.getStudentNumber());
+
         user.setRole(roleRepository.findByRoleName(RoleType.valueOf(request.getRoleName())));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
-        user.setGmail(request.getGmail());
-        user.setStudentNumber(request.getStudentNumber());
         user.setFullName(request.getFullName());
         user.setVerified(true);
         userRepository.save(user);

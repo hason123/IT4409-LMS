@@ -1,7 +1,9 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.constant.ItemType;
-import com.example.backend.dto.response.ChapterItemResponse;
+import com.example.backend.dto.request.LessonRequest;
+import com.example.backend.dto.request.quiz.QuizRequest;
+import com.example.backend.dto.response.chapter.ChapterItemResponse;
 import com.example.backend.dto.response.LessonResponse;
 import com.example.backend.dto.response.quiz.QuizResponse;
 import com.example.backend.entity.Chapter;
@@ -101,6 +103,80 @@ public class ChapterItemServiceImpl implements ChapterItemService {
 
             return buildResponse(ci, detail);
         }).toList();
+    }
+
+    @Transactional
+    @Override
+    public ChapterItemResponse createLessonInChapter(
+            Integer chapterId,
+            LessonRequest request
+    ) {
+        // 1. Check chapter
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chapter not found"));
+
+        // 2. Tạo lesson mới
+        Lesson lesson = new Lesson();
+        lesson.setTitle(request.getTitle());
+        lesson.setContent(request.getContent());
+        lessonRepository.save(lesson);
+
+        // 3. Tạo chapter item
+        ChapterItem ci = createChapterItem(
+                chapter,
+                ItemType.LESSON,
+                lesson.getId()
+        );
+
+        // 4. Build response
+        return buildResponse(
+                ci,
+                lessonService.convertEntityToDTO(lesson)
+        );
+    }
+
+    @Transactional
+    @Override
+    public ChapterItemResponse createQuizInChapter(
+            Integer chapterId,
+            QuizRequest request
+    ) {
+        // 1. Check chapter
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chapter not found"));
+        // 2. Tạo quiz mới
+        Quiz quiz = new Quiz();
+        quiz.setTitle(request.getTitle());
+        quiz.setDescription(request.getDescription());
+        quiz.setMinPassScore(request.getMinPassScore());
+        quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
+        quiz.setMaxAttempts(request.getMaxAttempts());
+        quizRepository.save(quiz);
+        // 3. Tạo chapter item
+        ChapterItem ci = createChapterItem(
+                chapter,
+                ItemType.QUIZ,
+                quiz.getId()
+        );
+        // 4. Build response
+        return buildResponse(
+                ci,
+                quizService.convertQuizToDTO(quiz)
+        );
+    }
+
+    @Transactional
+    @Override
+    public void deleteChapterItem(Integer id){
+        ChapterItem chapterItem = chapterItemRepository.findById(id).orElseThrow(()
+                -> new ResourceNotFoundException("Lesson not found"));
+        if(chapterItem.getType() == ItemType.LESSON){
+            lessonService.deleteLesson(chapterItem.getRefId());
+        }
+        if(chapterItem.getType() == ItemType.QUIZ){
+            quizService.deleteQuiz(chapterItem.getRefId());
+        }
+        chapterItemRepository.delete(chapterItem);
     }
 
     @Transactional

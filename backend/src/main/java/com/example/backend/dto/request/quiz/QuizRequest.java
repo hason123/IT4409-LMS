@@ -1,4 +1,4 @@
-package com.example.backend.dto.request;
+package com.example.backend.dto.request.quiz;
 import lombok.*;
 
 @Getter

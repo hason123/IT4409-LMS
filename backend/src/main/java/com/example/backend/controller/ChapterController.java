@@ -1,13 +1,11 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.request.ChapterOrderRequest;
-import com.example.backend.dto.request.ChapterRequest;
-import com.example.backend.dto.response.ChapterResponse;
+import com.example.backend.dto.request.chapter.ChapterOrderRequest;
+import com.example.backend.dto.request.chapter.ChapterRequest;
+import com.example.backend.dto.response.chapter.ChapterResponse;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.service.CategoryService;
 import com.example.backend.service.ChapterService;
 import io.swagger.v3.oas.annotations.Operation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;

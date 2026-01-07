@@ -25,7 +25,11 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt,Integer
 
     int countByChapterItem_IdAndStudent_Id(Integer chapterItemId, Integer studentId);
 
-
+    Page<QuizAttempt> findByChapterItem_IdAndStatusIn(
+            Integer chapterItemId,
+            List<AttemptStatus> statuses,
+            Pageable pageable
+    );
     /**
      * Lấy điểm số cao nhất của user trong một bài Quiz cụ thể.
      * Trả về null nếu chưa làm bài nào.
