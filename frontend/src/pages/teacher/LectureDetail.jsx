@@ -15,26 +15,24 @@ import {
   CheckCircleIcon,
   ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
-import { Form, Input, Button, Spin, Alert } from "antd";
+import { Form, Input, Button, Spin, Alert, message } from "antd";
 import { getCourseById } from "../../api/course";
+import { getLessonById, createLesson, updateLesson, deleteLesson, uploadLessonFile } from "../../api/lesson";
 
 export default function LectureDetail() {
-  const { courseId, lectureId } = useParams();
+  const { courseId, lectureId, chapterId } = useParams();
   const [course, setCourse] = useState(null);
+  const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [form] = Form.useForm();
 
   const navigate = useNavigate();
   const isEditMode = !!lectureId;
 
-  const [title, setTitle] = useState(
-    isEditMode ? "Bài 3: Đạo hàm và Ứng dụng" : ""
-  );
-  const [content, setContent] = useState(
-    isEditMode
-      ? "Chào các em, trong bài học hôm nay chúng ta sẽ tìm hiểu về định nghĩa đạo hàm và các quy tắc tính đạo hàm cơ bản..."
-      : ""
-  );
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -102,21 +100,50 @@ export default function LectureDetail() {
   ];
 
   useEffect(() => {
-    fetchCourse();
-  }, [courseId]);
+    const init = async () => {
+      try {
+        setLoading(true);
+        // Fetch course data
+        const courseResponse = await getCourseById(courseId);
+        setCourse(courseResponse.data);
 
-  const fetchCourse = async () => {
-    try {
-      setLoading(true);
-      const response = await getCourseById(courseId);
-      setCourse(response.data);
-    } catch (err) {
-      setError("Không thể tải thông tin khóa học");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+        // If editing, fetch lesson data
+        if (isEditMode) {
+          const lessonResponse = await getLessonById(lectureId);
+          const lessonData = lessonResponse.data || lessonResponse;
+          setLesson(lessonData);
+          
+          // Set form fields with lesson data
+          setTitle(lessonData.title || "");
+          setContent(lessonData.content || "");
+          setVideoUrl(lessonData.videoUrl || "");
+          setNotes(lessonData.notes || "");
+          
+          // Populate uploaded files if any
+          if (lessonData.attachments && Array.isArray(lessonData.attachments)) {
+            setUploadedFiles(lessonData.attachments.map(file => ({
+              id: file.id,
+              name: file.name || file.filename,
+              size: file.size ? (file.size / (1024 * 1024)).toFixed(1) : "0",
+              url: file.url,
+            })));
+          }
+          
+          form.setFieldsValue({
+            title: lessonData.title,
+            content: lessonData.content,
+          });
+        }
+      } catch (err) {
+        setError("Không thể tải dữ liệu");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
+  }, [courseId, lectureId, isEditMode, form]);
 
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files || []);
@@ -127,12 +154,12 @@ export default function LectureDetail() {
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
       ];
       if (!allowedTypes.includes(file.type)) {
-        alert("Chỉ hỗ trợ file PDF và PPTX");
+        message.error("Chỉ hỗ trợ file PDF và PPTX");
         return;
       }
       // Validate file size (50MB)
       if (file.size > 50 * 1024 * 1024) {
-        alert("File không được vượt quá 50MB");
+        message.error("File không được vượt quá 50MB");
         return;
       }
 
@@ -140,7 +167,8 @@ export default function LectureDetail() {
         id: Date.now() + Math.random(),
         name: file.name,
         size: (file.size / (1024 * 1024)).toFixed(1),
-        file: file,
+        file: file, // Store actual file object for upload
+        isNew: true, // Mark as new file
       };
       setUploadedFiles((prev) => [...prev, newFile]);
     });
@@ -153,6 +181,87 @@ export default function LectureDetail() {
   const handleDeleteFile = (fileId) => {
     setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
+
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+      
+      // Prepare lesson data
+      const lessonData = {
+        title: title.trim(),
+        content: content.trim(),
+        videoUrl: videoUrl.trim(),
+        notes: notes.trim(),
+        chapterId: chapterId, // Assuming chapterId is passed in params
+      };
+
+      // Validate required fields
+      if (!lessonData.title) {
+        message.error("Vui lòng nhập tiêu đề bài giảng");
+        return;
+      }
+
+      if (!lessonData.content) {
+        message.error("Vui lòng nhập nội dung bài giảng");
+        return;
+      }
+
+      let savedLesson;
+      
+      if (isEditMode) {
+        // Update existing lesson
+        const response = await updateLesson(lectureId, lessonData);
+        savedLesson = response.data || response;
+        message.success("Cập nhật bài giảng thành công");
+      } else {
+        // Create new lesson
+        const response = await createLesson(lessonData);
+        savedLesson = response.data || response;
+        message.success("Tạo bài giảng thành công");
+      }
+
+      // Upload files if there are any new files
+      const newFiles = uploadedFiles.filter(f => f.file);
+      if (newFiles.length > 0 && savedLesson?.id) {
+        for (const file of newFiles) {
+          try {
+            await uploadLessonFile(savedLesson.id, file.file);
+          } catch (uploadErr) {
+            console.error("Failed to upload file:", uploadErr);
+            message.warning(`Không thể tải lên file ${file.name}`);
+          }
+        }
+      }
+
+      // Navigate back
+      setTimeout(() => {
+        navigate(`/teacher/courses/${courseId}`);
+      }, 500);
+    } catch (err) {
+      message.error(err.message || "Không thể lưu bài giảng");
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bài giảng này?")) {
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await deleteLesson(lectureId);
+      message.success("Xóa bài giảng thành công");
+      navigate(`/teacher/courses/${courseId}`);
+    } catch (err) {
+      message.error(err.message || "Không thể xóa bài giảng");
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -180,22 +289,36 @@ export default function LectureDetail() {
       <TeacherHeader />
       <div className="flex">
         <TeacherSidebar />
-        <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 flex flex-col h-screen pb-28">
+        <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 flex flex-col h-screen pb-[4.5rem]">
           <div className="flex-1 overflow-y-auto p-6 md:px-12 md:py-8">
-            <button
-              onClick={() => navigate(`/teacher/courses/${courseId}`)}
-              className="flex items-center gap-2 mb-3 text-primary hover:text-primary/80 transition-colors"
-            >
-              <ArrowLeftIcon className="w-5 h-5" />
-              <span className="font-medium">
-                Quay lại khóa học {course?.title}
-              </span>
-            </button>
-            <div className="mx-auto flex flex-col gap-6">
-              {/* Page Header */}
-              <div className="flex flex-wrap justify-between items-start gap-4">
-                <div className="flex flex-col gap-1">
-                  <h1 className="text-[#111418] dark:text-white text-3xl font-black leading-tight tracking-tight">
+            {loading ? (
+              <div className="flex justify-center items-center h-full">
+                <Spin size="large" />
+              </div>
+            ) : error ? (
+              <Alert
+                message="Lỗi"
+                description={error}
+                type="error"
+                showIcon
+                className="mb-4"
+              />
+            ) : (
+              <>
+              <button
+                onClick={() => navigate(`/teacher/courses/${courseId}`)}
+                className="flex items-center gap-2 mb-3 text-primary hover:text-primary/80 transition-colors"
+              >
+                <ArrowLeftIcon className="w-5 h-5" />
+                <span className="font-medium">
+                  Quay lại khóa học {course?.title}
+                </span>
+              </button>
+              <div className="mx-auto flex flex-col gap-6">
+                {/* Page Header */}
+                <div className="flex flex-wrap justify-between items-start gap-4">
+                  <div className="flex flex-col gap-1">
+                    <h1 className="text-[#111418] dark:text-white text-3xl font-black leading-tight tracking-tight">
                     {isEditMode ? "Chi tiết Bài giảng" : "Tạo Bài giảng mới"}
                   </h1>
                   <p className="text-[#617589] dark:text-gray-400 text-base font-normal">
@@ -204,7 +327,11 @@ export default function LectureDetail() {
                 </div>
                 {isEditMode && (
                   <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-semibold">
+                    <button 
+                      onClick={handleDelete}
+                      disabled={submitting}
+                      className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       <TrashIcon className="h-[18px] w-[18px]" />
                       Xóa bài giảng
                     </button>
@@ -213,7 +340,7 @@ export default function LectureDetail() {
               </div>
 
               {/* Main Form Grid */}
-              <Form layout="vertical" className="grid grid-cols-1 gap-6">
+              <Form layout="vertical" className="grid grid-cols-1 gap-6" form={form}>
                 <div className="space-y-6">
                   <div className="flex flex-col gap-2">
                     <label className="text-[#111418] dark:text-gray-200 text-base font-medium">
@@ -247,6 +374,8 @@ export default function LectureDetail() {
                   >
                     <Input
                       placeholder="Nhập tiêu đề bài giảng..."
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
                       className="h-12 rounded-lg"
                     />
                   </Form.Item>
@@ -301,7 +430,7 @@ export default function LectureDetail() {
                       >
                         <div className="flex gap-2">
                           <Input
-                            placeholder="Dán link YouTube/Vimeo..."
+                            placeholder="Dán link YouTube/Video..."
                             size="large"
                             value={videoUrl}
                             onChange={(e) => setVideoUrl(e.target.value)}
@@ -450,32 +579,53 @@ export default function LectureDetail() {
                     <textarea
                       className="w-full bg-white dark:bg-gray-800 border border-yellow-200 dark:border-yellow-900/30 rounded-lg p-3 text-sm text-[#111418] dark:text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none min-h-[80px]"
                       placeholder="Nhập ghi chú cá nhân về bài giảng này..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
                     ></textarea>
                   </div>
                 </div>
               </Form>
             </div>
-
+            </>
+            )}
             {/* Sticky Footer Action Bar */}
             <div className="fixed bottom-0 left-0 right-0 lg:ml-64 border-t border-[#e5e7eb] dark:border-gray-800 bg-white dark:bg-card-dark p-4 px-6 md:px-12 flex justify-between items-center z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
               <div className="hidden sm:flex flex-col">
-                <span className="text-xs text-gray-500">
-                  Lần lưu cuối: 10:24 AM
-                </span>
-                <span className="text-xs font-medium text-green-600 dark:text-green-400 flex items-center gap-1">
-                  <CheckCircleIcon className="h-3 w-3" /> Đã đồng bộ
-                </span>
+                {isEditMode && (
+                  <>
+                    <span className="text-xs text-gray-500">
+                      Lần lưu cuối: {lesson?.updatedAt ? new Date(lesson.updatedAt).toLocaleTimeString('vi-VN') : 'Chưa lưu'}
+                    </span>
+                    <span className="text-xs font-medium text-green-600 dark:text-green-400 flex items-center gap-1">
+                      <CheckCircleIcon className="h-3 w-3" /> Đã đồng bộ
+                    </span>
+                  </>
+                )}
               </div>
               <div className="flex gap-3 w-full sm:w-auto justify-end">
                 <button
                   onClick={() => navigate(-1)}
-                  className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-[#111418] dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
+                  disabled={submitting}
+                  className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-[#111418] dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Hủy
                 </button>
-                <button className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold transition-all shadow-md shadow-primary/20 flex items-center gap-2 text-sm">
-                  <CheckCircleIcon className="h-5 w-5" />
-                  Lưu bài giảng
+                <button 
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold transition-all shadow-md shadow-primary/20 flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? (
+                    <>
+                      <Spin size="small" style={{ color: "white" }} />
+                      Đang lưu...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircleIcon className="h-5 w-5" />
+                      Lưu bài giảng
+                    </>
+                  )}
                 </button>
               </div>
             </div>

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/lms")
+@RequestMapping("/api/v1/lms/chapters")
 public class ChapterController {
     private final ChapterService chapterService;
 
@@ -26,7 +26,7 @@ public class ChapterController {
 
     @Operation(summary = "Tạo chương mới cho khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @PostMapping("/courses/{courseId}/chapters")
+    @PostMapping("/{courseId}")
     public ResponseEntity<ChapterResponse> createChapter(@PathVariable Integer courseId, @RequestBody ChapterRequest request) {
         return ResponseEntity.ok(chapterService.createChapter(courseId, request));
     }
@@ -59,7 +59,7 @@ public class ChapterController {
 
     @Operation(summary = "Cập nhật thông tin chương")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @PutMapping("/chapters/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ChapterResponse> updateChapter(
             @PathVariable Integer id,
             @RequestBody ChapterRequest request
@@ -69,7 +69,7 @@ public class ChapterController {
 
     @Operation(summary = "Xóa chương")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    @DeleteMapping("/chapters/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteChapter(@PathVariable Integer id) {
         chapterService.deleteChapter(id);
         return ResponseEntity.noContent().build();

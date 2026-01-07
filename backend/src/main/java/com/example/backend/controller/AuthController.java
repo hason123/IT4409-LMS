@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.request.*;
 import com.example.backend.dto.response.LoginResponse;
+import com.example.backend.dto.response.RegisterResponse;
 import com.example.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -83,9 +84,9 @@ public class AuthController {
     
     @Operation(summary = "Đăng ký")
     @PostMapping("/auth/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
-        authService.register(request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        Integer userId = authService.register(request);
+        return ResponseEntity.ok(new RegisterResponse(userId, "Đăng ký thành công. Vui lòng xác thực OTP qua email."));
     }
 
     @Operation(summary = "Xác thực OTP")

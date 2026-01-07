@@ -3,6 +3,7 @@ package com.example.backend.service.impl;
 import com.example.backend.constant.OtpType;
 import com.example.backend.dto.request.*;
 import com.example.backend.dto.response.LoginResponse;
+import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.repository.UserRepository;
@@ -89,14 +90,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void register(RegisterRequest request) {
-        userService.registerUser(request);
+    public Integer register(RegisterRequest request) {
+        UserInfoResponse userResponse = userService.registerUser(request);
         userService.initiateEmailVerification(request.getGmail());
+        return userResponse.getId();
     }
 
     @Override
     public LoginResponse verifyOtp(OtpVerificationRequest request) {
-        User user = (User) userService.getUserById(request.getUserId());
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new BusinessException("Người dùng không tồn tại"));
         boolean valid = otpService.validateOtp(
                 user,
                 request.getCode(),
@@ -107,13 +110,14 @@ public class AuthServiceImpl implements AuthService {
         }
         user.setVerified(true);
         userRepository.save(user);
-        Authentication authentication =
-                authenticationManagerBuilder.getObject().authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                user.getUserName(),
-                                user.getPassword()
-                        )
-                );
+
+        String roleName = user.getRole().getRoleName().name(); 
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            user.getUserName(), 
+            null, 
+            java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + roleName))
+        );
+
         return buildLoginResponse(authentication, user);
     }
 

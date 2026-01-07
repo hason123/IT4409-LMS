@@ -14,8 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name= "user")
-@SQLDelete(sql = "UPDATE user SET is_deleted = true WHERE user_id = ?")
+@Table(name= "users")
+@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE user_id = ?")
 @SQLRestriction(value = "is_deleted = false") //mac dinh chi lay nhung ban ghi ko bi soft delete
 public class User extends BaseEntity {
     @Id

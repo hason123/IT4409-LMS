@@ -26,6 +26,21 @@ export async function register(userData) {
   return await response.json();
 }
 
+// Xác thực OTP
+export async function verifyOtp(otpCode, userId) {
+  const response = await fetch(`${API_URL}/verify-otp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ code: otpCode, userId: userId })
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Xác thực OTP thất bại');
+  }
+  return await response.json();
+}
+
 // Đăng nhập bằng Google
 export async function googleLogin(credentialResponse) {
   const response = await fetch(`${API_URL}/google`, {

@@ -10,7 +10,7 @@ public interface AuthService {
 
     void logout();
 
-    void register(RegisterRequest request);
+    Integer register(RegisterRequest request);
 
     LoginResponse verifyOtp(OtpVerificationRequest request);
 

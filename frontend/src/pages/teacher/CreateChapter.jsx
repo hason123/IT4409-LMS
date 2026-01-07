@@ -61,7 +61,7 @@ export default function CreateChapter() {
         description: values.description || "",
       };
 
-      await createChapter(chapterData);
+      await createChapter(courseId, chapterData);
       message.success("Tạo chương thành công");
 
       if (addLessons) {

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { UserIcon, EnvelopeIcon, LockClosedIcon, AcademicCapIcon } from '@heroicons/react/24/outline'
 import { register } from '../../api/auth'
 import { useAuth } from '../../contexts/AuthContext'
+import OtpModal from './OtpModal'
 
 export default function RegisterForm() {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ export default function RegisterForm() {
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [registeredUserId, setRegisteredUserId] = useState(null);
 
   const validateField = (name, value) => {
     let error = '';
@@ -104,13 +107,23 @@ export default function RegisterForm() {
 
       const res = await register(requestData);
       console.log('Registration response:', res);
-      if (res.data && res.data.accessToken) {
-        loginUser(res.data.accessToken, res.data.user);
-        console.log('Registered and logged in successfully');
-        navigate('/');
+      
+      // After successful registration, show OTP modal
+      if (res.data && res.data.userId) {
+        console.log('Setting showOtpModal to true with userId:', res.data.userId);
+        setRegisteredUserId(res.data.userId);
+        setShowOtpModal(true);
+      } else if (res.userId) {
+        console.log('Setting showOtpModal to true with userId:', res.userId);
+        setRegisteredUserId(res.userId);
+        setShowOtpModal(true);
+        // Alternative structure
+        setRegisteredUserId(res.userId);
+        setShowOtpModal(true);
       } else {
-        // Should not happen if register returns login response
-        navigate('/login');
+        // Fallback: if no userId in response, navigate to login
+        setApiError('Đăng ký thành công. Vui lòng đăng nhập.');
+        setTimeout(() => navigate('/login'), 2000);
       }
     } catch (err) {
       setApiError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
@@ -267,6 +280,18 @@ export default function RegisterForm() {
       </button>
 
       <p className="text-center text-sm text-[#617589] dark:text-gray-400">By registering, you agree to our <a className="font-medium text-primary hover:underline" href="#">Terms</a>.</p>
+
+      {/* OTP Modal */}
+      <OtpModal 
+        visible={showOtpModal}
+        userEmail={formData.email}
+        userId={registeredUserId}
+        userData={formData}
+        onClose={() => {
+          setShowOtpModal(false);
+          setRegisteredUserId(null);
+        }}
+      />
     </form>
   )
 }

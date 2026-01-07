@@ -1,8 +1,8 @@
-const API_URL = "http://localhost:8080/api/v1/lms/chapters";
+const API_URL = "http://localhost:8080/api/v1/lms/lessons";
 
-export async function getChaptersByCourseId(courseId) {
+export async function getLessonsByChapterId(chapterId) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`${API_URL}/course/${courseId}`, {
+  const response = await fetch(`${API_URL}/chapter/${chapterId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -11,13 +11,13 @@ export async function getChaptersByCourseId(courseId) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch chapters");
+    throw new Error("Failed to fetch lessons");
   }
 
   return await response.json();
 }
 
-export async function getChapterById(id) {
+export async function getLessonById(id) {
   const token = localStorage.getItem("accessToken");
   const response = await fetch(`${API_URL}/${id}`, {
     method: "GET",
@@ -28,32 +28,32 @@ export async function getChapterById(id) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch chapter");
+    throw new Error("Failed to fetch lesson");
   }
 
   return await response.json();
 }
 
-export async function createChapter(courseId, chapterData) {
+export async function createLesson(lessonData) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`${API_URL}/${courseId}`, {
+  const response = await fetch(API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(chapterData),
+    body: JSON.stringify(lessonData),
   });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Failed to create chapter");
+    throw new Error(errorData.message || "Failed to create lesson");
   }
 
   return await response.json();
 }
 
-export async function updateChapter(id, chapterData) {
+export async function updateLesson(id, lessonData) {
   const token = localStorage.getItem("accessToken");
   const response = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
@@ -61,18 +61,18 @@ export async function updateChapter(id, chapterData) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(chapterData),
+    body: JSON.stringify(lessonData),
   });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Failed to update chapter");
+    throw new Error(errorData.message || "Failed to update lesson");
   }
 
   return await response.json();
 }
 
-export async function deleteChapter(id) {
+export async function deleteLesson(id) {
   const token = localStorage.getItem("accessToken");
   const response = await fetch(`${API_URL}/${id}`, {
     method: "DELETE",
@@ -84,11 +84,32 @@ export async function deleteChapter(id) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Failed to delete chapter");
+    throw new Error(errorData.message || "Failed to delete lesson");
   }
 
   if (response.status === 204) {
     return { success: true };
+  }
+
+  return await response.json();
+}
+
+export async function uploadLessonFile(lessonId, file) {
+  const token = localStorage.getItem("accessToken");
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_URL}/${lessonId}/files`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to upload file");
   }
 
   return await response.json();
