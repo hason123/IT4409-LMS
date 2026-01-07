@@ -53,6 +53,25 @@ export async function createLesson(lessonData) {
   return await response.json();
 }
 
+export async function createLessonInChapter(chapterId, lessonData) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`http://localhost:8080/api/v1/lms/chapters/${chapterId}/lessons`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(lessonData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to create lesson in chapter");
+  }
+
+  return await response.json();
+}
+
 export async function updateLesson(id, lessonData) {
   const token = localStorage.getItem("accessToken");
   const response = await fetch(`${API_URL}/${id}`, {

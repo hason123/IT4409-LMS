@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { PlusIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useParams, useNavigate } from "react-router-dom";
-import { getChaptersByCourseId, deleteChapter } from "../../api/chapter";
+import { getChaptersByCourseId, deleteChapter, getChapterItems } from "../../api/chapter";
 import { Spin, Alert, Dropdown, Modal, message } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
@@ -15,6 +15,9 @@ export default function CourseContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [chapters, setChapters] = useState([]);
+  const [expandedChapter, setExpandedChapter] = useState(null);
+  const [chapterItems, setChapterItems] = useState({});
+  const [loadingItems, setLoadingItems] = useState({});
 
   useEffect(() => {
     fetchChapters();
@@ -29,6 +32,30 @@ export default function CourseContent() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchChapterItems = async (chapterId) => {
+    try {
+      setLoadingItems(prev => ({ ...prev, [chapterId]: true }));
+      const response = await getChapterItems(chapterId);
+      setChapterItems(prev => ({ ...prev, [chapterId]: response.data || response }));
+    } catch (err) {
+      message.error("Lỗi khi tải danh sách bài học: " + err.message);
+    } finally {
+      setLoadingItems(prev => ({ ...prev, [chapterId]: false }));
+    }
+  };
+
+  const handleToggleChapter = (chapterId) => {
+    if (expandedChapter === chapterId) {
+      setExpandedChapter(null);
+    } else {
+      setExpandedChapter(chapterId);
+      // Fetch items if not already loaded
+      if (!chapterItems[chapterId]) {
+        fetchChapterItems(chapterId);
+      }
     }
   };
 
@@ -140,12 +167,14 @@ export default function CourseContent() {
       <div className="space-y-3">
         {chapters && chapters.length > 0 ? (
           chapters.map((chapter) => (
-            <details
+            <div
               key={chapter.id}
-              className="group bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
-              open
+              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
             >
-              <summary className="flex cursor-pointer items-center justify-between list-none">
+              <div
+                onClick={() => handleToggleChapter(chapter.id)}
+                className="flex cursor-pointer items-center justify-between p-4 list-none hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
                 <span className="font-semibold text-[#111418] dark:text-white">
                   {chapter.title}
                 </span>
@@ -157,24 +186,62 @@ export default function CourseContent() {
                       placement="bottomRight"
                     >
                       <button
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => e.stopPropagation()}
                         className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                       >
                         <EllipsisVerticalIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                       </button>
                     </Dropdown>
                   )}
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">
+                  <span 
+                    className={`material-symbols-outlined transition-transform ${
+                      expandedChapter === chapter.id ? "rotate-180" : ""
+                    }`}
+                  >
                     expand_more
                   </span>
                 </div>
-              </summary>
-              <div className="mt-4 space-y-3 border-t border-gray-200 dark:border-gray-700 pt-3">
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Hiện tại chưa có bài giảng trong chương này
-                </p>
               </div>
-            </details>
+              
+              {expandedChapter === chapter.id && (
+                <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3">
+                  {loadingItems[chapter.id] ? (
+                    <div className="flex justify-center py-4">
+                      <Spin size="small" />
+                    </div>
+                  ) : chapterItems[chapter.id] && chapterItems[chapter.id].length > 0 ? (
+                    <div className="space-y-2">
+                      {chapterItems[chapter.id].map((item) => (
+                        <div
+                          key={item.id}
+                          className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                          onClick={() => {
+                            if (item.type === "LESSON") {
+                              handleEditLecture(item.item?.id);
+                            } else if (item.type === "QUIZ") {
+                              handleQuizClick(item.item?.id);
+                            }
+                          }}
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium text-[#111418] dark:text-white">
+                              {item.item?.title || "Không xác định"}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {item.type === "LESSON" ? "Bài giảng" : "Bài kiểm tra"}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-600 dark:text-gray-300 text-center py-4">
+                      Chương này không có nội dung nào
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           ))
         ) : (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">

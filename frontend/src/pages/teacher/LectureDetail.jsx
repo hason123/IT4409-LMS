@@ -17,7 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Form, Input, Button, Spin, Alert, message } from "antd";
 import { getCourseById } from "../../api/course";
-import { getLessonById, createLesson, updateLesson, deleteLesson, uploadLessonFile } from "../../api/lesson";
+import { getLessonById, createLessonInChapter, updateLesson, deleteLesson, uploadLessonFile } from "../../api/lesson";
 
 export default function LectureDetail() {
   const { courseId, lectureId, chapterId } = useParams();
@@ -214,9 +214,10 @@ export default function LectureDetail() {
         savedLesson = response.data || response;
         message.success("Cập nhật bài giảng thành công");
       } else {
-        // Create new lesson
-        const response = await createLesson(lessonData);
-        savedLesson = response.data || response;
+        // Create new lesson via chapter endpoint
+        const response = await createLessonInChapter(chapterId, lessonData);
+        // The response from ChapterItemController contains the lesson data inside
+        savedLesson = response.data?.lesson || response.lesson || response.data || response;
         message.success("Tạo bài giảng thành công");
       }
 

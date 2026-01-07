@@ -93,3 +93,20 @@ export async function deleteChapter(id) {
 
   return await response.json();
 }
+
+export async function getChapterItems(chapterId) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`${API_URL}/${chapterId}/items`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch chapter items");
+  }
+
+  return await response.json();
+}
