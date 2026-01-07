@@ -330,10 +330,15 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             throw new RuntimeException("Chapter Item not found");
         }
         Integer teacherCourseId = chapterItem.getChapter().getCourse().getTeacher().getId();
-        if (!(currentUser.getRole().getRoleName() == RoleType.ADMIN) ||
-                !teacherCourseId.equals(currentUser.getId())) {
+
+        boolean isAdmin =
+                currentUser.getRole().getRoleName() == RoleType.ADMIN;
+        boolean isTeacher =
+                teacherCourseId.equals(currentUser.getId());
+        if (!isAdmin && !isTeacher) {
             throw new UnauthorizedException("Bạn không có quyền xem bài làm này");
         }
+
         List<QuizAttempt> attempts =
                 quizAttemptRepository.findByChapterItem_IdAndStudent_Id(
                         chapterItemId, currentUser.getId()
@@ -369,9 +374,11 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         Integer teacherCourseId = attempt.getChapterItem().getChapter().getCourse().getTeacher().getId();
         User currentUser = userService.getCurrentUser();
 
-        if (!attempt.getStudent().getId().equals(currentUser.getId())
-                || !(currentUser.getRole().getRoleName() == RoleType.ADMIN) ||
-        !teacherCourseId.equals(currentUser.getId())) {
+        boolean isStudent = attempt.getStudent().getId().equals(currentUser.getId());
+        boolean isTeacher = teacherCourseId.equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().getRoleName() == RoleType.ADMIN;
+
+        if (!(isStudent || isTeacher || isAdmin)) {
             throw new UnauthorizedException("Bạn không có quyền xem bài làm này");
         }
 
