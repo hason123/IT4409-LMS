@@ -26,7 +26,7 @@ public class QuizAttemptController {
     @Operation(summary = "Bắt đầu làm quiz", description = "Allows students to start attempting a quiz. Creates a new quiz attempt record.")  // ← ENHANCED DESCRIPTION
     @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/chapterItem/{chapterItemId}/quiz/{quizId}/start")
-    public ResponseEntity<QuizAttemptResponse> startQuizAttempt(
+    public ResponseEntity<QuizAttemptDetailResponse> startQuizAttempt(
             @PathVariable Integer quizId, @PathVariable Integer chapterItemId
     ) {
         return ResponseEntity.ok(quizAttemptService.startQuizAttempt(quizId, chapterItemId));
