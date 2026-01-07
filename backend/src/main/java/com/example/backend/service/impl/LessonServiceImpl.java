@@ -2,12 +2,14 @@ package com.example.backend.service.impl;
 
 import com.example.backend.dto.request.LessonRequest;
 import com.example.backend.dto.response.LessonResponse;
+import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.ResourceResponse;
 import com.example.backend.entity.Lesson;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.LessonRepository;
 import com.example.backend.service.LessonService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,7 +52,8 @@ public class LessonServiceImpl implements LessonService {
         Lesson lesson = lessonRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
         lesson.getResources().forEach(r -> r.set_deleted(true));
         lesson.getComments().forEach(c -> c.set_deleted(true));
-        lessonRepository.delete(lesson);
+        //lessonRepository.delete(lesson);
+        lesson.set_deleted(true);
     }
 
 //    @Override
@@ -85,5 +88,6 @@ public class LessonServiceImpl implements LessonService {
         }
         return response;
     }
+
 
 }

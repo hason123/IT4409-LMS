@@ -1,7 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.request.QuizAttemptAnswerRequest;
-import com.example.backend.dto.response.quiz.QuizAttemptAnswerResponse;
+import com.example.backend.dto.request.quiz.QuizAttemptAnswerRequest;
 import com.example.backend.dto.response.quiz.QuizAttemptDetailResponse;
 import com.example.backend.dto.response.quiz.QuizAttemptResponse;
 import org.springframework.transaction.annotation.Transactional;

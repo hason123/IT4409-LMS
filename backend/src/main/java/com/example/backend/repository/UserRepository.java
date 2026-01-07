@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<User,Integer>, JpaSpecific
 
     User findByUserNameAndRefreshToken(String userName, String refreshToken);
 
+    User findByStudentNumber(String studentNumber);
+
     @Query("""
         SELECT u
         FROM User u

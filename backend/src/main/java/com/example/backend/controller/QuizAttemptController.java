@@ -1,7 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.request.QuizAttemptAnswerRequest;
-import com.example.backend.dto.response.quiz.QuizAttemptAnswerResponse;
+import com.example.backend.dto.request.quiz.QuizAttemptAnswerRequest;
 import com.example.backend.dto.response.quiz.QuizAttemptResponse;
 import com.example.backend.service.QuizAttemptService;
 import io.swagger.v3.oas.annotations.Operation;

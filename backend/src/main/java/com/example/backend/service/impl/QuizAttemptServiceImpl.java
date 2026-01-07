@@ -4,7 +4,7 @@ import com.example.backend.constant.AttemptStatus;
 import com.example.backend.constant.ItemType;
 import com.example.backend.constant.QuestionType;
 import com.example.backend.constant.RoleType;
-import com.example.backend.dto.request.QuizAttemptAnswerRequest;
+import com.example.backend.dto.request.quiz.QuizAttemptAnswerRequest;
 import com.example.backend.dto.response.quiz.*;
 import com.example.backend.entity.*;
 import com.example.backend.exception.BusinessException;
