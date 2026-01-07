@@ -1,22 +1,27 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.request.EnrollmentRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
+import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.service.EnrollmentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;  // ← ADD THIS IMPORT
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/lms")
-@Tag(name = "Enrollment Management", description = "APIs for managing course enrollments and student registrations")  // ← ADD THIS LINE
+@Tag(name = "Enrollment Management", description = "APIs for managing course enrollments and student registrations")
 public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
@@ -24,7 +29,83 @@ public class EnrollmentController {
         this.enrollmentService = enrollmentService;
     }
 
-    @Operation(summary = "Lấy danh sách sinh viên trong khóa học", description = "Retrieve paginated list of students currently enrolled in a course with search filtering")  // ← ENHANCED
+    // ================= STUDENT SELF-ENROLLMENT =================
+
+    @Operation(summary = "Đăng ký tham gia khóa học Public")
+    @PreAuthorize("hasRole('STUDENT')")
+    @PostMapping("/courses/{courseId}/enroll")
+    public ResponseEntity<EnrollmentResponse> enrollPublicCourse(@PathVariable Integer courseId) {
+        EnrollmentResponse response = enrollmentService.enrollPublicCourse(courseId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Đăng ký tham gia khóa học Private")
+    @PreAuthorize("hasRole('STUDENT')")
+    @PostMapping("/courses/enroll/private")
+    public ResponseEntity<EnrollmentResponse> enrollPrivateCourse(@RequestBody Map<String, String> requestBody) {
+        // Giả sử body gửi lên là { "classCode": "CODE123" }
+        String classCode = requestBody.get("classCode");
+        EnrollmentResponse response = enrollmentService.enrollPrivateCourse(classCode);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+    // ================= TEACHER/ADMIN APPROVAL & MANAGEMENT =================
+
+    @Operation(summary = "Phê duyệt yêu cầu tham gia khóa học")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PostMapping("/enrollments/approve")
+    public ResponseEntity<EnrollmentResponse> approveStudentToEnrollment(@RequestBody EnrollmentRequest request) {
+        EnrollmentResponse response = enrollmentService.approveStudentToEnrollment(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Từ chối/Xóa học viên khỏi khóa học")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @DeleteMapping("/enrollments/reject")
+    public ResponseEntity<Void> rejectStudent(@RequestBody EnrollmentRequest request) {
+        enrollmentService.rejectStudentEnrollment(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Lấy danh sách học viên đã được duyệt vào khóa học")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @GetMapping("/courses/{courseId}/enrollments/approved")
+    public ResponseEntity<PageResponse<EnrollmentResponse>> getStudentsApprovedInEnrollment(
+            @PathVariable Integer courseId,
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("id").descending());
+        PageResponse<EnrollmentResponse> response = enrollmentService.getStudentsApprovedInEnrollment(courseId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Lấy danh sách yêu cầu đang CHỜ duyệt")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @GetMapping("/courses/{courseId}/enrollments/pending")
+    public ResponseEntity<PageResponse<EnrollmentResponse>> getStudentsPendingEnrollment(
+            @PathVariable Integer courseId,
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("id").descending());
+        PageResponse<EnrollmentResponse> response = enrollmentService.getStudentsPendingEnrollment(courseId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Lấy tất cả danh sách ghi danh", description = "Get all enrollments in the system")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/enrollments")
+    public ResponseEntity<PageResponse<EnrollmentResponse>> getEnrollmentPage(
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        PageResponse<EnrollmentResponse> response = enrollmentService.getEnrollmentPage(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= MANUAL ADD/REMOVE STUDENTS (EXISTING) =================
+
+    @Operation(summary = "Lấy danh sách sinh viên có thể thêm vào khóa học (Search)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @GetMapping("/courses/{courseId}/students/available")
     public ResponseEntity<PageResponse<UserViewResponse>> getStudentsInCourse(
@@ -33,10 +114,10 @@ public class EnrollmentController {
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
         PageResponse<UserViewResponse> response = enrollmentService.searchStudentsInCourse(courseId, request, pageable);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Lấy danh sách sinh viên không trong khóa học", description = "Retrieve paginated list of students NOT enrolled in a course with search filtering")  // ← ENHANCED
+    @Operation(summary = "Lấy danh sách sinh viên chưa trong khóa học (Search)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @GetMapping("/courses/{courseId}/students/not-available")
     public ResponseEntity<PageResponse<UserViewResponse>> getStudentsNotInCourse(
@@ -45,10 +126,10 @@ public class EnrollmentController {
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
         PageResponse<UserViewResponse> response = enrollmentService.searchStudentsNotInCourse(courseId, request, pageable);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Thêm sinh viên vào khóa học", description = "Add one or multiple students to a course enrollment")  // ← ENHANCED
+    @Operation(summary = "Thêm trực tiếp sinh viên vào khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/courses/{courseId}/students")
     public ResponseEntity<String> addStudentsToCourse(@PathVariable Integer courseId, @RequestBody StudentCourseRequest request) {
@@ -56,11 +137,11 @@ public class EnrollmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Students has been added");
     }
 
-    @Operation(summary = "Xóa sinh viên khỏi khóa học", description = "Remove one or multiple students from course enrollment")  // ← ENHANCED
+    @Operation(summary = "Xóa sinh viên khỏi khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/courses/{courseId}/students")
     public ResponseEntity<String> removeStudentsInCourse(@PathVariable Integer courseId, @RequestBody StudentCourseRequest request) {
         enrollmentService.removeStudentsInCourse(courseId, request);
-        return ResponseEntity.status(HttpStatus.OK).body("Students has been deleted");
+        return ResponseEntity.ok("Students has been deleted");
     }
 }

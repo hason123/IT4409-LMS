@@ -1,7 +1,9 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.request.EnrollmentRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
+import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +15,20 @@ public interface EnrollmentService {
 
     @Transactional
     void removeStudentsInCourse(Integer courseId, StudentCourseRequest request);
+
+    EnrollmentResponse enrollPublicCourse(Integer courseId);
+
+    EnrollmentResponse enrollPrivateCourse(String classCode);
+
+    EnrollmentResponse approveStudentToEnrollment(EnrollmentRequest request);
+
+    void rejectStudentEnrollment(EnrollmentRequest request);
+
+    PageResponse<EnrollmentResponse> getStudentsApprovedInEnrollment(Integer courseId, Pageable pageable);
+
+    PageResponse<EnrollmentResponse> getStudentsPendingEnrollment(Integer courseId, Pageable pageable);
+
+    PageResponse<EnrollmentResponse> getEnrollmentPage(Pageable pageable);
 
     PageResponse<UserViewResponse> searchStudentsInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
 

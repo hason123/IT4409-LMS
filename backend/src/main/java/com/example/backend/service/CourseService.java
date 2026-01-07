@@ -22,11 +22,12 @@ public interface CourseService {
 
     CourseResponse getCourseById(Integer id);
 
+    PageResponse<CourseResponse> getAllPublicCourses(Pageable pageable);
+
+    PageResponse<CourseResponse> getAllCoursesByTeacher(Pageable pageable);
+
     PageResponse<CourseResponse> getAllCourses(Pageable pageable);
 
     CloudinaryResponse uploadImage(final Integer id, final MultipartFile file);
 
-   // PageResponse<UserViewResponse> searchStudentsInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
-
-   // PageResponse<UserViewResponse> searchStudentsNotInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
 }

@@ -56,9 +56,9 @@ public class CourseController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Lấy danh sách khóa học có phân trang")
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/courses")
+    @Operation(summary = "Lấy danh sách khóa học có phân trang, chỉ dành cho ADMIN")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/courses")
     public ResponseEntity<PageResponse<CourseResponse>> getAllCourses(
             @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize
@@ -66,6 +66,32 @@ public class CourseController {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
         PageResponse<CourseResponse> response =
                 courseService.getAllCourses(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Lấy danh sách khóa học của riêng giáo viên")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @GetMapping("/teacher/courses")
+    public ResponseEntity<PageResponse<CourseResponse>> getAllCoursesByTeacher(
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        PageResponse<CourseResponse> response =
+                courseService.getAllCoursesByTeacher(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Lấy danh sách khóa học được công khai trên trang chủ")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/courses")
+    public ResponseEntity<PageResponse<CourseResponse>> getAllPublicCourses(
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        PageResponse<CourseResponse> response =
+                courseService.getAllPublicCourses(pageable);
         return ResponseEntity.ok(response);
     }
 

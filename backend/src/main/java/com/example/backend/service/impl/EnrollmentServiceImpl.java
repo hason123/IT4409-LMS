@@ -1,7 +1,9 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.constant.CourseStatus;
 import com.example.backend.constant.EnrollmentStatus;
 import com.example.backend.constant.RoleType;
+import com.example.backend.dto.request.EnrollmentRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.PageResponse;
@@ -10,6 +12,9 @@ import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.Course;
 import com.example.backend.entity.Enrollment;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BusinessException;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.CourseRepository;
 import com.example.backend.repository.EnrollmentRepository;
 import com.example.backend.repository.UserRepository;
@@ -31,6 +36,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+   // private final EnrollmentService enrollmentService;
 
     public EnrollmentServiceImpl(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, UserRepository userRepository, UserService userService) {
         this.courseRepository = courseRepository;
@@ -69,6 +75,134 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollmentRepository.deleteAll(progresses);
     }
 
+    @Override
+    public EnrollmentResponse enrollPublicCourse(Integer courseId) {
+        User currentUser = userService.getCurrentUser();
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
+
+        if (course.getStatus() == CourseStatus.PRIVATE) {
+            throw new UnauthorizedException("Bạn không được truy cập vào tài nguyên này!");
+        }
+
+        Enrollment existingEnrollment = enrollmentRepository.findByStudent_IdAndCourse_Id(currentUser.getId(), courseId);
+
+        if (existingEnrollment != null) {
+            EnrollmentStatus status = existingEnrollment.getApprovalStatus();
+
+            if (status == EnrollmentStatus.APPROVED) {
+                throw new BusinessException("Bạn đã tham gia khóa học này!");
+            }
+
+            if (status == EnrollmentStatus.PENDING) {
+                throw new BusinessException("Hãy đợi giáo viên xét duyệt yêu cầu của bạn!");
+            }
+        }
+
+        Enrollment newEnrollment = Enrollment.builder()
+                .student(currentUser)
+                .course(course)
+                .progress(0)
+                .approvalStatus(EnrollmentStatus.PENDING)
+                .build();
+
+        enrollmentRepository.save(newEnrollment);
+        return convertEnrollmentToDTO(newEnrollment);
+    }
+
+    @Override
+    public EnrollmentResponse enrollPrivateCourse(String classCode){
+        User currentUser = userService.getCurrentUser();
+        if(!userRepository.existsById(currentUser.getId())){
+            throw new ResourceNotFoundException("Không tìm thấy người dùng");
+        }
+        Course course = courseRepository.findByClassCode(classCode).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
+        if(enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(
+                currentUser.getId(), course.getId(), EnrollmentStatus.APPROVED) != null){
+            throw new BusinessException("Bạn đã tham gia khóa học này!");
+        }
+        if(enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(
+                currentUser.getId(), course.getId(), EnrollmentStatus.PENDING) != null){
+            throw new BusinessException("Hãy đợi giáo viên xét duyệt yêu cầu của bạn");
+        }
+        Enrollment newEnrollment = Enrollment.builder()
+                .student(currentUser)
+                .course(course)
+                .progress(0)
+                .approvalStatus(EnrollmentStatus.PENDING)
+                .build();
+        enrollmentRepository.save(newEnrollment);
+        return convertEnrollmentToDTO(newEnrollment);
+    }
+
+    @Override
+    public EnrollmentResponse approveStudentToEnrollment(EnrollmentRequest request) {
+        User currentUser = userService.getCurrentUser();
+        Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(
+                request.getStudentId(), request.getCourseId(), EnrollmentStatus.PENDING);
+        if (enrollment == null) {
+            throw new ResourceNotFoundException("Yêu cầu tham gia khóa học không tồn tại hoặc đã được xử lý!");
+        }
+        boolean isCourseOwner = enrollment.getCourse().getTeacher().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().getRoleName().equals(RoleType.ADMIN);
+        if (!isCourseOwner && !isAdmin) {
+            throw new UnauthorizedException("Bạn không có quyền phê duyệt cho khóa học này!");
+        }
+        enrollment.setApprovalStatus(EnrollmentStatus.APPROVED);
+        enrollmentRepository.save(enrollment);
+        return convertEnrollmentToDTO(enrollment);
+    }
+
+    @Override
+    public void rejectStudentEnrollment(EnrollmentRequest request) {
+        User currentUser = userService.getCurrentUser();
+        Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_Id(
+                request.getStudentId(), request.getCourseId());
+        if (enrollment == null) {
+            throw new ResourceNotFoundException("Không tìm thấy thông tin đăng ký của người dùng này!");
+        }
+        boolean isCourseOwner = enrollment.getCourse().getTeacher().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().getRoleName().equals(RoleType.ADMIN);
+        if (!isCourseOwner && !isAdmin) {
+            throw new UnauthorizedException("Bạn không có quyền từ chối yêu cầu này!");
+        }
+        enrollmentRepository.delete(enrollment);
+    }
+
+    @Override
+    public PageResponse<EnrollmentResponse> getStudentsApprovedInEnrollment(Integer courseId, Pageable pageable) {
+        if(!courseRepository.existsById(courseId)){
+            throw new ResourceNotFoundException("Không tìm thấy khóa học");
+        }
+        Page<Enrollment> enrollmentPage = enrollmentRepository.findByCourse_IdAndApprovalStatus(courseId, EnrollmentStatus.APPROVED, pageable);
+        Page<EnrollmentResponse> enrollmentResponse = enrollmentPage.map(this::convertEnrollmentToDTO);
+        PageResponse<EnrollmentResponse> response = new PageResponse<>(
+                enrollmentResponse.getNumber() + 1,
+                enrollmentResponse.getTotalPages(),
+                enrollmentResponse.getNumberOfElements(),
+                enrollmentResponse.getContent()
+        );
+        return response;
+    }
+
+    @Override
+    public PageResponse<EnrollmentResponse> getStudentsPendingEnrollment(Integer courseId, Pageable pageable){
+        if(!courseRepository.existsById(courseId)){
+            throw new ResourceNotFoundException("Không tìm thấy khóa học");
+        }
+        Page<Enrollment> enrollmentPage = enrollmentRepository.findByCourse_IdAndApprovalStatus(courseId, EnrollmentStatus.PENDING, pageable);
+        Page<EnrollmentResponse> enrollmentResponse = enrollmentPage.map(this::convertEnrollmentToDTO);
+        PageResponse<EnrollmentResponse> response = new PageResponse<>(
+                enrollmentResponse.getNumber() + 1,
+                enrollmentResponse.getTotalPages(),
+                enrollmentResponse.getNumberOfElements(),
+                enrollmentResponse.getContent()
+        );
+        return response;
+    }
+
+    @Override
     public PageResponse<EnrollmentResponse> getEnrollmentPage(Pageable pageable){
         Page<Enrollment> enrollmentPage = enrollmentRepository.findAll(pageable);
         Page<EnrollmentResponse> enrollmentResponse = enrollmentPage.map(this::convertEnrollmentToDTO);
@@ -133,6 +267,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private EnrollmentResponse convertEnrollmentToDTO(Enrollment enrollment) {
         EnrollmentResponse response = new EnrollmentResponse();
         response.setProgress(enrollment.getProgress());
+        response.setUserName(enrollment.getStudent().getUserName());
         response.setStudentNumber(enrollment.getStudent().getFullName());
         response.setCourseTitle(enrollment.getCourse().getTitle());
         response.setFullName(enrollment.getStudent().getFullName());

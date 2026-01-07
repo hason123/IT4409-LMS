@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.CourseStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -37,5 +38,7 @@ public class Course extends BaseEntity{
     @JoinColumn(name = "category_id")
     private Category category;
     private String classCode;
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status;
 }
 

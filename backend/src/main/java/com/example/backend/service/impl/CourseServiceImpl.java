@@ -1,37 +1,30 @@
 package com.example.backend.service.impl;
 
 
+import com.example.backend.constant.CourseStatus;
+import com.example.backend.constant.EnrollmentStatus;
 import com.example.backend.constant.ResourceType;
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.course.CourseRequest;
-import com.example.backend.dto.request.course.StudentCourseRequest;
-import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.PageResponse;
-import com.example.backend.dto.response.user.UserViewResponse;
-import com.example.backend.entity.Category;
-import com.example.backend.entity.Course;
-import com.example.backend.entity.Enrollment;
-import com.example.backend.entity.User;
+import com.example.backend.entity.*;
+import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.CourseRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repository.EnrollmentRepository;
 import com.example.backend.service.CloudinaryService;
 import com.example.backend.service.CourseService;
 import com.example.backend.service.UserService;
-import com.example.backend.specification.UserSpecification;
 import com.example.backend.utils.FileUploadUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -39,14 +32,16 @@ public class CourseServiceImpl implements CourseService {
     private final CategoryRepository categoryRepository;
     private final UserService userService;
     private final CloudinaryService cloudinaryService;
+    private final EnrollmentRepository enrollmentRepository;
    // private final UserRepository userRepository;
 
 
-    public CourseServiceImpl(CourseRepository courseRepository, CategoryRepository categoryRepository, UserService userService, CloudinaryService cloudinaryService) {
+    public CourseServiceImpl(CourseRepository courseRepository, CategoryRepository categoryRepository, UserService userService, CloudinaryService cloudinaryService, EnrollmentRepository enrollmentRepository) {
         this.courseRepository = courseRepository;
         this.categoryRepository = categoryRepository;
         this.userService = userService;
         this.cloudinaryService = cloudinaryService;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     @Override
@@ -55,6 +50,8 @@ public class CourseServiceImpl implements CourseService {
         newCourse.setDescription(request.getDescription());
         newCourse.setTitle(request.getTitle());
         newCourse.setTeacher(userService.getCurrentUser());
+        newCourse.setStatus(request.getStatus());
+        newCourse.setClassCode(request.getClassCode());
         Category newCategory = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
         newCourse.setCategory(newCategory);
         courseRepository.save(newCourse);
@@ -76,6 +73,12 @@ public class CourseServiceImpl implements CourseService {
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
             course.setCategory(category);
         }
+        if(request.getClassCode() != null){
+            course.setClassCode(request.getClassCode());
+        }
+        if(request.getStatus() != null){
+            course.setStatus(request.getStatus());
+        }
         courseRepository.save(course);
         return convertEntityToDto(course);
     }
@@ -85,14 +88,58 @@ public class CourseServiceImpl implements CourseService {
         Course deletedCourse = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         User currentUser = userService.getCurrentUser();
         if(currentUser.getRole().getRoleName().equals(RoleType.ADMIN) || deletedCourse.getTeacher().getId().equals(currentUser.getId())) {
+            for (Chapter chapter : deletedCourse.getChapters()) {
+                chapter.set_deleted(true);
+            }
             courseRepository.deleteById(id);
         }
     }
 
     @Override
     public CourseResponse getCourseById(Integer id) {
+        User currentUser = userService.getCurrentUser();
+        boolean isAdmin = currentUser.getRole().getRoleName().equals(RoleType.ADMIN);
         Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        boolean isCourseOwner = course.getTeacher().getId().equals(currentUser.getId());
+        if(course.getStatus() == CourseStatus.PRIVATE){
+            if(!isAdmin && !isCourseOwner){
+                throw new UnauthorizedException("Bạn không được truy cập vào tài nguyên này!");
+            }
+        }
+        else{ // FOR STUDENT
+            if(enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(currentUser.getId(), id, EnrollmentStatus.APPROVED) != null){
+                throw new UnauthorizedException("Bạn không được truy cập vào tài nguyên này!");
+            }
+        }
+
         return convertEntityToDto(course);
+    }
+
+    @Override
+    public PageResponse<CourseResponse> getAllPublicCourses(Pageable pageable) {
+        Page<Course> coursePublicPage = courseRepository.findByStatus(CourseStatus.PUBLIC, pageable);
+        Page<CourseResponse> courseResponsePage = coursePublicPage.map(this::convertEntityToDto);
+        PageResponse<CourseResponse> response = new PageResponse<>(
+                courseResponsePage.getNumber() + 1,
+                courseResponsePage.getTotalPages(),
+                courseResponsePage.getNumberOfElements(),
+                courseResponsePage.getContent()
+        );
+        return response;
+    }
+
+    @Override
+    public PageResponse<CourseResponse> getAllCoursesByTeacher(Pageable pageable) {
+        User currentUser = userService.getCurrentUser();
+        Page<Course> coursePublicPage = courseRepository.findByTeacher_Id(currentUser.getId(), pageable);
+        Page<CourseResponse> courseResponsePage = coursePublicPage.map(this::convertEntityToDto);
+        PageResponse<CourseResponse> response = new PageResponse<>(
+                courseResponsePage.getNumber() + 1,
+                courseResponsePage.getTotalPages(),
+                courseResponsePage.getNumberOfElements(),
+                courseResponsePage.getContent()
+        );
+        return response;
     }
 
     @Override
@@ -136,6 +183,8 @@ public class CourseServiceImpl implements CourseService {
         response.setTeacherName(course.getTeacher().getFullName());
         response.setImageUrl(course.getImageUrl());
         response.setCloudinaryImageId(course.getCloudinaryImageId());
+        response.setStatus(course.getStatus());
+        response.setClassCode(course.getClassCode());
         return response;
     }
 }

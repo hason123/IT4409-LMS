@@ -1,6 +1,9 @@
 package com.example.backend.dto.response.course;
 
 
+import com.example.backend.constant.CourseStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 
 @Getter
@@ -18,4 +21,6 @@ public class CourseResponse {
     private String imageUrl;
     private String cloudinaryImageId;
     private String classCode;
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status;
 }
