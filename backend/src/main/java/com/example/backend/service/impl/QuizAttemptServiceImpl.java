@@ -204,6 +204,10 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         return convertToDetailResponse(attempt);
     }
 
+    // =========================================================================
+    // THỐNG KÊ BÀI LÀM CỦA CÁ NHÂN SINH VIÊN VÀ SINH VIÊN NÓI CHUNG TRONG KHÓA HỌC
+    // =========================================================================
+
     @Override
     public QuizAttemptDetailResponse getAttemptDetail(Integer attemptId) {
         QuizAttempt attempt = quizAttemptRepository.findById(attemptId)

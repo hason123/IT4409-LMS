@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import java.security.SecureRandom;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -32,8 +33,9 @@ public class CourseServiceImpl implements CourseService {
     private final UserService userService;
     private final CloudinaryService cloudinaryService;
     private final EnrollmentRepository enrollmentRepository;
-   // private final UserRepository userRepository;
 
+    private static final String ALPHANUMERIC_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public CourseServiceImpl(CourseRepository courseRepository, CategoryRepository categoryRepository, UserService userService, CloudinaryService cloudinaryService, EnrollmentRepository enrollmentRepository) {
         this.courseRepository = courseRepository;
@@ -49,10 +51,11 @@ public class CourseServiceImpl implements CourseService {
         newCourse.setDescription(request.getDescription());
         newCourse.setTitle(request.getTitle());
         newCourse.setTeacher(userService.getCurrentUser());
-        newCourse.setStatus(request.getStatus());
-        newCourse.setClassCode(request.getClassCode());
+        newCourse.setStatus(CourseStatus.PRIVATE);
+        newCourse.setClassCode(generateUniqueClassCode());
         newCourse.setRating(5.0);
-        Category newCategory = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
+        Category newCategory = categoryRepository.findById(request.getCategoryId()).orElseThrow(()
+                -> new ResourceNotFoundException("Không tìm thấy danh mục!"));
         newCourse.setCategory(newCategory);
         courseRepository.save(newCourse);
         return convertEntityToDto(newCourse);
@@ -61,7 +64,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseResponse updateCourse(Integer id, CourseRequest request) {
         Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
         if (request.getTitle() != null) {
             course.setTitle(request.getTitle());
         }
@@ -70,11 +73,8 @@ public class CourseServiceImpl implements CourseService {
         }
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục!"));
             course.setCategory(category);
-        }
-        if(request.getClassCode() != null){
-            course.setClassCode(request.getClassCode());
         }
         if(request.getStatus() != null){
             course.setStatus(request.getStatus());
@@ -88,7 +88,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public void deleteCourseById(Integer id) {
-        Course deletedCourse = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        Course deletedCourse = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoá học!"));
         User currentUser = userService.getCurrentUser();
         if(currentUser.getRole().getRoleName().equals(RoleType.ADMIN) || deletedCourse.getTeacher().getId().equals(currentUser.getId())) {
             for (Chapter chapter : deletedCourse.getChapters()) {
@@ -102,7 +102,7 @@ public class CourseServiceImpl implements CourseService {
     public CourseResponse getCourseById(Integer id) {
         User currentUser = userService.getCurrentUser();
         boolean isAdmin = currentUser.getRole().getRoleName().equals(RoleType.ADMIN);
-        Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
         boolean isCourseOwner = course.getTeacher().getId().equals(currentUser.getId());
         if(course.getStatus() == CourseStatus.PRIVATE){
             if(!isAdmin && !isCourseOwner){
@@ -233,4 +233,19 @@ public class CourseServiceImpl implements CourseService {
         response.setRating(course.getRating());
         return response;
     }
+
+    private String generateUniqueClassCode() {
+        String code;
+        do {
+            StringBuilder sb = new StringBuilder(5);
+            for (int i = 0; i < 5; i++) {
+                int randomIndex = secureRandom.nextInt(ALPHANUMERIC_CHARS.length());
+                sb.append(ALPHANUMERIC_CHARS.charAt(randomIndex));
+            }
+            code = sb.toString();
+        } while (courseRepository.existsByClassCode(code)); // Nếu trùng thì random lại
+        return code;
+    }
+
+
 }
