@@ -13,19 +13,20 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/uploads")
+@RequestMapping("/api/v1/lms")
 @RequiredArgsConstructor
 public class UploadController {
 
     private final CloudinaryService cloudinaryService;
 
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    @PostMapping("/quiz-question/image")
-    public ResponseEntity<CloudinaryResponse> uploadQuizQuestionImage(
+    @PostMapping("/upload/image")
+    public ResponseEntity<CloudinaryResponse> uploadImage(
             @RequestPart MultipartFile file
     ) {
         CloudinaryResponse response =
                 cloudinaryService.uploadEditorImage(file);
         return ResponseEntity.ok(response);
     }
+
 }
