@@ -55,6 +55,8 @@ public class User extends BaseEntity {
     private List<Course> taughtCourses;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Otp> otps = new ArrayList<>();
+    @OneToMany(mappedBy = "recipient")
+    private List<Notification> notifications = new ArrayList<>();
 
 
 }

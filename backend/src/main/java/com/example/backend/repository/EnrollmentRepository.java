@@ -22,4 +22,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment,Integer> 
 
     Enrollment findByStudent_IdAndCourse_IdAndApprovalStatus(Integer studentId, Integer courseId, EnrollmentStatus approvalStatus);
 
+    Page<Enrollment> findByStudent_IdAndApprovalStatus(Integer studentId, EnrollmentStatus approvalStatus, Pageable pageable);
+
 }

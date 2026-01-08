@@ -95,6 +95,30 @@ public class CourseController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
+    @GetMapping("/courses/approved")
+    public ResponseEntity<PageResponse<CourseResponse>> getCoursesApprovedByStudent(
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        PageResponse<CourseResponse> response =
+                courseService.getCoursesApprovedByStudent(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('STUDENT')")
+    @GetMapping("/courses/pending")
+    public ResponseEntity<PageResponse<CourseResponse>> getCoursesPendingByStudent(
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        PageResponse<CourseResponse> response =
+                courseService.getCoursesPendingByStudent(pageable);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Tải lên ảnh đại diện khóa học")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
     @PostMapping("/courses/{id}/avatar")

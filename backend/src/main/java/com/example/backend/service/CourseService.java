@@ -22,7 +22,11 @@ public interface CourseService {
 
     CourseResponse getCourseById(Integer id);
 
+    PageResponse<CourseResponse> getCoursesApprovedByStudent(Pageable pageable);
+
     PageResponse<CourseResponse> getAllPublicCourses(Pageable pageable);
+
+    PageResponse<CourseResponse> getCoursesPendingByStudent(Pageable pageable);
 
     PageResponse<CourseResponse> getAllCoursesByTeacher(Pageable pageable);
 

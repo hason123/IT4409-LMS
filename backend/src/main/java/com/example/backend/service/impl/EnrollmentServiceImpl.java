@@ -19,8 +19,10 @@ import com.example.backend.repository.CourseRepository;
 import com.example.backend.repository.EnrollmentRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.EnrollmentService;
+import com.example.backend.service.NotificationService;
 import com.example.backend.service.UserService;
 import com.example.backend.specification.UserSpecification;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,25 +33,20 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class EnrollmentServiceImpl implements EnrollmentService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final NotificationService notificationService;
    // private final EnrollmentService enrollmentService;
-
-    public EnrollmentServiceImpl(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, UserRepository userRepository, UserService userService) {
-        this.courseRepository = courseRepository;
-        this.enrollmentRepository = enrollmentRepository;
-        this.userRepository = userRepository;
-        this.userService = userService;
-    }
 
     @Transactional
     @Override
     public void addStudentsToCourse(Integer courseId, StudentCourseRequest request){
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
 
         List<User> users = userRepository.findAllById(request.getStudentIds());
         List<Enrollment> progresses = users.stream()
@@ -61,6 +58,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                         .build())
                 .toList();
         enrollmentRepository.saveAll(progresses);
+        for(User u : users){
+            String message = "Bạn đã được thêm vào khóa học " + course.getTitle();
+            notificationService.createNotification(u, message);
+        }
     }
 
     @Transactional
@@ -71,8 +72,13 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         if (request.getStudentIds() == null || request.getStudentIds().isEmpty()) {
             return;
         }
+        List<User> users = userRepository.findAllById(request.getStudentIds());
         List<Enrollment> progresses = enrollmentRepository.findByCourse_IdAndStudent_IdIn(courseId, request.getStudentIds());
         enrollmentRepository.deleteAll(progresses);
+        for(User u : users){
+            String message = "Bạn đã bị xóa tên khỏi danh sách lớp " + course.getTitle();
+            notificationService.createNotification(u, message);
+        }
     }
 
     @Override
@@ -106,8 +112,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .progress(0)
                 .approvalStatus(EnrollmentStatus.PENDING)
                 .build();
-
         enrollmentRepository.save(newEnrollment);
+
+        String message = "Sinh viên " + currentUser.getFullName() + " đã yêu cầu tham gia khóa học: " + course.getTitle();
+        notificationService.createNotification(course.getTeacher(), message);
+
         return convertEnrollmentToDTO(newEnrollment);
     }
 
@@ -133,12 +142,20 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .approvalStatus(EnrollmentStatus.PENDING)
                 .build();
         enrollmentRepository.save(newEnrollment);
+
+        String message = "Sinh viên " + currentUser.getFullName() + " đã yêu cầu tham gia khóa học: " + course.getTitle();
+        notificationService.createNotification(course.getTeacher(), message);
+
         return convertEnrollmentToDTO(newEnrollment);
     }
 
     @Override
     public EnrollmentResponse approveStudentToEnrollment(EnrollmentRequest request) {
         User currentUser = userService.getCurrentUser();
+        User student = userRepository.findById(request.getStudentId()).orElseThrow(() ->
+                new ResourceNotFoundException("Không tìm tháy người dùng!"));
+        Course course = courseRepository.findById(request.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
         Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(
                 request.getStudentId(), request.getCourseId(), EnrollmentStatus.PENDING);
         if (enrollment == null) {
@@ -151,12 +168,19 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
         enrollment.setApprovalStatus(EnrollmentStatus.APPROVED);
         enrollmentRepository.save(enrollment);
+
+        String message = "Bạn đã được thêm vào khóa học" + course.getTitle();
+        notificationService.createNotification(student, message);
         return convertEnrollmentToDTO(enrollment);
     }
 
     @Override
     public void rejectStudentEnrollment(EnrollmentRequest request) {
         User currentUser = userService.getCurrentUser();
+        User student = userRepository.findById(request.getStudentId()).orElseThrow(() ->
+                new ResourceNotFoundException("Không tìm tháy người dùng!"));
+        Course course = courseRepository.findById(request.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
         Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_Id(
                 request.getStudentId(), request.getCourseId());
         if (enrollment == null) {
@@ -168,6 +192,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new UnauthorizedException("Bạn không có quyền từ chối yêu cầu này!");
         }
         enrollmentRepository.delete(enrollment);
+        String message = "Yêu cầu tham gia khóa học" + course.getTitle() + "của bạn đã bị từ chối";
+        notificationService.createNotification(student, message);
     }
 
     @Override
@@ -185,6 +211,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         );
         return response;
     }
+
+
 
     @Override
     public PageResponse<EnrollmentResponse> getStudentsPendingEnrollment(Integer courseId, Pageable pageable){

@@ -10,7 +10,6 @@ import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.*;
-import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.CategoryRepository;
@@ -129,6 +128,46 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public PageResponse<CourseResponse> getCoursesApprovedByStudent(Pageable pageable) {
+        User currentStudent = userService.getCurrentUser();
+        Page<Enrollment> enrollmentPage = enrollmentRepository.findByStudent_IdAndApprovalStatus(
+                currentStudent.getId(),
+                EnrollmentStatus.APPROVED,
+                pageable
+        );
+        Page<CourseResponse> courseResponsePage = enrollmentPage.map(enrollment -> {
+            Course course = enrollment.getCourse();
+            return convertEntityToDto(course);
+        });
+        return new PageResponse<>(
+                courseResponsePage.getNumber() + 1,
+                courseResponsePage.getTotalPages(),
+                courseResponsePage.getTotalElements(),
+                courseResponsePage.getContent()
+        );
+    }
+
+    @Override
+    public PageResponse<CourseResponse> getCoursesPendingByStudent(Pageable pageable) {
+        User currentStudent = userService.getCurrentUser();
+        Page<Enrollment> enrollmentPage = enrollmentRepository.findByStudent_IdAndApprovalStatus(
+                currentStudent.getId(),
+                EnrollmentStatus.PENDING,
+                pageable
+        );
+        Page<CourseResponse> courseResponsePage = enrollmentPage.map(enrollment -> {
+            Course course = enrollment.getCourse();
+            return convertEntityToDto(course);
+        });
+        return new PageResponse<>(
+                courseResponsePage.getNumber() + 1,
+                courseResponsePage.getTotalPages(),
+                courseResponsePage.getTotalElements(),
+                courseResponsePage.getContent()
+        );
+    }
+
+    @Override
     public PageResponse<CourseResponse> getAllCoursesByTeacher(Pageable pageable) {
         User currentUser = userService.getCurrentUser();
         Page<Course> coursePublicPage = courseRepository.findByTeacher_Id(currentUser.getId(), pageable);
@@ -141,6 +180,7 @@ public class CourseServiceImpl implements CourseService {
         );
         return response;
     }
+
 
     @Override
     public PageResponse<CourseResponse> getAllCourses(Pageable pageable) {
