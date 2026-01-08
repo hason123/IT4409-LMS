@@ -1,9 +1,6 @@
 package com.example.backend.service.impl;
 
-import com.example.backend.constant.AttemptStatus;
-import com.example.backend.constant.ItemType;
-import com.example.backend.constant.QuestionType;
-import com.example.backend.constant.RoleType;
+import com.example.backend.constant.*;
 import com.example.backend.dto.request.quiz.QuizAttemptAnswerRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.quiz.*;
@@ -12,6 +9,7 @@ import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
+import com.example.backend.service.EnrollmentService;
 import com.example.backend.service.QuizAttemptService;
 import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +36,9 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final ChapterItemRepository chapterItemRepository;
+    private final ProgressRepository progressRepository;
+    private final EnrollmentService enrollmentService;
+
 
     // =========================================================================
     // MAIN LOGIC
@@ -57,6 +58,12 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         if (chapterItem.getType() != ItemType.QUIZ || !chapterItem.getRefId().equals(quizId)) {
             throw new BusinessException("Quiz không tồn tại");
+        }
+
+        boolean isEnrolled = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
+                currentUser.getId(), chapterItem.getChapter().getCourse().getId(), EnrollmentStatus.APPROVED);
+        if (!isEnrolled) {
+            throw new BusinessException("Bạn không có quyền truy cập vào tài nguyên này!");
         }
 
         // Validate Quiz
@@ -185,9 +192,34 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         updateAttemptStatistics(attempt);
         attempt.setCompletedTime(LocalDateTime.now());
         Integer passingScore = attempt.getQuiz().getMinPassScore();
-        attempt.setIsPassed(attempt.getGrade() >= passingScore);
+        boolean isPassed = attempt.getGrade() >= passingScore; // Check pass
+        attempt.setIsPassed(isPassed);
         attempt.setStatus(AttemptStatus.COMPLETED);
         quizAttemptRepository.save(attempt);
+
+        if (isPassed) {
+            User student = attempt.getStudent();
+            ChapterItem chapterItem = attempt.getChapterItem();
+            StudentChapterItemProgress progress = progressRepository
+                    .findByStudent_IdAndChapterItem_Id(student.getId(), chapterItem.getId())
+                    .orElse(StudentChapterItemProgress.builder()
+                            .student(student)
+                            .chapterItem(chapterItem)
+                            .isCompleted(false) // Mặc định false nếu chưa có bản ghi
+                            .build());
+            // CHỈ cập nhật và tính toán lại nếu chưa hoàn thành trước đó
+            if (Boolean.FALSE.equals(progress.getIsCompleted())) {
+                progress.setIsCompleted(true);
+                progress.setCompletedAt(LocalDateTime.now());
+                progressRepository.save(progress);
+
+                // Cập nhật progress tổng của Enrollment
+                if (chapterItem.getChapter() != null && chapterItem.getChapter().getCourse() != null) {
+                    Integer courseId = chapterItem.getChapter().getCourse().getId();
+                    enrollmentService.recalculateAndSaveProgress(student.getId(), courseId);
+                }
+            }
+        }
 
         return convertQuizAttemptToDTO(attempt);
     }

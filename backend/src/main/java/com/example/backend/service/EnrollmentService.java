@@ -23,6 +23,9 @@ public interface EnrollmentService {
 
     CourseResponse ratingCourse(Integer courseId, Double newRating);
 
+    @Transactional
+    void completeLesson(Integer lessonId);
+
     EnrollmentResponse approveStudentToEnrollment(EnrollmentRequest request);
 
     void rejectStudentEnrollment(EnrollmentRequest request);
@@ -36,4 +39,6 @@ public interface EnrollmentService {
     PageResponse<UserViewResponse> searchStudentsInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
 
     PageResponse<UserViewResponse> searchStudentsNotInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
+
+    void recalculateAndSaveProgress(Integer studentId, Integer courseId);
 }

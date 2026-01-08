@@ -5,8 +5,10 @@ import com.example.backend.dto.response.LessonResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.ResourceResponse;
 import com.example.backend.entity.Lesson;
+import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.LessonRepository;
+import com.example.backend.repository.ProgressRepository;
 import com.example.backend.service.LessonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LessonServiceImpl implements LessonService {
     private final LessonRepository lessonRepository;
-    //private final ResourceService resourceService;
+    private final ProgressRepository progressRepository;
 
     @Override
     public LessonResponse getLessonById(Integer id) {
@@ -88,6 +90,4 @@ public class LessonServiceImpl implements LessonService {
         }
         return response;
     }
-
-
 }
