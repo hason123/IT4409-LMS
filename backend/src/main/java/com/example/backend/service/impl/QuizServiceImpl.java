@@ -37,6 +37,8 @@ public class QuizServiceImpl implements QuizService {
         response.setMinPassScore(quiz.getMinPassScore());
         response.setTimeLimitMinutes(quiz.getTimeLimitMinutes());
         response.setMaxAttempts(quiz.getMaxAttempts());
+        response.setAvailableFrom(quiz.getAvailableFrom());
+        response.setAvailableUntil(quiz.getAvailableUntil());
         if (quiz.getQuestions() != null) {
             response.setQuestions(quiz.getQuestions().stream()
                 .map(question -> {
@@ -95,6 +97,8 @@ public class QuizServiceImpl implements QuizService {
         quiz.setMinPassScore(request.getMinPassScore());
         quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
         quiz.setMaxAttempts(request.getMaxAttempts());
+        quiz.setAvailableFrom(request.getAvailableFrom());
+        quiz.setAvailableUntil(request.getAvailableUntil());
         return convertQuizToDTO(quizRepository.save(quiz));
     }
 
@@ -116,6 +120,12 @@ public class QuizServiceImpl implements QuizService {
         }
         if(request.getMaxAttempts() != null){
             quiz.setMaxAttempts(request.getMaxAttempts());
+        }
+        if(request.getAvailableFrom() != null){
+            quiz.setAvailableFrom(request.getAvailableFrom());
+        }
+        if(request.getAvailableUntil() != null){
+            quiz.setAvailableUntil(request.getAvailableUntil());
         }
         return convertQuizToDTO(quizRepository.save(quiz));
     }

@@ -5,6 +5,7 @@ import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,8 @@ public interface EnrollmentService {
     EnrollmentResponse enrollPublicCourse(Integer courseId);
 
     EnrollmentResponse enrollPrivateCourse(String classCode);
+
+    CourseResponse ratingCourse(Integer courseId, Double newRating);
 
     EnrollmentResponse approveStudentToEnrollment(EnrollmentRequest request);
 

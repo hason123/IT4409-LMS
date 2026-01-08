@@ -11,5 +11,9 @@ import java.util.List;
 public class QuizQuestionRequest {
     private String content;
     private QuestionType type;
+    private Integer points;
+    private String fileUrl;
+    private String embedUrl;
+    private String cloudinaryId;
     private List<QuizAnswerRequest> answers;
 }

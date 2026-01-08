@@ -63,6 +63,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         Quiz chosenQuiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new RuntimeException("Quiz không tồn tại"));
 
+        checkQuizAvailability(chosenQuiz);
         // Check if exists attempt in progress
         Optional<QuizAttempt> inProgressAttempt = quizAttemptRepository.findByChapterItem_IdAndStudent_IdAndStatus(
                 chapterItem.getId(), currentUser.getId(), AttemptStatus.IN_PROGRESS);
@@ -227,7 +228,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     // HELPER METHODS & STATISTICS
     // =========================================================================
 
-    private void updateAttemptStatistics(QuizAttempt attempt) {
+    /*private void updateAttemptStatistics(QuizAttempt attempt) {
         List<QuizAttemptAnswer> attemptAnswers = quizAttemptAnswerRepository.findByAttempt_Id(attempt.getId());
         int answered = 0;
         int correct = 0;
@@ -264,6 +265,122 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         attempt.setIncorrectAnswers(incorrect);
         attempt.setUnansweredQuestions(attempt.getTotalQuestions() - answered);
         attempt.setGrade(attempt.getTotalQuestions() > 0 ? correct * 100 / attempt.getTotalQuestions() : 0);
+
+        quizAttemptRepository.save(attempt);
+        quizAttemptAnswerRepository.saveAll(attemptAnswers);
+    }*/
+
+    private void updateAttemptStatistics(QuizAttempt attempt) {
+        List<QuizAttemptAnswer> attemptAnswers = quizAttemptAnswerRepository.findByAttempt_Id(attempt.getId());
+
+        int answered = 0;
+        int correctCount = 0;   // Đếm số câu Full điểm
+        int incorrectCount = 0; // Đếm số câu 0 điểm hoặc điểm thành phần
+
+        double totalEarnedScore = 0.0;
+        int totalMaxScore = 0;
+
+        for (QuizAttemptAnswer submitAnswer : attemptAnswers) {
+            QuizQuestion question = submitAnswer.getQuestion();
+            int questionPoints = (question.getPoints() != null) ? question.getPoints() : 1;
+            totalMaxScore += questionPoints;
+
+            boolean isFullScore = false;
+            double earnedPoints = 0.0;
+
+            // ===== 1. ESSAY (Giữ nguyên) =====
+            if (question.getType() == QuestionType.ESSAY) {
+                String userAnswer = submitAnswer.getTextAnswer();
+                if (userAnswer != null && !userAnswer.trim().isEmpty()) {
+                    answered++;
+                    if (!question.getAnswers().isEmpty()) {
+                        QuizAnswer correctAnswer = question.getAnswers().get(0);
+                        if (correctAnswer.getContent().trim().equalsIgnoreCase(userAnswer.trim())) {
+                            earnedPoints = questionPoints;
+                            isFullScore = true;
+                        }
+                    }
+                }
+            }
+            // ===== 2. MULTIPLE CHOICE (Sửa Logic) =====
+            else if (question.getType() == QuestionType.MULTIPLE_CHOICE) {
+                List<QuizAnswer> selectedAnswers = submitAnswer.getSelectedAnswers();
+
+                if (selectedAnswers != null && !selectedAnswers.isEmpty()) {
+                    answered++;
+
+                    // 1. Lấy tập ID đáp án ĐÚNG của hệ thống
+                    var systemCorrectIds = question.getAnswers().stream()
+                            .filter(a -> Boolean.TRUE.equals(a.getIsCorrect()))
+                            .map(QuizAnswer::getId)
+                            .collect(java.util.stream.Collectors.toSet());
+
+                    int totalCorrectOptions = systemCorrectIds.size(); // Tổng số đáp án đúng có thể chọn
+
+                    // 2. Lấy tập ID đáp án USER chọn
+                    var userSelectedIds = selectedAnswers.stream()
+                            .map(QuizAnswer::getId)
+                            .collect(java.util.stream.Collectors.toSet());
+
+                    // 3. Tính toán
+                    // Số lượng user chọn ĐÚNG
+                    long userRightCount = userSelectedIds.stream()
+                            .filter(systemCorrectIds::contains)
+                            .count();
+
+                    // Số lượng user chọn SAI (Chọn thừa)
+                    long userWrongCount = userSelectedIds.size() - userRightCount;
+
+                    // 4. Logic Triệt Tiêu: Đúng trừ Sai
+                    long netCorrectCount = userRightCount - userWrongCount;
+
+                    // Chỉ tính điểm nếu số câu đúng "ròng" > 0
+                    if (netCorrectCount > 0) {
+                        double ratio = (double) netCorrectCount / totalCorrectOptions;
+
+                        // Case 1: Đúng tuyệt đối (Chọn đủ ý đúng, ko chọn sai ý nào)
+                        // ratio == 1.0 nghĩa là netCorrectCount == totalCorrectOptions
+                        if (ratio >= 1.0) {
+                            earnedPoints = questionPoints;
+                            isFullScore = true;
+                        }
+                        // Case 2: Đúng được >= 50% (sau khi đã bị trừ câu sai)
+                        else if (ratio >= 0.5) {
+                            earnedPoints = questionPoints / 2.0;
+                        }
+                        // Case 3: Còn lại (ví dụ đúng 1/3) thì coi như chưa đạt -> 0 điểm
+                        else {
+                            earnedPoints = 0;
+                        }
+                    } else {
+                        // Chọn sai nhiều hơn hoặc bằng chọn đúng -> 0 điểm
+                        earnedPoints = 0;
+                    }
+                }
+            }
+            // Set kết quả vào DB
+            submitAnswer.setIsCorrect(isFullScore);
+            totalEarnedScore += earnedPoints;
+
+            if (earnedPoints == questionPoints) {
+                correctCount++;
+            } else if (earnedPoints == 0 && answered > 0) {
+                incorrectCount++;
+            }
+
+        }
+
+        // Tổng kết Attempt
+        attempt.setCorrectAnswers(correctCount);
+        attempt.setIncorrectAnswers(incorrectCount);
+        attempt.setUnansweredQuestions(attempt.getTotalQuestions() - answered);
+
+        if (totalMaxScore > 0) {
+            int finalGrade = (int) Math.round((totalEarnedScore / totalMaxScore) * 100);
+            attempt.setGrade(finalGrade);
+        } else {
+            attempt.setGrade(0);
+        }
 
         quizAttemptRepository.save(attempt);
         quizAttemptAnswerRepository.saveAll(attemptAnswers);
@@ -319,6 +436,18 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         User currentUser = userService.getCurrentUser();
         Integer maxGrade = quizAttemptRepository.findMaxGradeByChapterItemAndStudent(chapterItemId, currentUser.getId());
         return maxGrade == null ? 0 : maxGrade;
+    }
+
+    private void checkQuizAvailability(Quiz quiz) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (quiz.getAvailableFrom() != null && now.isBefore(quiz.getAvailableFrom())) {
+            throw new BusinessException("Chưa đến giờ làm bài");
+        }
+
+        if (quiz.getAvailableUntil() != null && now.isAfter(quiz.getAvailableUntil())) {
+            throw new BusinessException("Đã hết hạn làm bài");
+        }
     }
 
     // =========================================================================

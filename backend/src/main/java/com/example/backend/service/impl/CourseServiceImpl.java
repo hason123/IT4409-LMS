@@ -51,6 +51,7 @@ public class CourseServiceImpl implements CourseService {
         newCourse.setTeacher(userService.getCurrentUser());
         newCourse.setStatus(request.getStatus());
         newCourse.setClassCode(request.getClassCode());
+        newCourse.setRating(5.0);
         Category newCategory = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
         newCourse.setCategory(newCategory);
         courseRepository.save(newCourse);
@@ -77,6 +78,9 @@ public class CourseServiceImpl implements CourseService {
         }
         if(request.getStatus() != null){
             course.setStatus(request.getStatus());
+        }
+        if(request.getRating() != null){
+            course.setRating(request.getRating());
         }
         courseRepository.save(course);
         return convertEntityToDto(course);
@@ -212,7 +216,8 @@ public class CourseServiceImpl implements CourseService {
         return response;
     }
 
-    private CourseResponse convertEntityToDto(Course course){
+    @Override
+    public CourseResponse convertEntityToDto(Course course){
         CourseResponse response = new CourseResponse();
         response.setId(course.getId());
         response.setTitle(course.getTitle());
@@ -225,6 +230,7 @@ public class CourseServiceImpl implements CourseService {
         response.setCloudinaryImageId(course.getCloudinaryImageId());
         response.setStatus(course.getStatus());
         response.setClassCode(course.getClassCode());
+        response.setRating(course.getRating());
         return response;
     }
 }

@@ -15,5 +15,6 @@ public class QuizQuestionResponse {
     private String fileUrl;
     private String embedUrl;
     private String cloudinaryId;
+    private Integer points;
     private List<QuizAnswerResponse> answers;
 }

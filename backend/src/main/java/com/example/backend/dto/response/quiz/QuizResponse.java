@@ -1,6 +1,8 @@
 package com.example.backend.dto.response.quiz;
 
 import lombok.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -14,5 +16,7 @@ public class QuizResponse {
     private Integer minPassScore;
     private Integer timeLimitMinutes;
     private Integer maxAttempts;
+    private LocalDateTime availableFrom;
+    private LocalDateTime availableUntil;
     private List<QuizQuestionResponse> questions;
 }

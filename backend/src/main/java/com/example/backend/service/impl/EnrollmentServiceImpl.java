@@ -8,16 +8,20 @@ import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.EnrollmentResponse;
+import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.Course;
+import com.example.backend.entity.CourseRating;
 import com.example.backend.entity.Enrollment;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
+import com.example.backend.repository.CourseRatingRepository;
 import com.example.backend.repository.CourseRepository;
 import com.example.backend.repository.EnrollmentRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.CourseService;
 import com.example.backend.service.EnrollmentService;
 import com.example.backend.service.NotificationService;
 import com.example.backend.service.UserService;
@@ -40,7 +44,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final NotificationService notificationService;
-   // private final EnrollmentService enrollmentService;
+    private final CourseRatingRepository courseRatingRepository;
+    private final CourseService courseService;
 
     @Transactional
     @Override
@@ -147,6 +152,40 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         notificationService.createNotification(course.getTeacher(), message);
 
         return convertEnrollmentToDTO(newEnrollment);
+    }
+
+    @Override
+    @Transactional
+    public CourseResponse ratingCourse(Integer courseId, Double newRating) {
+        if (newRating < 1 || newRating > 5) {
+            throw new BusinessException("Điểm đánh giá phải từ 1 đến 5!");
+        }
+        User currentUser = userService.getCurrentUser();
+        // 2. Check quyền (Giữ nguyên logic của ông nhưng tối ưu query chút)
+        boolean isEnrolled = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
+                currentUser.getId(), courseId, EnrollmentStatus.APPROVED);
+
+        if (!isEnrolled) {
+            throw new BusinessException("Bạn phải tham gia khóa học mới được đánh giá!");
+        }
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học"));
+        // 3. Lưu/Cập nhật Review cá nhân
+        CourseRating review = courseRatingRepository.findByStudent_IdAndCourse_Id(currentUser.getId(), courseId)
+                .orElse(CourseRating.builder()
+                        .student(currentUser)
+                        .course(course)
+                        .build());
+
+        review.setRatingValue(newRating);
+        courseRatingRepository.save(review);
+        Double avgRating = courseRatingRepository.getAverageRating(courseId);
+        // 5. Làm tròn (nếu muốn, ví dụ 1 số thập phân)
+        // Ví dụ: 4.5666 -> 4.6
+        double roundedRating = (avgRating != null) ? Math.round(avgRating * 10.0) / 10.0 : 0.0;
+        course.setRating(roundedRating);
+        courseRepository.save(course);
+        return courseService.convertEntityToDto(course);
     }
 
     @Override

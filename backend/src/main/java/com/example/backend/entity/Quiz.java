@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -24,13 +26,11 @@ public class Quiz extends BaseEntity {
     private Integer minPassScore;
     private Integer timeLimitMinutes;
     private Integer maxAttempts;
-/*    @ManyToOne
-    @JoinColumn(name = "chapter_id")
-    private Chapter chapter;*/
+    private LocalDateTime availableFrom;
+    private LocalDateTime availableUntil;
     @OneToMany(mappedBy = "quiz")
     private List<QuizQuestion> questions;
-/*    @OneToMany(mappedBy = "quiz")
-    private List<Comment> comments;*/
+
     @OneToMany(mappedBy = "quiz")
     private List<QuizAttempt> attempts;
 }

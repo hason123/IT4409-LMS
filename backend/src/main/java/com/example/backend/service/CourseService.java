@@ -7,6 +7,7 @@ import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
+import com.example.backend.entity.Course;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,4 +35,5 @@ public interface CourseService {
 
     CloudinaryResponse uploadImage(final Integer id, final MultipartFile file);
 
+    CourseResponse convertEntityToDto(Course course);
 }

@@ -33,7 +33,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
         response.setId(question.getId());
         response.setContent(question.getContent());
         response.setType(question.getType());
-
+        response.setPoints(question.getPoints());
         if (question.getAnswers() != null) {
             response.setAnswers(question.getAnswers().stream().map(answer -> {
                 QuizAnswerResponse aDto = new QuizAnswerResponse();
@@ -78,6 +78,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
         QuizQuestion question = new QuizQuestion();
         question.setContent(request.getContent());
         question.setType(request.getType());
+        question.setPoints(request.getPoints());
         question.setQuiz(quiz);
 
         return convertQuizQuestionToDTO(quizQuestionRepository.save(question));
@@ -93,6 +94,9 @@ public class QuizQuestionServiceImpl implements QuizQuestionService{
         }
         if(request.getType() != null){
             question.setType(request.getType());
+        }
+        if(request.getPoints() != null){
+            question.setPoints(request.getPoints());
         }
         return convertQuizQuestionToDTO(quizQuestionRepository.save(question));
     }

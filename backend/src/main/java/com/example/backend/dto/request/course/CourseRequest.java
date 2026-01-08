@@ -15,6 +15,7 @@ public class CourseRequest {
     private Integer teacherId;
     private Integer categoryId;
     private String classCode;
+    private Double rating;
     @Enumerated(EnumType.STRING)
     private CourseStatus status;
 }

@@ -5,6 +5,7 @@ import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.service.EnrollmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,6 +50,15 @@ public class EnrollmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Đăng ký tham gia khóa học Private")
+    @PreAuthorize("hasRole('STUDENT')")
+    @PostMapping("/courses/{courseId}/rating")
+    public ResponseEntity<CourseResponse> ratingCourse(@PathVariable Integer courseId, @RequestBody Map<String, String> requestBody) {
+        // Giả sử body gửi lên là { "classCode": "CODE123" }
+        Double rating = Double.valueOf(requestBody.get("rating"));
+        CourseResponse response = enrollmentService.ratingCourse(courseId, rating);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     // ================= TEACHER/ADMIN APPROVAL & MANAGEMENT =================
 

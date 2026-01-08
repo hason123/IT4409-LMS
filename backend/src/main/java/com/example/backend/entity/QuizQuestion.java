@@ -24,6 +24,8 @@ public class QuizQuestion extends BaseEntity {
     private String fileUrl;
     private String embedUrl;
     private String cloudinaryId;
+    private Integer points;
+
     @ManyToOne
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
