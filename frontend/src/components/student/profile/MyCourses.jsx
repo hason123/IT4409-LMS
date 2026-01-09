@@ -1,37 +1,52 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Spin, Empty } from "antd";
+import { useNavigate } from "react-router-dom";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import CourseCard from "../../course/CourseCard";
+import { getApprovedCourses } from "../../../api/course";
 
 export default function MyCourses() {
-  // Sample data for My Courses
-  const myCourses = [
-    {
-      id: 1,
-      title: "Complete Web Development Bootcamp",
-      author: "Dr. Angela Yu",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCZlF95kIMvRxO1c3xvW5Od-BDxzPIgrZx6k-Pc989zr7t5K3zxVuHbkFnClplI0MA6eEea_xiEg-OdiQ2YEUkm5kuBSEyKkTERJA3-cODcBXAhJZrEYhlUhmtlxMvNB-Z9gUlV6ApvHTYjopsu-X3kO0ZruggAHqJO49SG0WMokZYf30ATvj9XdXLMHJHGzsyrSaR4sg0zHuHnQc32jcISQWdzaivF4tMcD2zLNdqRZ7dDM1z7yYqo-s2AjrgnDow1hN3FwYIHHg0",
-      rating: 4.8,
-      reviews: "12,345",
-    },
-    {
-      id: 3,
-      title: "UI/UX Design Essentials in Figma",
-      author: "Daniel Scott",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAm6KrMYTf28Hzo1efhV4hqALrRNRDD2Yzafr9xXDsOa0bT_99R3MW0pcyuqCGBOWDJiXdaINrBZ6sdR_zSWENCkqVGwpyxFwUIf4ZCe80iRwh-0Dww_VvBhl8eKybPM-9DoP5epN0WumA_k6W-_dbtavN3Wf8mYovG8n8HDml5iLzlPOAYs8qrLh-UoKLTTwDPx9pMYizLy_AhT_mJi3sEsF0Kl_dOMpKhXLxDj08dddn6Zpo6XUG7kbPpKZPacNsXZR_-pygVkg4",
-      rating: 4.9,
-      reviews: "5,432",
-    },
-    {
-      id: 6,
-      title: "React - The Complete Guide",
-      author: "Maximilian Schwarzmüller",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBs2fcRufsqig4RLRJ2PXFHpbCBsvjksnCTjzG7wPdAUBh6PGvcjkkmNk4UQmbBuKh981XAfOOHwrxWBKZzO3IHPI4c0wwDeyHog-wQBoYRlMBTslPS_6NC5sm1M-swcRHxrkz_MSAeqGYD7uwHeVAl29g_8P7V0df1NC_ToP3WSPL2yHcz2e7qKMULoaaMdyJckLxgkJPTxAshqUdgfSeRwHXnXqXb5ThsRHILBY2nQ8Lr0G1yvcBaE5yTt9eQTTqV4k8rvC7hG8I",
-      rating: 4.7,
-      reviews: "41,888",
-    },
-  ];
+  const navigate = useNavigate();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchMyCourses();
+  }, []);
+
+  const fetchMyCourses = async () => {
+    try {
+      setLoading(true);
+      const response = await getApprovedCourses(1, 100);
+      // Handle API response structure: data.pageList
+      const courseList = response.data?.pageList || [];
+      setCourses(courseList);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch my courses:", err);
+      setError(err.message);
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <Spin size="large" tip="Đang tải khóa học..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <p className="text-red-800 dark:text-red-200">Lỗi: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -46,19 +61,32 @@ export default function MyCourses() {
         </div>
       </div>
       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {myCourses.map((c) => (
-            <CourseCard
-              key={c.id}
-              id={c.id}
-              title={c.title}
-              author={c.author}
-              image={c.image}
-              rating={c.rating}
-              reviews={c.reviews}
-            />
-          ))}
-        </div>
+        {courses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center min-h-96 gap-4">
+            <Empty description="Bạn chưa đăng ký khóa học nào" />
+            <button
+              className="group flex min-w-[84px] max-w-[480px] w-fit cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold gap-2"
+              onClick={() => navigate("/courses")}
+            >
+              <span>Khám phá các khóa học</span>
+              <ArrowRightIcon className="h-4 w-4 transform transition-transform duration-200 group-hover:translate-x-2" />
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {courses.map((course) => (
+              <CourseCard
+                key={course.id}
+                id={course.id}
+                title={course.title || course.courseName}
+                author={course.instructor?.fullName || course.author || "Unknown"}
+                image={course.avatar || course.image}
+                rating={course.rating || 0}
+                reviews={course.reviewCount?.toString() || "0"}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

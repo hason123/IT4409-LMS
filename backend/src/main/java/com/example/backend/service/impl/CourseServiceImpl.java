@@ -8,6 +8,7 @@ import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.course.CourseRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.course.CourseResponse;
+import com.example.backend.dto.response.EnrollmentStatusResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.*;
 import com.example.backend.exception.ResourceNotFoundException;
@@ -53,7 +54,7 @@ public class CourseServiceImpl implements CourseService {
         newCourse.setTeacher(userService.getCurrentUser());
         newCourse.setStatus(CourseStatus.PRIVATE);
         newCourse.setClassCode(generateUniqueClassCode());
-        newCourse.setRating(5.0);
+        newCourse.setRating(0.0);
         Category newCategory = categoryRepository.findById(request.getCategoryId()).orElseThrow(()
                 -> new ResourceNotFoundException("Không tìm thấy danh mục!"));
         newCourse.setCategory(newCategory);
@@ -232,6 +233,55 @@ public class CourseServiceImpl implements CourseService {
         response.setClassCode(course.getClassCode());
         response.setRating(course.getRating());
         return response;
+    }
+
+    @Override
+    public CourseResponse publishCourse(Integer id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
+        User currentUser = userService.getCurrentUser();
+        boolean isAdmin = currentUser.getRole().getRoleName().equals(RoleType.ADMIN);
+        boolean isCourseOwner = course.getTeacher().getId().equals(currentUser.getId());
+
+        if (!isAdmin && !isCourseOwner) {
+            throw new UnauthorizedException("Bạn không có quyền xuất bản khóa học này!");
+        }
+
+        if (course.getStatus() == CourseStatus.PUBLIC) {
+            throw new IllegalArgumentException("Khóa học đã được xuất bản!");
+        }
+
+        course.setStatus(CourseStatus.PUBLIC);
+        courseRepository.save(course);
+        return convertEntityToDto(course);
+    }
+
+    @Override
+    public EnrollmentStatusResponse checkEnrollmentStatus(Integer courseId) {
+        User currentUser = userService.getCurrentUser();
+        
+        // Check if user is enrolled with APPROVED status
+        boolean isApproved = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
+                currentUser.getId(),
+                courseId,
+                EnrollmentStatus.APPROVED
+        );
+        
+        // Check if user has any enrollment (PENDING or APPROVED)
+        Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_Id(
+                currentUser.getId(),
+                courseId
+        );
+        
+        String enrollmentStatus = null;
+        if (enrollment != null) {
+            enrollmentStatus = enrollment.getApprovalStatus().toString();
+        }
+        
+        return EnrollmentStatusResponse.builder()
+                .enrolled(isApproved)
+                .enrollmentStatus(enrollmentStatus)
+                .build();
     }
 
     private String generateUniqueClassCode() {

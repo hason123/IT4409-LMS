@@ -5,6 +5,7 @@ import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.course.CourseResponse;
+import com.example.backend.dto.response.EnrollmentStatusResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.Course;
@@ -36,4 +37,8 @@ public interface CourseService {
     CloudinaryResponse uploadImage(final Integer id, final MultipartFile file);
 
     CourseResponse convertEntityToDto(Course course);
+
+    CourseResponse publishCourse(Integer id);
+
+    EnrollmentStatusResponse checkEnrollmentStatus(Integer courseId);
 }

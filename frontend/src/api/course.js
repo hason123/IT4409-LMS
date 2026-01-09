@@ -197,3 +197,58 @@ export async function deleteCourse(id) {
 
   return await response.json();
 }
+
+export async function publishCourse(id) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`${API_URL}/courses/${id}/publish`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to publish course");
+  }
+
+  return await response.json();
+}
+
+export async function enrollCourse(courseId) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`${API_URL}/courses/${courseId}/enroll`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to enroll in course");
+  }
+
+  return await response.json();
+}
+
+export async function checkEnrollmentStatus(courseId) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`${API_URL}/courses/${courseId}/enrollment-status`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    // If endpoint doesn't exist or error, return false (not enrolled)
+    return false;
+  }
+
+  const data = await response.json();
+  return data.enrolled || data.isEnrolled || false;
+}

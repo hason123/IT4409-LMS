@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.request.course.CourseRequest;
 import com.example.backend.dto.response.CloudinaryResponse;
 import com.example.backend.dto.response.course.CourseResponse;
+import com.example.backend.dto.response.EnrollmentStatusResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -124,6 +125,22 @@ public class CourseController {
     @PostMapping("/courses/{id}/avatar")
     public ResponseEntity<CloudinaryResponse> uploadImage(@PathVariable final Integer id, @RequestPart final MultipartFile file) {
         CloudinaryResponse response = courseService.uploadImage(id, file);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Xuất bản khóa học (chuyển từ PRIVATE sang PUBLIC)")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @PostMapping("/courses/{id}/publish")
+    public ResponseEntity<CourseResponse> publishCourse(@PathVariable Integer id) {
+        CourseResponse response = courseService.publishCourse(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Kiểm tra trạng thái đăng ký khóa học của sinh viên")
+    @PreAuthorize("hasRole('STUDENT')")
+    @GetMapping("/courses/{id}/enrollment-status")
+    public ResponseEntity<EnrollmentStatusResponse> checkEnrollmentStatus(@PathVariable Integer id) {
+        EnrollmentStatusResponse response = courseService.checkEnrollmentStatus(id);
         return ResponseEntity.ok(response);
     }
 }
