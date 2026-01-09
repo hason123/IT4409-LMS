@@ -78,13 +78,13 @@ export default function NotificationsPage() {
 
   return (
     <>
-      {isTeacherOrAdmin ? <TeacherHeader /> : <Header />}
+      {isTeacherOrAdmin && <TeacherHeader />}
       <div className="flex">
         {isTeacherOrAdmin && <TeacherSidebar />}
         <main
-          className={`flex-1 ${isTeacherOrAdmin ? "ml-64 mt-16" : "mt-16"} min-h-screen bg-background-light dark:bg-background-dark`}
+          className={`flex-1 ${isTeacherOrAdmin && "ml-64 mt-16 bg-background-light min-h-screen"} dark:bg-background-dark`}
         >
-          <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className={`mx-auto ${isTeacherOrAdmin && "px-4 sm:px-6 lg:px-8 py-8"}`}>
             {/* Header */}
             <div className="mb-6 flex items-center gap-4">
               <div className="flex-1">

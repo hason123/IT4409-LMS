@@ -1,25 +1,39 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { Select, Spin } from 'antd'
+import { getAllCategories } from '../../api/category'
 
 export default function CourseFilters({ onFilterChange }) {
   const [filters, setFilters] = useState({
     categories: [],
-    level: '',
     rating: '4.5'
   });
 
-  const handleCategoryChange = (e) => {
-    const { value, checked } = e.target;
-    setFilters(prev => {
-      const categories = checked 
-        ? [...prev.categories, value]
-        : prev.categories.filter(cat => cat !== value);
-      return { ...prev, categories };
-    });
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await getAllCategories(1, 100);
+      const categoryList = response.data?.pageList || [];
+      setCategories(categoryList);
+    } catch (err) {
+      console.error('Failed to fetch categories:', err);
+      setCategories([]);
+    } finally {
+      setLoadingCategories(false);
+    }
   };
 
-  const handleLevelChange = (e) => {
-    const level = e.target.value;
-    setFilters(prev => ({ ...prev, level }));
+  const handleCategoryChange = (selectedValues) => {
+    setFilters(prev => ({
+      ...prev,
+      categories: selectedValues
+    }));
   };
 
   const handleRatingChange = (e) => {
@@ -33,97 +47,39 @@ export default function CourseFilters({ onFilterChange }) {
     }
   };
 
+  const categoryOptions = categories.map(cat => {
+    const categoryName = cat.title;
+    return {
+      label: categoryName,
+      value: categoryName
+    };
+  });
+
   return (
-    <div className="sticky top-24 space-y-6">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white">Bộ lọc:</h3>
+    <div className="sticky top-24 bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+      <h3 className="text-lg font-bold text-white px-4 py-3 bg-primary">Bộ lọc:</h3>
+      <div className="space-y-6 p-4">
       <div>
-        <h4 className="font-semibold mb-3 text-gray-800 dark:text-gray-200">Danh mục</h4>
-        <div className="space-y-2">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input 
-              className="form-checkbox h-4 w-4 rounded text-primary" 
-              type="checkbox"
-              value="web"
-              checked={filters.categories.includes('web')}
-              onChange={handleCategoryChange}
-            />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Lập trình Web</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input 
-              className="form-checkbox h-4 w-4 rounded text-primary" 
-              type="checkbox"
-              value="ui-ux"
-              checked={filters.categories.includes('ui-ux')}
-              onChange={handleCategoryChange}
-            />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Thiết kế UI/UX</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input 
-              className="form-checkbox h-4 w-4 rounded text-primary" 
-              type="checkbox"
-              value="data-science"
-              checked={filters.categories.includes('data-science')}
-              onChange={handleCategoryChange}
-            />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Data Science</span>
-          </label>
-        </div>
+        <h4 className="font-semibold mb-3 text-[#111418] dark:text-white">Danh mục</h4>
+        {loadingCategories ? (
+          <div className="flex justify-center py-4">
+            <Spin size="small" />
+          </div>
+        ) : (
+          <Select
+            mode="multiple"
+            placeholder="Chọn danh mục"
+            options={categoryOptions}
+            value={filters.categories}
+            onChange={handleCategoryChange}
+            style={{ width: '100%' }}
+            className="w-full"
+          />
+        )}
       </div>
 
       <div>
-        <h4 className="font-semibold mb-3 text-gray-800 dark:text-gray-200">Cấp độ</h4>
-        <div className="space-y-2">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input 
-              className="form-radio h-4 w-4 text-primary" 
-              name="level" 
-              type="radio"
-              value="beginner"
-              checked={filters.level === 'beginner'}
-              onChange={handleLevelChange}
-            />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Cơ bản</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input 
-              className="form-radio h-4 w-4 text-primary" 
-              name="level" 
-              type="radio"
-              value="intermediate"
-              checked={filters.level === 'intermediate'}
-              onChange={handleLevelChange}
-            />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Trung bình</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input 
-              className="form-radio h-4 w-4 text-primary" 
-              name="level" 
-              type="radio"
-              value="advanced"
-              checked={filters.level === 'advanced'}
-              onChange={handleLevelChange}
-            />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Nâng cao</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input 
-              className="form-radio h-4 w-4 text-primary" 
-              name="level" 
-              type="radio"
-              value="all"
-              checked={filters.level === 'all'}
-              onChange={handleLevelChange}
-            />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Mọi cấp độ</span>
-          </label>
-        </div>
-      </div>
-
-      <div>
-        <h4 className="font-semibold mb-3 text-gray-800 dark:text-gray-200">Đánh giá</h4>
+        <h4 className="font-semibold mb-3 text-[#111418] dark:text-white">Đánh giá</h4>
         <div className="space-y-2">
           <label className="flex items-center gap-3 cursor-pointer">
             <input 
@@ -140,7 +96,7 @@ export default function CourseFilters({ onFilterChange }) {
               <span className="material-symbols-outlined !text-lg text-yellow-500" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
               <span className="material-symbols-outlined !text-lg text-yellow-500" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
               <span className="material-symbols-outlined !text-lg text-yellow-500" style={{fontVariationSettings: "'FILL' 0.5"}}>star_half</span>
-              <span className="text-sm ml-2 text-gray-600 dark:text-gray-300">4.5 &amp; Up</span>
+              <span className="text-sm ml-2 text-gray-600 dark:text-gray-300">4.5 & Up</span>
             </div>
           </label>
 
@@ -159,7 +115,7 @@ export default function CourseFilters({ onFilterChange }) {
               <span className="material-symbols-outlined !text-lg text-yellow-500" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
               <span className="material-symbols-outlined !text-lg text-yellow-500" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
               <span className="material-symbols-outlined !text-lg text-gray-300">star</span>
-              <span className="text-sm ml-2 text-gray-600 dark:text-gray-300">4.0 &amp; Up</span>
+              <span className="text-sm ml-2 text-gray-600 dark:text-gray-300">4.0 & Up</span>
             </div>
           </label>
         </div>
@@ -169,8 +125,9 @@ export default function CourseFilters({ onFilterChange }) {
         onClick={handleApplyFilters}
         className="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
       >
-        Apply Filters
+        Áp dụng bộ lọc
       </button>
+      </div>
     </div>
   )
 }

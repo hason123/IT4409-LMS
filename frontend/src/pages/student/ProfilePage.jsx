@@ -6,6 +6,8 @@ import MyInformation from "../../components/student/profile/MyInformation";
 import MyCourses from "../../components/student/profile/MyCourses";
 import AccountSettings from "../../components/student/profile/AccountSettings";
 import ChangePassword from "../../components/student/profile/ChangePassword";
+import NotificationsPage from "../common/NotificationsPage";
+import Avatar from "../../components/common/Avatar";
 import { useAuth } from "../../contexts/AuthContext";
 import { getUserById } from "../../api/user";
 import {
@@ -16,6 +18,7 @@ import {
   LockClosedIcon,
   ReceiptPercentIcon,
   CameraIcon,
+  BellIcon,
 } from "@heroicons/react/24/outline";
 
 export default function ProfilePage() {
@@ -60,6 +63,7 @@ export default function ProfilePage() {
     { id: "profile", label: "Thông tin cá nhân", icon: UserIcon },
     { id: "courses", label: "Khóa học của tôi", icon: BookOpenIcon },
     { id: "certificate", label: "Chứng chỉ của tôi", icon: AcademicCapIcon },
+    { id: "notifications", label: "Thông báo", icon: BellIcon },
     // {
     //   id: "transactions",
     //   label: "Lịch sử giao dịch",
@@ -76,6 +80,8 @@ export default function ProfilePage() {
         return <MyCourses />;
       case "certificate":
         return <MyCertificate />;
+      case "notifications":
+        return <NotificationsPage />;
       case "transactions":
         return (
           <div className="text-center py-10 text-gray-500">
@@ -102,13 +108,11 @@ export default function ProfilePage() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <div className="relative group">
-                    <div
-                      className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12"
-                      style={{
-                        backgroundImage:
-                          'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHsHgzDpASndSqzmKxLp3Q0HJnnOlC8bFOLHlF5JKLO24rNGTKUUNE1I8P1NM_oqh8_5TovPFgia8PC8FsQyl9-NrG9vUoJU9RtLnhNzHGgSvpfGzQV9ekEhQs81AEHIUpp7Jd8zAO5dcT-_4va2284UDJK3t5AnX9VtQsPcttfMTs_SYSMGmcoPhYdjwqsqLi0oPQFnsZhdiE8J08qlHyUMvyDHGxTVhtbTJiRs1CeUzte1MkBvByECECwLCkVtaTf8z2pCfpkME")',
-                      }}
-                    ></div>
+                    <Avatar
+                      src={userData?.avatar || userData?.profilePicture}
+                      alt={userData?.fullName || userData?.username}
+                      className="w-12 h-12"
+                    />
                     <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                       <CameraIcon className="text-white h-5 w-5" />
                     </div>
@@ -118,7 +122,7 @@ export default function ProfilePage() {
                       {profileData?.fullName || user?.username || "User"}
                     </h1>
                     <p className="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal break-all">
-                      {profileData?.gmail || "No email"}
+                      {profileData?.gmail || profileData?.email || "No email"}
                     </p>
                   </div>
                 </div>

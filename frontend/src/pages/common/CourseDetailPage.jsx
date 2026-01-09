@@ -7,9 +7,9 @@ import DescriptionCourse from "../../components/course/DescriptionCourse";
 import CourseContent from "../../components/course/CourseContent";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { getCourseById } from "../../api/course";
-import { Spin, Alert } from "antd";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { getCourseById, publishCourse, enrollCourse, checkEnrollmentStatus } from "../../api/course";
+import { Spin, Alert, Modal, Button, message } from "antd";
+import { ArrowLeftIcon, ArrowRightIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 export default function CourseDetailPage() {
   const { user } = useAuth();
@@ -22,6 +22,9 @@ export default function CourseDetailPage() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [publishing, setPublishing] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrollmentStatus, setEnrollmentStatus] = useState(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -30,6 +33,12 @@ export default function CourseDetailPage() {
         const response = await getCourseById(id);
         console.log("Fetched course details:", response);
         setCourse(response.data);
+        
+        // Check enrollment status if user is a student
+        if (isStudent) {
+          const data = await checkEnrollmentStatus(id);
+          setEnrollmentStatus(data.enrollmentStatus);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -40,7 +49,7 @@ export default function CourseDetailPage() {
     if (id) {
       fetchCourse();
     }
-  }, [id]);
+  }, [id, isStudent]);
 
   // Helper function to render stars based on rating
   const renderStars = (rating) => {
@@ -110,18 +119,65 @@ export default function CourseDetailPage() {
 
   if (!course) return null;
 
+  const handlePublish = () => {
+    Modal.confirm({
+      title: "Xuất bản khóa học",
+      content: `Bạn có chắc chắn muốn xuất bản khóa học "${course.title}" không? Khóa học sẽ trở thành công khai.`,
+      okText: "Xuất bản",
+      cancelText: "Hủy",
+      okButtonProps: { danger: false },
+      onOk: async () => {
+        try {
+          setPublishing(true);
+          await publishCourse(id);
+          message.success("Khóa học đã được xuất bản thành công!");
+          // Refresh course data
+          const response = await getCourseById(id);
+          setCourse(response.data);
+        } catch (err) {
+          message.error(err.message || "Lỗi khi xuất bản khóa học");
+        } finally {
+          setPublishing(false);
+        }
+      },
+    });
+  };
+
+  const handleEnroll = async () => {
+    Modal.confirm({
+      title: "Xác nhận đăng ký khóa học",
+      content: `Bạn có chắc chắn muốn đăng ký khóa học "${course.title}" không?`,
+      okText: "Đăng ký",
+      cancelText: "Hủy",
+      okButtonProps: { danger: false },
+      onOk: async () => {
+        try {
+          setEnrolling(true);
+          await enrollCourse(id);
+          message.success("Bạn đã gửi đăng ký khóa học. Vui lòng chờ phê duyệt.");
+          setEnrollmentStatus("PENDING");
+          // Refresh course data
+          const response = await getCourseById(id);
+          setCourse(response.data);
+        } catch (err) {
+          message.error(err.message || "Lỗi khi đăng ký khóa học");
+        } finally {
+          setEnrolling(false);
+        }
+      },
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#333333] dark:text-gray-200">
-      {isTeacherOrAdmin ? (
-        <>
-          <TeacherHeader />
-          <div className="flex">
-            <TeacherSidebar />
-            <main className="flex-1 lg:ml-64 pt-16 w-full">
+        {isTeacherOrAdmin ? <TeacherHeader /> : <Header />}
+          <div className="flex items-center justify-center">
+            {isTeacherOrAdmin && <TeacherSidebar />}
+            <main className={`flex-1 ${isTeacherOrAdmin ? "lg:ml-64 pt-16" : "max-w-7xl"} w-full`}>
               <div className="container mx-auto sm:px-6 lg:px-8 py-8">
                 {/* Back Button */}
                 <button
-                  onClick={() => navigate("/teacher/courses")}
+                  onClick={() => navigate(isTeacherOrAdmin ? "/teacher/courses" : "/courses")}
                   className="flex items-center gap-2 mb-3 text-primary hover:text-primary/80 transition-colors"
                 >
                   <ArrowLeftIcon className="w-5 h-5" />
@@ -169,11 +225,6 @@ export default function CourseDetailPage() {
                           </span>
                         </div>
                       </div>
-                      {user?.role !== "TEACHER" && (
-                        <button className="w-full flex min-w-[84px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-transparent text-primary dark:text-primary border-2 border-primary text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors">
-                          <span className="truncate">Đăng ký học</span>
-                        </button>
-                      )}
                     </div>
                     {/* Tabs */}
                     <div className="w-full">
@@ -240,180 +291,53 @@ export default function CourseDetailPage() {
                           </li>
                         </ul>
                       </div>
+                      {isTeacherOrAdmin && course.status === "PRIVATE" && (
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          loading={publishing}
+                          onClick={handlePublish}
+                          className="h-12 text-base font-bold flex items-center justify-center gap-2"
+                        >
+                          Xuất bản khóa học
+                          <PaperAirplaneIcon className="w-5 h-5 ml-2" />
+                        </Button>
+                      )}
+                      {!isTeacherOrAdmin && (enrollmentStatus === null || enrollmentStatus === "REJECTED") && (
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          loading={enrolling}
+                          onClick={handleEnroll}
+                          className="h-12 text-base group font-bold flex items-center justify-center gap-2"
+                        >
+                          Đăng ký học
+                          <ArrowRightIcon className="h-4 w-4 transform transition-transform duration-200 group-hover:translate-x-2" />
+                        </Button>
+                      )}
+                      {!isTeacherOrAdmin && enrollmentStatus === "PENDING" && (
+                        <div className="w-full h-12 bg-yellow-100 dark:bg-yellow-900 border-2 border-yellow-500 rounded-lg flex items-center justify-center text-yellow-700 dark:text-yellow-200 font-bold">
+                          ⏳ Chờ duyệt
+                        </div>
+                      )}
+                      {!isTeacherOrAdmin && enrollmentStatus === "APPROVED" && (
+                        <div className="w-full h-12 bg-green-100 dark:bg-green-900 border-2 border-green-500 rounded-lg flex items-center justify-center text-green-700 dark:text-green-200 font-bold">
+                          ✓ Đã đăng ký khóa học
+                        </div>
+                      )}
+                      {!isTeacherOrAdmin && enrollmentStatus === "REJECTED" && (
+                        <div className="w-full h-12 bg-red-100 dark:bg-red-900 border-2 border-red-500 rounded-lg flex items-center justify-center text-red-700 dark:text-red-200 font-bold">
+                          ✗ Yêu cầu bị từ chối
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             </main>
           </div>
-        </>
-      ) : (
-        <>
-          <Header />
-          <main className="w-full">
-            <div className="container mx-auto px-4 py-8">
-              {/* Breadcrumbs */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                <Link className="text-primary text-sm font-medium" to="/">
-                  Trang chủ
-                </Link>
-                <span className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-                  /
-                </span>
-                <Link
-                  className="text-primary text-sm font-medium"
-                  to="/courses"
-                >
-                  Khóa học
-                </Link>
-                <span className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-                  /
-                </span>
-                <span className="text-gray-800 dark:text-gray-200 text-sm font-medium">
-                  {course.title}
-                </span>
-              </div>
-              <div className="grid grid-cols-12 gap-8">
-                {/* Main Content (Left Column) */}
-                <div className="col-span-12 lg:col-span-8">
-                  <div className="flex flex-col gap-4 mb-6">
-                    <p className="text-[#111418] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">
-                      {course.title}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-300 text-lg">
-                      {course.description}
-                    </p>
-                    <div className="flex items-center gap-4 text-sm text-gray-700 dark:text-gray-300 mt-2">
-                      <div className="flex items-center gap-2">
-                        <img
-                          alt={`Avatar giảng viên ${course.teacherName}`}
-                          className="w-8 h-8 rounded-full object-cover"
-                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhE6xdMrjAf3wdfHim4XGXWu3OqQvnxB4867xflSLd5V9-yT4yG-ZMEZiwrIirdOFJzHqSp2-MTT68oHt7LaXzL9ujl-dzXRiw7I9NOiXuUE1L9s1P3Kc3bolXXCDB6v5XhXbwdprTYw1DyT6YlY6D1-uN8gLHOsrNKkLNN40ldPvbDCyTUCXUnV7mBp3VNsJMOdl5pPtgJCCnpF1l9a9SFvc9W47I9P5dSub8YrS3UvjRb7xT_IEtbW2JljPyy3QAivITahhBpb4"
-                        />
-                        <span>
-                          Giảng viên:{" "}
-                          <span className="font-semibold text-[#111418] dark:text-white">
-                            {course.teacherName}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-yellow-500">4.7</span>
-                        <div className="flex text-yellow-500">
-                          <span
-                            className="material-symbols-outlined !text-base"
-                            style={{ fontVariationSettings: '"FILL" 1' }}
-                          >
-                            star
-                          </span>
-                          <span
-                            className="material-symbols-outlined !text-base"
-                            style={{ fontVariationSettings: '"FILL" 1' }}
-                          >
-                            star
-                          </span>
-                          <span
-                            className="material-symbols-outlined !text-base"
-                            style={{ fontVariationSettings: '"FILL" 1' }}
-                          >
-                            star
-                          </span>
-                          <span
-                            className="material-symbols-outlined !text-base"
-                            style={{ fontVariationSettings: '"FILL" 1' }}
-                          >
-                            star
-                          </span>
-                          <span
-                            className="material-symbols-outlined !text-base"
-                            style={{ fontVariationSettings: '"FILL" 1' }}
-                          >
-                            star_half
-                          </span>
-                        </div>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          (12,455 đánh giá)
-                        </span>
-                      </div>
-                    </div>
-                    {isStudent && (
-                      <button className="w-full flex min-w-[84px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-transparent text-primary dark:text-primary border-2 border-primary text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors">
-                        <span className="truncate">Đăng ký học</span>
-                      </button>
-                    )}
-                  </div>
-                  {/* Tabs */}
-                  <div className="w-full">
-                    {/* Tabs */}
-                    <CourseTabs
-                      tabs={[
-                        {
-                          label: "Mô tả",
-                          content: (
-                            <DescriptionCourse
-                              description={course.description}
-                            />
-                          ),
-                        },
-                        {
-                          label: "Nội dung khóa học",
-                          content: <CourseContent />,
-                        },
-                        { label: "Giảng viên", content: <div>...</div> },
-                        { label: "Đánh giá", content: <div>...</div> },
-                      ]}
-                      defaultIndex={0}
-                    />
-                  </div>
-                </div>
-                {/* Sidebar (Right Column) */}
-                <div className="col-span-12 lg:col-span-4">
-                  <div className="sticky top-24 space-y-6">
-                    {/* Course Info List */}
-                    <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-                      <h3 className="text-lg font-bold text-[#111418] dark:text-white mb-4">
-                        Thông tin khóa học
-                      </h3>
-                      <ul className="space-y-3 text-gray-700 dark:text-gray-300">
-                        <li className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">
-                            schedule
-                          </span>
-                          <span>Thời lượng: 30 giờ video</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">
-                            slideshow
-                          </span>
-                          <span>Số bài giảng: 215</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">
-                            bar_chart
-                          </span>
-                          <span>Cấp độ: Mọi cấp độ</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">
-                            language
-                          </span>
-                          <span>Ngôn ngữ: Tiếng Việt</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">
-                            workspace_premium
-                          </span>
-                          <span>Có chứng chỉ hoàn thành</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </>
-      )}
     </div>
   );
 }
