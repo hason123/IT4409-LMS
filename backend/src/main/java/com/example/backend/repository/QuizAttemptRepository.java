@@ -1,6 +1,8 @@
 package com.example.backend.repository;
 
 import com.example.backend.constant.AttemptStatus;
+import com.example.backend.dto.response.quiz.CourseQuizResultResponse;
+import com.example.backend.dto.response.quiz.StudentQuizResultResponse;
 import com.example.backend.entity.Chapter;
 import com.example.backend.entity.QuizAttempt;
 import org.springframework.data.domain.Page;
@@ -68,6 +70,38 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt,Integer
     Page<QuizAttempt> searchByStudentNameOrEmail(@Param("chapterItemId") Integer chapterItemId,
                                                  @Param("keyword") String keyword,
                                                  Pageable pageable);
+
+    // Trong QuizAttemptRepository.java
+
+    @Query("SELECT new com.example.backend.dto.response.quiz.StudentQuizResultResponse(" +
+            "qa.quiz.id, qa.quiz.title, qa.chapterItem.id, MAX(qa.grade), " +
+            "(MAX(CASE WHEN qa.isPassed = true THEN 1 ELSE 0 END) = 1)) " +
+            "FROM QuizAttempt qa " +
+            "JOIN qa.chapterItem ci " +       // Join sang ChapterItem
+            "JOIN ci.chapter c " +            // Join sang Chapter
+            "WHERE qa.student.id = :studentId " +
+            "AND c.course.id = :courseId " +  // <-- THÊM ĐIỀU KIỆN NÀY
+            "AND (qa.status = 'COMPLETED' OR qa.status = 'EXPIRED') " +
+            "GROUP BY qa.quiz.id, qa.quiz.title, qa.chapterItem.id " +
+            "ORDER BY ci.orderIndex ASC")     // Nên sort theo thứ tự bài học
+    List<StudentQuizResultResponse> findMaxGradesByStudentAndCourse(
+            @Param("studentId") Integer studentId,
+            @Param("courseId") Integer courseId
+    );
+
+    // 2. Query cho Giáo viên: Lấy bảng điểm toàn khóa (Điểm cao nhất của mỗi SV tại mỗi Quiz)
+    @Query("SELECT new com.example.backend.dto.response.quiz.CourseQuizResultResponse(" +
+            "s.id, s.fullName, s.studentNumber, " +
+            "qa.quiz.id, qa.quiz.title, qa.chapterItem.id, MAX(qa.grade)) " +
+            "FROM QuizAttempt qa " +
+            "JOIN qa.student s " +
+            "JOIN qa.chapterItem ci " +
+            "JOIN ci.chapter c " +
+            "WHERE c.course.id = :courseId " +
+            "AND (qa.status = 'COMPLETED' OR qa.status = 'EXPIRED') " +
+            "GROUP BY s.id, s.fullName, s.studentNumber, qa.quiz.id, qa.quiz.title, qa.chapterItem.id " +
+            "ORDER BY s.studentNumber ASC, ci.orderIndex ASC")
+    List<CourseQuizResultResponse> findMaxGradesByCourse(@Param("courseId") Integer courseId);
 }
 
 
