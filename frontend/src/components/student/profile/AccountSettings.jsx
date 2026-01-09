@@ -3,16 +3,17 @@ import { Select } from "antd";
 import { PencilIcon } from "@heroicons/react/24/solid";
 
 export default function AccountSettings() {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      return (
-        localStorage.getItem("theme") === "dark" ||
-        (!("theme" in localStorage) &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches)
-      );
-    }
-    return false;
-  });
+  // const [isDarkMode, setIsDarkMode] = useState(() => {
+  //   if (typeof window !== "undefined") {
+  //     return (
+  //       localStorage.getItem("theme") === "dark" ||
+  //       (!("theme" in localStorage) &&
+  //         window.matchMedia("(prefers-color-scheme: dark)").matches)
+  //     );
+  //   }
+  //   return false;
+  // });
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
 

@@ -18,6 +18,7 @@ import LectureDetail from "./pages/teacher/LectureDetail";
 import QuizDetail from "./pages/teacher/QuizDetail";
 import TeacherProfilePage from "./pages/teacher/TeacherProfilePage";
 import TeacherSettingsPage from "./pages/teacher/TeacherSettingsPage";
+import TeacherStudentManagement from "./pages/teacher/TeacherStudentManagement";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import AdminProfilePage from "./pages/admin/AdminProfilePage";
@@ -236,6 +237,15 @@ export default function App() {
             element={
               <ProtectedRoute
                 element={<QuizDetail />}
+                allowedRoles={["TEACHER"]}
+              />
+            }
+          />
+          <Route
+            path="/teacher/students"
+            element={
+              <ProtectedRoute
+                element={<TeacherStudentManagement />}
                 allowedRoles={["TEACHER"]}
               />
             }
