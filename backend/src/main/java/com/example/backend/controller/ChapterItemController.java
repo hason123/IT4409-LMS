@@ -20,7 +20,7 @@ public class ChapterItemController {
 
     private final ChapterItemService chapterItemService;
 
-    @Operation(summary = "Lấy danh sách item trong chương")
+    @Operation(summary = "Lấy danh sách item trong chương dành cho giáo viên và admin")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
     @GetMapping("/chapters/{chapterId}/items")
     public ResponseEntity<List<ChapterItemResponse>> getItemsByChapter(
@@ -28,6 +28,17 @@ public class ChapterItemController {
     ) {
         return ResponseEntity.ok(
                 chapterItemService.getItemsByChapter(chapterId)
+        );
+    }
+
+    @Operation(summary = "Lấy danh sách item trong chương dành cho sinh viên")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
+    @GetMapping("/chapters/{chapterId}/items/student")
+    public ResponseEntity<List<ChapterItemResponse>> getItemsByChapterForStudent(
+            @PathVariable Integer chapterId
+    ) {
+        return ResponseEntity.ok(
+                chapterItemService.getItemsByChapterForStudent(chapterId)
         );
     }
 

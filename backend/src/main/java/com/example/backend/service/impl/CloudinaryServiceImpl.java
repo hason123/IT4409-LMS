@@ -60,4 +60,24 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             throw new BusinessException("Failed to delete file");
         }
     }
+
+    @Override
+    public CloudinaryResponse uploadEditorImage(MultipartFile file) {
+        try {
+            Map<String, Object> options = new HashMap<>();
+            options.put("folder", "quiz");
+            options.put("resource_type", "image");
+
+            Map result = cloudinary.uploader().upload(file.getBytes(), options);
+
+            return CloudinaryResponse.builder()
+                    .publicId((String) result.get("public_id"))
+                    .url((String) result.get("secure_url"))
+                    .type("image")
+                    .build();
+        } catch (Exception e) {
+            throw new BusinessException("Failed to upload editor image");
+        }
+    }
+
 }

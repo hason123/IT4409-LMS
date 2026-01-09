@@ -2,6 +2,7 @@ package com.example.backend.service.impl;
 
 import com.example.backend.constant.CourseStatus;
 import com.example.backend.constant.EnrollmentStatus;
+import com.example.backend.constant.ItemType;
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.EnrollmentRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
@@ -10,17 +11,11 @@ import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
-import com.example.backend.entity.Course;
-import com.example.backend.entity.CourseRating;
-import com.example.backend.entity.Enrollment;
-import com.example.backend.entity.User;
+import com.example.backend.entity.*;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
-import com.example.backend.repository.CourseRatingRepository;
-import com.example.backend.repository.CourseRepository;
-import com.example.backend.repository.EnrollmentRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repository.*;
 import com.example.backend.service.CourseService;
 import com.example.backend.service.EnrollmentService;
 import com.example.backend.service.NotificationService;
@@ -34,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -46,6 +42,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final NotificationService notificationService;
     private final CourseRatingRepository courseRatingRepository;
     private final CourseService courseService;
+    private final ProgressRepository progressRepository;
+    private final ChapterItemRepository chapterItemRepository;
 
     @Transactional
     @Override
@@ -188,6 +186,51 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return courseService.convertEntityToDto(course);
     }
 
+    @Transactional
+    @Override
+    public void completeLesson(Integer chapterItemId) {
+        User currentUser = userService.getCurrentUser();
+
+        // 1. Lấy thông tin ChapterItem
+        ChapterItem chapterItem = chapterItemRepository.findById(chapterItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bài giảng không tồn tại"));
+        Integer courseId = chapterItem.getChapter().getCourse().getId();
+
+        if(chapterItem.getType() != ItemType.LESSON){
+            throw new BusinessException("Đây không phải là bài giảng!");
+        }
+        boolean isEnrolled = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
+                currentUser.getId(), courseId, EnrollmentStatus.APPROVED);
+
+        if (!isEnrolled) {
+            throw new UnauthorizedException("Bạn chưa đăng ký hoặc chưa được duyệt vào khóa học này");
+        }
+
+        // 3. Cập nhật hoặc tạo mới StudentChapterItemProgress
+        StudentChapterItemProgress progress = progressRepository
+                .findByStudent_IdAndChapterItem_Id(currentUser.getId(), chapterItem.getId())
+                .orElse(StudentChapterItemProgress.builder()
+                        .student(currentUser)
+                        .chapterItem(chapterItem)
+                        .isCompleted(false)
+                        .build());
+
+        // 4. Nếu chưa hoàn thành thì mới cập nhật và tính lại %
+        if (!Boolean.TRUE.equals(progress.getIsCompleted())) {
+            progress.setIsCompleted(true);
+            progress.setCompletedAt(LocalDateTime.now());
+            progressRepository.save(progress);
+
+            // 5. Tính lại tổng % tiến độ cho Enrollment
+            if (chapterItem.getChapter() != null && chapterItem.getChapter().getCourse() != null) {
+                recalculateAndSaveProgress(
+                        currentUser.getId(),
+                        chapterItem.getChapter().getCourse().getId()
+                );
+            }
+        }
+    }
+
     @Override
     public EnrollmentResponse approveStudentToEnrollment(EnrollmentRequest request) {
         User currentUser = userService.getCurrentUser();
@@ -251,8 +294,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return response;
     }
 
-
-
     @Override
     public PageResponse<EnrollmentResponse> getStudentsPendingEnrollment(Integer courseId, Pageable pageable){
         if(!courseRepository.existsById(courseId)){
@@ -268,6 +309,25 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         );
         return response;
     }
+
+    @Override
+    public EnrollmentResponse getCurrentUserProgressByCourse(Integer courseId){
+        User currentStudent = userService.getCurrentUser();
+        Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(currentStudent.getId(), courseId, EnrollmentStatus.APPROVED);
+        if(enrollment == null){
+            throw new BusinessException("Bạn không nằm trong khóa học này!");
+        }
+        return convertEnrollmentToDTO(enrollment);
+    }
+
+    @Override
+    public EnrollmentResponse getEnrollmentById(Integer id){
+        Enrollment enrollment = enrollmentRepository.findById(id).orElseThrow(()
+                -> new ResourceNotFoundException("Không tìm thấy tài nguyên"));
+        return convertEnrollmentToDTO(enrollment);
+    }
+
+
 
     @Override
     public PageResponse<EnrollmentResponse> getEnrollmentPage(Pageable pageable){
@@ -311,6 +371,21 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 response.getTotalPages(),
                 response.getContent()
         );
+    }
+
+    @Override
+    public void recalculateAndSaveProgress(Integer studentId, Integer courseId) {
+        long totalItems = chapterItemRepository.countTotalItemsByCourseId(courseId);
+        if (totalItems == 0) return;
+        long completedItems = progressRepository.countCompletedItemsByStudentAndCourse(studentId, courseId);
+        int percent = (int) Math.round(((double) completedItems / totalItems) * 100);
+        if (percent > 100) percent = 100;
+        // 4. Update vào Enrollment
+        Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(studentId, courseId, EnrollmentStatus.APPROVED); // Cần viết hàm này trong repo nếu chưa có hoặc dùng hàm có sẵn
+        if (enrollment != null) {
+            enrollment.setProgress(percent);
+            enrollmentRepository.save(enrollment);
+        }
     }
 
     private Specification<User> buildBaseUserSearchSpec(SearchUserRequest request) {

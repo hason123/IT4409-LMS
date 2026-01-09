@@ -17,4 +17,6 @@ public interface CourseRepository extends JpaRepository<Course,Integer> {
 
     Optional<Course> findByClassCode(String classCode);
 
+    boolean existsByClassCode(String classCode);
+
 }

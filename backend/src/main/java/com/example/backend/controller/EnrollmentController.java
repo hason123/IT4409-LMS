@@ -7,6 +7,7 @@ import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
+import com.example.backend.service.CourseService;
 import com.example.backend.service.EnrollmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +27,7 @@ import java.util.Map;
 public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
-    public EnrollmentController(EnrollmentService enrollmentService) {
+    public EnrollmentController(EnrollmentService enrollmentService, CourseService courseService) {
         this.enrollmentService = enrollmentService;
     }
 
@@ -54,11 +55,26 @@ public class EnrollmentController {
     @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/courses/{courseId}/rating")
     public ResponseEntity<CourseResponse> ratingCourse(@PathVariable Integer courseId, @RequestBody Map<String, String> requestBody) {
-        // Giả sử body gửi lên là { "classCode": "CODE123" }
         Double rating = Double.valueOf(requestBody.get("rating"));
         CourseResponse response = enrollmentService.ratingCourse(courseId, rating);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @Operation(summary = "Đánh dấu hoàn thành LESSON")
+    @PreAuthorize("hasRole('STUDENT')")
+    @PostMapping("/chapter-items/{chapterItemId}/complete")
+    public ResponseEntity<Void> completeLesson(@PathVariable Integer chapterItemId) {
+        enrollmentService.completeLesson(chapterItemId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('STUDENT')")
+    @GetMapping("/my-progress/{courseId}")
+    public ResponseEntity<EnrollmentResponse> getCurrentUserProgressByCourse(@PathVariable Integer courseId){
+        EnrollmentResponse response =  enrollmentService.getCurrentUserProgressByCourse(courseId);
+        return ResponseEntity.ok().body(response);
+    }
+
 
     // ================= TEACHER/ADMIN APPROVAL & MANAGEMENT =================
 

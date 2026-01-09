@@ -1,26 +1,20 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.constant.EnrollmentStatus;
 import com.example.backend.constant.ItemType;
 import com.example.backend.dto.request.LessonRequest;
 import com.example.backend.dto.request.quiz.QuizRequest;
 import com.example.backend.dto.response.chapter.ChapterItemResponse;
 import com.example.backend.dto.response.LessonResponse;
 import com.example.backend.dto.response.quiz.QuizResponse;
-import com.example.backend.entity.Chapter;
-import com.example.backend.entity.ChapterItem;
-import com.example.backend.entity.Lesson;
-import com.example.backend.entity.Quiz;
-import com.example.backend.entity.QuizQuestion;
-import com.example.backend.entity.QuizAnswer;
+import com.example.backend.entity.*;
+import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
-import com.example.backend.repository.ChapterItemRepository;
-import com.example.backend.repository.ChapterRepository;
-import com.example.backend.repository.LessonRepository;
-import com.example.backend.repository.QuizRepository;
-import com.example.backend.repository.QuizQuestionRepository;
+import com.example.backend.repository.*;
 import com.example.backend.service.ChapterItemService;
 import com.example.backend.service.LessonService;
 import com.example.backend.service.QuizService;
+import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +34,9 @@ public class ChapterItemServiceImpl implements ChapterItemService {
     private final QuizRepository quizRepository;
     private final ChapterRepository chapterRepository;
     private final QuizService quizService;
-    private final QuizQuestionRepository quizQuestionRepository;
+    private final ProgressRepository progressRepository;
+    private final UserService userService;
+    private final EnrollmentRepository enrollmentRepository;
 
     @Transactional
     @Override
@@ -64,6 +60,66 @@ public class ChapterItemServiceImpl implements ChapterItemService {
             }
         }
         chapterItemRepository.saveAll(items);
+    }
+
+    @Override
+    public List<ChapterItemResponse> getItemsByChapterForStudent(Integer chapterId) {
+        // 1. Lấy User hiện tại
+        User currentUser = userService.getCurrentUser();
+
+        Chapter chapter = chapterRepository.findById(chapterId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chương!"));
+
+        if(!enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
+                currentUser.getId(), chapter.getCourse().getId(), EnrollmentStatus.APPROVED)){
+            throw new BusinessException("Bạn không nằm trong khóa học này!");
+        }
+        // 2. Lấy danh sách ID bài đã học xong (Query mới thêm)
+        List<Integer> completedIds = progressRepository.findCompletedItemIdsByUserAndChapter(
+                currentUser.getId(),
+                chapterId
+        );
+        // 3. Lấy danh sách Items từ DB (Logic cũ)
+        List<ChapterItem> items = chapterItemRepository.findByChapter_IdOrderByOrderIndexAsc(chapterId);
+        if (items.isEmpty()) return new ArrayList<>();
+
+        // 4. Batch query để lấy chi tiết Lesson/Quiz (Logic cũ)
+        List<Integer> lessonIds = items.stream().filter(i -> i.getType() == ItemType.LESSON).map(ChapterItem::getRefId).toList();
+        List<Integer> quizIds = items.stream().filter(i -> i.getType() == ItemType.QUIZ).map(ChapterItem::getRefId).toList();
+
+        Map<Integer, Lesson> lessonMap = lessonRepository.findAllById(lessonIds).stream()
+                .collect(Collectors.toMap(Lesson::getId, Function.identity()));
+
+        Map<Integer, Quiz> quizMap = quizRepository.findAllById(quizIds).stream()
+                .collect(Collectors.toMap(Quiz::getId, Function.identity()));
+        // 5. Map sang DTO và set isCompleted
+        return items.stream().map(ci -> {
+            Object detail = null;
+            if (ci.getType() == ItemType.LESSON) {
+                Lesson lesson = lessonMap.get(ci.getRefId());
+                if (lesson != null) detail = lessonService.convertEntityToDTO(lesson);
+            }
+            else if (ci.getType() == ItemType.QUIZ) {
+                Quiz quiz = quizMap.get(ci.getRefId());
+                if (quiz != null) detail = quizService.convertQuizToDTO(quiz);
+            }
+            // --- ĐOẠN KHÁC BIỆT ---
+            boolean isCompleted = completedIds.contains(ci.getId());
+            return buildResponseForStudent(ci, detail, isCompleted);
+        }).toList();
+    }
+
+    private ChapterItemResponse buildResponseForStudent(ChapterItem ci, Object itemDetail, Boolean isCompleted) {
+        ChapterItemResponse response = new ChapterItemResponse();
+        response.setId(ci.getId());
+        response.setType(ci.getType());
+        response.setOrderIndex(ci.getOrderIndex());
+        response.setItem(itemDetail);
+        response.setCompleted(isCompleted); // Set trạng thái
+
+        if (ci.getChapter() != null) {
+            response.setChapterId(ci.getChapter().getId());
+        }
+        return response;
     }
 
     @Transactional(readOnly = true)

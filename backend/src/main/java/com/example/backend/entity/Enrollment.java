@@ -12,8 +12,8 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name= "student_progress")
-@SQLDelete(sql = "UPDATE student_progress SET is_deleted = true WHERE id = ?")
+@Table(name= "enrollment")
+@SQLDelete(sql = "UPDATE enrollment SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
 public class Enrollment extends BaseEntity{
     @Id
