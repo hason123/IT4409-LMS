@@ -34,6 +34,10 @@ public interface EnrollmentService {
 
     PageResponse<EnrollmentResponse> getStudentsPendingEnrollment(Integer courseId, Pageable pageable);
 
+    EnrollmentResponse getCurrentUserProgressByCourse(Integer courseId);
+
+    EnrollmentResponse getEnrollmentById(Integer id);
+
     PageResponse<EnrollmentResponse> getEnrollmentPage(Pageable pageable);
 
     PageResponse<UserViewResponse> searchStudentsInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);

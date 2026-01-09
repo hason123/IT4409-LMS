@@ -294,8 +294,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return response;
     }
 
-
-
     @Override
     public PageResponse<EnrollmentResponse> getStudentsPendingEnrollment(Integer courseId, Pageable pageable){
         if(!courseRepository.existsById(courseId)){
@@ -310,6 +308,23 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 enrollmentResponse.getContent()
         );
         return response;
+    }
+
+    @Override
+    public EnrollmentResponse getCurrentUserProgressByCourse(Integer courseId){
+        User currentStudent = userService.getCurrentUser();
+        Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(currentStudent.getId(), courseId, EnrollmentStatus.APPROVED);
+        if(enrollment == null){
+            throw new BusinessException("Bạn không nằm trong khóa học này!");
+        }
+        return convertEnrollmentToDTO(enrollment);
+    }
+
+    @Override
+    public EnrollmentResponse getEnrollmentById(Integer id){
+        Enrollment enrollment = enrollmentRepository.findById(id).orElseThrow(()
+                -> new ResourceNotFoundException("Không tìm thấy tài nguyên"));
+        return convertEnrollmentToDTO(enrollment);
     }
 
     @Override

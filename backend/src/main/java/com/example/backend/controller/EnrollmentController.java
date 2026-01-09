@@ -68,6 +68,14 @@ public class EnrollmentController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
+    @GetMapping("/my-progress/{courseId}")
+    public ResponseEntity<EnrollmentResponse> getCurrentUserProgressByCourse(@PathVariable Integer courseId){
+        EnrollmentResponse response =  enrollmentService.getCurrentUserProgressByCourse(courseId);
+        return ResponseEntity.ok().body(response);
+    }
+
+
     // ================= TEACHER/ADMIN APPROVAL & MANAGEMENT =================
 
     @Operation(summary = "Phê duyệt yêu cầu tham gia khóa học")
