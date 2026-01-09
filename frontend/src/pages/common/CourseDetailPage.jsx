@@ -42,6 +42,56 @@ export default function CourseDetailPage() {
     }
   }, [id]);
 
+  // Helper function to render stars based on rating
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating || 0);
+    const hasHalfStar = (rating % 1) >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    const stars = [];
+
+    // Full stars
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <span
+          key={`full-${i}`}
+          className="material-symbols-outlined !text-base text-yellow-500"
+          style={{ fontVariationSettings: '"FILL" 1' }}
+        >
+          star
+        </span>
+      );
+    }
+
+    // Half star
+    if (hasHalfStar) {
+      stars.push(
+        <span
+          key="half"
+          className="material-symbols-outlined !text-base text-yellow-500"
+          style={{ fontVariationSettings: '"FILL" 1' }}
+        >
+          star_half
+        </span>
+      );
+    }
+
+    // Empty stars
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <span
+          key={`empty-${i}`}
+          className="material-symbols-outlined !text-base text-gray-300 dark:text-gray-600"
+          style={{ fontVariationSettings: '"FILL" 0' }}
+        >
+          star
+        </span>
+      );
+    }
+
+    return stars;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
@@ -91,11 +141,17 @@ export default function CourseDetailPage() {
                       </p>
                       <div className="flex items-center gap-4 text-sm text-gray-700 dark:text-gray-300 mt-2">
                         <div className="flex items-center gap-2">
-                          <img
-                            alt={`Avatar giảng viên ${course.teacherName}`}
-                            className="w-8 h-8 rounded-full object-cover"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhE6xdMrjAf3wdfHim4XGXWu3OqQvnxB4867xflSLd5V9-yT4yG-ZMEZiwrIirdOFJzHqSp2-MTT68oHt7LaXzL9ujl-dzXRiw7I9NOiXuUE1L9s1P3Kc3bolXXCDB6v5XhXbwdprTYw1DyT6YlY6D1-uN8gLHOsrNKkLNN40ldPvbDCyTUCXUnV7mBp3VNsJMOdl5pPtgJCCnpF1l9a9SFvc9W47I9P5dSub8YrS3UvjRb7xT_IEtbW2JljPyy3QAivITahhBpb4"
-                          />
+                          {course.teacherImageUrl ? (
+                            <img
+                              alt={`Avatar giảng viên ${course.teacherName}`}
+                              className="w-8 h-8 rounded-full object-cover"
+                              src={course.teacherImageUrl}
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-white font-semibold text-xs">
+                              {course.teacherName?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
                           <span>
                             Giảng viên:{" "}
                             <span className="font-semibold text-[#111418] dark:text-white">
@@ -104,38 +160,9 @@ export default function CourseDetailPage() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-yellow-500">4.7</span>
-                          <div className="flex text-yellow-500">
-                            <span
-                              className="material-symbols-outlined !text-base"
-                              style={{ fontVariationSettings: '"FILL" 1' }}
-                            >
-                              star
-                            </span>
-                            <span
-                              className="material-symbols-outlined !text-base"
-                              style={{ fontVariationSettings: '"FILL" 1' }}
-                            >
-                              star
-                            </span>
-                            <span
-                              className="material-symbols-outlined !text-base"
-                              style={{ fontVariationSettings: '"FILL" 1' }}
-                            >
-                              star
-                            </span>
-                            <span
-                              className="material-symbols-outlined !text-base"
-                              style={{ fontVariationSettings: '"FILL" 1' }}
-                            >
-                              star
-                            </span>
-                            <span
-                              className="material-symbols-outlined !text-base"
-                              style={{ fontVariationSettings: '"FILL" 1' }}
-                            >
-                              star_half
-                            </span>
+                          <span className="font-bold text-yellow-500">{course.rating?.toFixed(1) || "0.0"}</span>
+                          <div className="flex gap-0.5 text-yellow-500">
+                            {renderStars(course.rating)}
                           </div>
                           <span className="text-gray-500 dark:text-gray-400">
                             (12,455 đánh giá)

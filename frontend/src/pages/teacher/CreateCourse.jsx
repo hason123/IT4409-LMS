@@ -23,32 +23,6 @@ const whiteSpinner = (
   <LoadingOutlined style={{ fontSize: 16, color: "#fff" }} spin />
 );
 
-// Styles for disabled form inputs with better contrast
-const disabledFormStyles = `
-  .disabled-form .ant-input:disabled,
-  .disabled-form .ant-input-textarea-disabled textarea {
-    background-color: #f5f5f5 !important;
-    color: #262626 !important;
-    border-color: #d9d9d9 !important;
-  }
-  .disabled-form .ant-select-disabled .ant-select-selector {
-    background-color: #f5f5f5 !important;
-    border-color: #d9d9d9 !important;
-  }
-  .disabled-form .ant-select-disabled .ant-select-selector .ant-select-selection-item {
-    color: #262626 !important;
-  }
-  .disabled-form .ant-select-disabled .ant-select-selection-placeholder {
-    color: #8c8c8c !important;
-  }
-`;
-
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.textContent = disabledFormStyles;
-  document.head.appendChild(style);
-}
-
 export default function CreateCourse() {
   const { id } = useParams();
   const navigate = useNavigate();

@@ -188,8 +188,8 @@ export default function TeacherCourses() {
                       course.imageUrl ||
                       "https://via.placeholder.com/300x200?text=No+Image"
                     }
-                    status={"active"} // Mock status
-                    code={course.id} // Mock code
+                    status={course.status} // Mock status
+                    code={course.classCode} // Mock code
                     studentsCount={0} // Mock count
                     schedule={"Chưa có lịch"} // Mock schedule
                     onPreview={() => handlePreviewCourse(course.id)}

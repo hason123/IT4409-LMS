@@ -87,7 +87,7 @@ export default function CourseCard({
                   onClick={onEdit}
                   className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-3 bg-primary text-white text-xs font-bold leading-normal tracking-wide hover:bg-primary/90"
                 >
-                  Soạn thảo
+                  Chi tiết
                 </button>
                 <button
                   onClick={onPreview}

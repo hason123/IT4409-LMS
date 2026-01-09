@@ -288,3 +288,103 @@ textarea {
 .dark .view-mode-inputs .ant-select-disabled .ant-select-selection-item {
   color: rgb(243, 244, 246) !important;
 }
+
+/* Disabled form styles for course/quiz creation pages */
+.disabled-form .ant-input:disabled,
+.disabled-form .ant-input-textarea:disabled,
+.disabled-form .ant-input-textarea-disabled,
+.disabled-form .ant-input-textarea-disabled textarea,
+.disabled-form textarea:disabled {
+  background-color: #ffffff !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+  border-color: #d9d9d9 !important;
+  cursor: text !important;
+}
+
+.disabled-form .ant-input:disabled::placeholder,
+.disabled-form .ant-input-textarea:disabled::placeholder,
+.disabled-form textarea:disabled::placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.disabled-form .ant-select-disabled,
+.disabled-form .ant-select-disabled:hover {
+  cursor: default !important;
+}
+
+.disabled-form .ant-select-disabled .ant-select-selector {
+  background-color: #ffffff !important;
+  border-color: #d9d9d9 !important;
+  cursor: default !important;
+}
+
+.disabled-form .ant-select-disabled .ant-select-selector:hover {
+  background-color: #ffffff !important;
+  border-color: #d9d9d9 !important;
+  cursor: default !important;
+}
+
+.disabled-form .ant-select-disabled .ant-select-selection-item {
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.disabled-form .ant-select-disabled .ant-select-selection-placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.disabled-form input:disabled,
+.disabled-form textarea:disabled,
+.disabled-form select:disabled {
+  cursor: default !important;
+}
+
+/* Override Ant Design's cursor: not-allowed */
+.disabled-form * {
+  cursor: inherit !important;
+}
+
+.disabled-form .ant-input:disabled,
+.disabled-form textarea:disabled {
+  cursor: text !important;
+}
+
+.disabled-form .ant-select-disabled {
+  cursor: default !important;
+}
+
+/* Dark mode disabled form styles */
+.dark .disabled-form .ant-input:disabled,
+.dark .disabled-form .ant-input-textarea:disabled,
+.dark .disabled-form .ant-input-textarea-disabled,
+.dark .disabled-form .ant-input-textarea-disabled textarea,
+.dark .disabled-form textarea:disabled {
+  background-color: #1f2937 !important;
+  color: rgb(243, 244, 246) !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .disabled-form .ant-input:disabled::placeholder,
+.dark .disabled-form .ant-input-textarea:disabled::placeholder,
+.dark .disabled-form textarea:disabled::placeholder {
+  color: rgb(156, 163, 175) !important;
+}
+
+.dark .disabled-form .ant-select-disabled .ant-select-selector {
+  background-color: #1f2937 !important;
+  border-color: #4b5563 !important;
+  cursor: default !important;
+}
+
+.dark .disabled-form .ant-select-disabled .ant-select-selector:hover {
+  background-color: #1f2937 !important;
+  border-color: #4b5563 !important;
+  cursor: default !important;
+}
+
+.dark .disabled-form .ant-select-disabled .ant-select-selection-item {
+  color: rgb(243, 244, 246) !important;
+}
+
+.dark .disabled-form .ant-select-disabled .ant-select-selection-placeholder {
+  color: rgb(156, 163, 175) !important;
+}
