@@ -9,19 +9,80 @@ import {
   BellIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
+import {
+  getMyNotifications,
+  countUnreadNotifications,
+  markNotificationAsRead,
+} from "../../api/notification";
 
 export default function TeacherHeader({ toggleSidebar }) {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, isLoggedIn } = useAuth();
   const user = useUserStore((state) => state.user);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
+  // Fetch notifications when component mounts or when dropdown opens
+  useEffect(() => {
+    if (isLoggedIn && isNotificationOpen) {
+      fetchNotifications();
+    }
+  }, [isNotificationOpen, isLoggedIn]);
+
+  // Fetch unread count on mount
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUnreadCount();
+    }
+  }, [isLoggedIn]);
+
+  const fetchNotifications = async () => {
+    try {
+      setIsLoadingNotifications(true);
+      const response = await getMyNotifications();
+      setNotifications(response);
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+      setNotifications([]);
+    } finally {
+      setIsLoadingNotifications(false);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const count = await countUnreadNotifications();
+      setUnreadCount(count);
+    } catch (err) {
+      console.error("Failed to fetch unread count:", err);
+      setUnreadCount(0);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markNotificationAsRead(notificationId);
+      // Update local state
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.id === notificationId ? { ...notif, isRead: true } : notif
+        )
+      );
+      // Refresh unread count
+      fetchUnreadCount();
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
+
   // Dummy notifications - reuse from Header.jsx or fetch from API
-  const notifications = [
+  const mockNotifications = [
     {
       id: 1,
       title: "Bài tập mới",
@@ -122,23 +183,35 @@ export default function TeacherHeader({ toggleSidebar }) {
               className="relative flex items-center justify-center size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 focus:outline-none"
             >
               <BellIcon className="h-6 w-6" />
-              <div className="absolute top-1 right-1 flex items-center justify-center size-4 bg-red-500 text-white text-xs font-bold rounded-full">
-                3
-              </div>
+              {unreadCount > 0 && (
+                <div className="absolute top-1 right-1 flex items-center justify-center size-4 bg-red-500 text-white text-xs font-bold rounded-full">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </div>
+              )}
             </button>
 
             {isNotificationOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
                 <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Thông báo
+                    Thông báo {unreadCount > 0 && `(${unreadCount})`}
                   </h3>
                 </div>
-                <div>
-                  {notifications.map((notification) => (
+                <div className="max-h-96 overflow-y-auto">
+                  {isLoadingNotifications ? (
+                    <div className="px-4 py-3 text-center text-sm text-gray-500">
+                      Đang tải...
+                    </div>
+                  ) : notifications.length > 0 ? (
+                    notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0 relative"
+                      className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0 relative transition-colors"
+                      onClick={() => {
+                        if (!notification.isRead) {
+                          handleMarkAsRead(notification.id);
+                        }
+                      }}
                     >
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex-1 min-w-0">
@@ -157,11 +230,16 @@ export default function TeacherHeader({ toggleSidebar }) {
                         )}
                       </div>
                     </div>
-                  ))}
+                  ))
+                  ) : (
+                    <div className="px-4 py-3 text-center text-sm text-gray-500">
+                      Không có thông báo
+                    </div>
+                  )}
                 </div>
                 <div className="border-t border-gray-100 dark:border-gray-700">
                   <Link
-                    to="#"
+                    to="/notifications"
                     className="block px-4 py-2 text-xs font-medium text-center text-primary hover:text-primary/80"
                   >
                     Xem tất cả thông báo

@@ -7,6 +7,7 @@ import {
   UserGroupIcon,
   ChartBarIcon,
   Cog6ToothIcon,
+  BellIcon,
 } from "@heroicons/react/24/outline";
 
 export default function TeacherSidebar() {
@@ -39,6 +40,12 @@ export default function TeacherSidebar() {
           label="Báo cáo/Thống kê"
           active={currentPath === "/teacher/reports"}
           to="/teacher/reports"
+        />
+        <SidebarLink
+          icon={<BellIcon className="h-6 w-6" />}
+          label="Thông báo"
+          active={currentPath === "/notifications"}
+          to="/notifications"
         />
         <SidebarLink
           icon={<UserGroupIcon className="h-6 w-6" />}

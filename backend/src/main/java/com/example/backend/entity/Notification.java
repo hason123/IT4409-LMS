@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 @SQLDelete(sql = "UPDATE notifications SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
-public class Notification {
+public class Notification extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -35,3 +35,4 @@ public class Notification {
 
 
 }
+ 

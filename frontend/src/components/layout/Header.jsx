@@ -5,6 +5,11 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import useUserStore from "../../store/useUserStore";
 import { MagnifyingGlassIcon, BellIcon } from "@heroicons/react/24/outline";
+import {
+  getMyNotifications,
+  countUnreadNotifications,
+  markNotificationAsRead,
+} from "../../api/notification";
 
 export default function Header({ menuItems }) {
   const navigate = useNavigate();
@@ -16,6 +21,9 @@ export default function Header({ menuItems }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
@@ -28,29 +36,58 @@ export default function Header({ menuItems }) {
 
   const itemsToRender = menuItems || defaultMenuItems;
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Khóa học mới",
-      message: 'Khóa học "ReactJS Nâng Cao" vừa được xuất bản.',
-      time: "2 giờ trước",
-      isRead: false,
-    },
-    {
-      id: 2,
-      title: "Nhắc nhở học tập",
-      message: "Bạn chưa hoàn thành bài tập của ngày hôm nay.",
-      time: "5 giờ trước",
-      isRead: false,
-    },
-    {
-      id: 3,
-      title: "Cập nhật hệ thống",
-      message: "Hệ thống sẽ bảo trì vào lúc 00:00 ngày mai.",
-      time: "1 ngày trước",
-      isRead: true,
-    },
-  ];
+  // Fetch notifications when component mounts or when dropdown opens
+  useEffect(() => {
+    if (isLoggedIn && isNotificationOpen) {
+      fetchNotifications();
+    }
+  }, [isNotificationOpen, isLoggedIn]);
+
+  // Fetch unread count on mount
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUnreadCount();
+    }
+  }, [isLoggedIn]);
+
+  const fetchNotifications = async () => {
+    try {
+      setIsLoadingNotifications(true);
+      const response = await getMyNotifications();
+      setNotifications(response.data);
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+      setNotifications([]);
+    } finally {
+      setIsLoadingNotifications(false);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const count = await countUnreadNotifications();
+      setUnreadCount(count.data);
+    } catch (err) {
+      console.error("Failed to fetch unread count:", err);
+      setUnreadCount(0);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markNotificationAsRead(notificationId);
+      // Update local state
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.id === notificationId ? { ...notif, isRead: true } : notif
+        )
+      );
+      // Refresh unread count
+      fetchUnreadCount();
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
 
   // Helper function to check if a path is active
   const isActive = (path) => {
@@ -141,21 +178,33 @@ export default function Header({ menuItems }) {
                     className="text-[#111418] dark:text-white hover:text-primary transition-colors relative p-1 focus:outline-none"
                   >
                     <BellIcon className="h-6 w-6" />
-                    <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900"></span>
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900"></span>
+                    )}
                   </button>
 
                   {isNotificationOpen && (
                     <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
                       <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                          Thông báo
+                          Thông báo {unreadCount > 0 && `(${unreadCount})`}
                         </h3>
                       </div>
-                      <div>
-                        {notifications.map((notification) => (
+                      <div className="max-h-96 overflow-y-auto">
+                        {isLoadingNotifications ? (
+                          <div className="px-4 py-3 text-center text-sm text-gray-500">
+                            Đang tải...
+                          </div>
+                        ) : notifications.length > 0 ? (
+                          notifications.map((notification) => (
                           <div
                             key={notification.id}
-                            className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0 relative"
+                            className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0 relative transition-colors"
+                            onClick={() => {
+                              if (!notification.isRead) {
+                                handleMarkAsRead(notification.id);
+                              }
+                            }}
                           >
                             <div className="flex justify-between items-start gap-3">
                               <div className="flex-1 min-w-0">
@@ -174,11 +223,16 @@ export default function Header({ menuItems }) {
                               )}
                             </div>
                           </div>
-                        ))}
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-center text-sm text-gray-500">
+                            Không có thông báo
+                          </div>
+                        )}
                       </div>
                       <div className="border-t border-gray-100 dark:border-gray-700">
                         <Link
-                          to="#"
+                          to="/notifications"
                           className="block px-4 py-2 text-xs font-medium text-center text-primary hover:text-primary/80"
                         >
                           Xem tất cả thông báo

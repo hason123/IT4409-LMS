@@ -6,6 +6,7 @@ import AuthPage from "./pages/auth/AuthPage";
 import Home from "./pages/student/Home";
 import CoursesPage from "./pages/common/CoursesPage";
 import CourseDetailPage from "./pages/common/CourseDetailPage";
+import NotificationsPage from "./pages/common/NotificationsPage";
 import QuizAttempt from "./pages/student/QuizAttempt";
 import QuizResult from "./pages/student/QuizResult";
 import ProfilePage from "./pages/student/ProfilePage";
@@ -101,8 +102,16 @@ export default function App() {
             path="/register"
             element={<AuthPage defaultTab="register" />}
           />
-
           {/* Common Routes (Student, Teacher, Admin) */}
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute
+                element={<NotificationsPage />}
+                allowedRoles={["STUDENT", "TEACHER", "ADMIN"]}
+              />
+            }
+          />
           <Route
             path="/courses"
             element={
