@@ -241,3 +241,50 @@ button:hover {
 textarea {
   height: 190px !important;
 }
+
+/* View mode styles for disabled inputs */
+.view-mode-inputs .ant-input:disabled,
+.view-mode-inputs .ant-input-number-disabled,
+.view-mode-inputs .ant-picker-disabled,
+.view-mode-inputs textarea:disabled {
+  background-color: #ffffff !important;
+  cursor: text !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.view-mode-inputs .ant-input-disabled::placeholder,
+.view-mode-inputs .ant-input-number-disabled::placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.view-mode-inputs .ant-select-disabled .ant-select-selector {
+  background-color: #ffffff !important;
+  cursor: pointer !important;
+}
+
+.view-mode-inputs .ant-select-disabled .ant-select-selection-item {
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.dark .view-mode-inputs .ant-input:disabled,
+.dark .view-mode-inputs .ant-input-number-disabled,
+.dark .view-mode-inputs .ant-picker-disabled,
+.dark .view-mode-inputs textarea:disabled {
+  background-color: #1f2937 !important;
+  cursor: text !important;
+  color: rgb(243, 244, 246) !important;
+}
+
+.dark .view-mode-inputs .ant-input-disabled::placeholder,
+.dark .view-mode-inputs .ant-input-number-disabled::placeholder {
+  color: rgb(156, 163, 175) !important;
+}
+
+.dark .view-mode-inputs .ant-select-disabled .ant-select-selector {
+  background-color: #1f2937 !important;
+  cursor: pointer !important;
+}
+
+.dark .view-mode-inputs .ant-select-disabled .ant-select-selection-item {
+  color: rgb(243, 244, 246) !important;
+}

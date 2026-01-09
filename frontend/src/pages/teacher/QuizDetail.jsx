@@ -4,14 +4,17 @@ import { Select, DatePicker, Form, Input, Button, Checkbox, Radio, message, Spin
 import dayjs from "dayjs";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
-import { createQuiz, createQuizInChapter, getQuizById } from "../../api/quiz";
+import { createQuiz, createQuizInChapter, getQuizById, updateQuiz } from "../../api/quiz";
 import {
   TrashIcon,
   PlusCircleIcon,
   CheckCircleIcon,
   XMarkIcon,
   CheckIcon,
+  PencilIcon,
+  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
+import { getCourseById } from "../../api/course";
 
 export default function QuizDetail() {
   const { courseId, quizId, chapterId } = useParams();
@@ -21,6 +24,8 @@ export default function QuizDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
   const [error, setError] = useState(null);
+  const [isViewMode, setIsViewMode] = useState(isEditMode);
+  const [course, setCourse] = useState(null);
 
   const [quizData, setQuizData] = useState({
     title: "",
@@ -33,6 +38,7 @@ export default function QuizDetail() {
         id: 1,
         type: "SINGLE_CHOICE",
         content: "",
+        points: 1,
         answers: [
           { id: 1, content: "", isCorrect: true },
           { id: 2, content: "", isCorrect: false },
@@ -41,6 +47,23 @@ export default function QuizDetail() {
       },
     ],
   });
+
+  useEffect(() => {
+      fetchCourse();
+    }, [courseId]);
+  
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        const response = await getCourseById(courseId);
+        setCourse(response.data);
+      } catch (err) {
+        setError("Không thể tải thông tin khóa học");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   useEffect(() => {
     if (isEditMode && quizId) {
@@ -64,6 +87,8 @@ export default function QuizDetail() {
         timeLimitMinutes: quiz.timeLimitMinutes ? String(quiz.timeLimitMinutes) : "30",
         minPassScore: quiz.minPassScore || undefined,
         maxAttempts: quiz.maxAttempts || undefined,
+        availableFrom: quiz.availableFrom ? dayjs(quiz.availableFrom) : null,
+        availableUntil: quiz.availableUntil ? dayjs(quiz.availableUntil) : null,
       });
 
       // Update quiz data with questions from backend
@@ -71,6 +96,7 @@ export default function QuizDetail() {
         id: q.id,
         type: q.type || "SINGLE_CHOICE",
         content: q.content || "",
+        points: q.points || 1,
         answers: (q.answers || []).map(a => ({
           id: a.id,
           content: a.content || "",
@@ -104,6 +130,7 @@ export default function QuizDetail() {
           id: Date.now(),
           type: "SINGLE_CHOICE",
           content: "",
+          points: 1,
           answers: [
             { id: 1, content: "", isCorrect: false },
             { id: 2, content: "", isCorrect: false },
@@ -134,6 +161,17 @@ export default function QuizDetail() {
       ...quizData,
       questions: quizData.questions.map((q) =>
         q.id === questionId ? { ...q, content } : q
+      ),
+    });
+  };
+
+  const handlePointsChange = (questionId, points) => {
+    // allow empty string for input clearing
+    const newPoints = points === "" ? "" : parseInt(points);
+    setQuizData({
+      ...quizData,
+      questions: quizData.questions.map((q) =>
+        q.id === questionId ? { ...q, points: newPoints } : q
       ),
     });
   };
@@ -267,20 +305,41 @@ export default function QuizDetail() {
         }
       }
 
+      // Process questions to ensure IDs are handled correctly for backend
+      // Real IDs are small integers. Temp IDs are Date.now() (very large).
+      // We set ID to null for temp IDs so backend treats them as new.
+      const processedQuestions = quizData.questions.map(q => {
+        const isTempId = q.id > 2000000000; // a simple heuristic, or check if it was present in initial load
+        return {
+          ...q,
+          id: isTempId ? null : q.id,
+          // Ensure points is sent (default 1)
+          points: q.points || 1,
+          answers: q.answers.map(a => {
+            const isTempAnswerId = a.id > 2000000000;
+            return {
+              ...a,
+              id: isTempAnswerId ? null : a.id
+            };
+          })
+        };
+      });
+
       const formData = {
         ...values,
         timeLimitMinutes: parseInt(values.timeLimitMinutes) || 30,
         minPassScore: values.minPassScore ? parseInt(values.minPassScore) : 0,
         maxAttempts: values.maxAttempts ? parseInt(values.maxAttempts) : null,
-        questions: quizData.questions,
+        availableFrom: values.availableFrom ? values.availableFrom.toISOString() : null,
+        availableUntil: values.availableUntil ? values.availableUntil.toISOString() : null,
+        questions: processedQuestions,
       };
 
       let response;
       if (isEditMode) {
         // Update existing quiz
-        // TODO: Implement update
-        message.info("Chức năng cập nhật đang được phát triển");
-        return;
+        response = await updateQuiz(quizId, formData);
+        message.success("Cập nhật bài kiểm tra thành công");
       } else {
         // Create new quiz
         if (chapterId) {
@@ -298,17 +357,35 @@ export default function QuizDetail() {
           if (chapterId) {
             navigate(`/teacher/courses/${courseId}`);
           } else {
-            navigate(`/teacher/courses/${courseId}`);
+            navigate(`/teacher/courses`);
           }
-        }, 500);
+        }, 1000);
       }
-    } catch (error) {
-      message.error(error.message || "Lỗi khi lưu bài kiểm tra");
-      console.error("Form submission error:", error);
-    } finally {
+      
+      if (isEditMode) {
+         // Stay on page or navigate? Usually stay or go back. Let's go back for consistency
+         setTimeout(() => {
+            navigate(-1);
+         }, 1000);
+      }
+
+    } catch (err) {
+      console.error(err);
+      message.error(err.message || "Có lỗi xảy ra");
       setSubmitting(false);
     }
   };
+      //       navigate(`/teacher/courses/${courseId}`);
+      //     }
+      //   }, 500);
+      // }
+    // } catch (error) {
+    //   message.error(error.message || "Lỗi khi lưu bài kiểm tra");
+    //   console.error("Form submission error:", error);
+    // } finally {
+    //   setSubmitting(false);
+    // }
+  // };
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
@@ -317,6 +394,15 @@ export default function QuizDetail() {
         <TeacherSidebar />
         <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 flex flex-col h-screen">
           <div className="flex-1 overflow-y-auto p-6 md:px-12 md:py-8">
+            <button
+              onClick={() => navigate(`/teacher/courses/${courseId}`)}
+              className="flex items-center gap-2 mb-3 text-primary hover:text-primary/80 transition-colors"
+            >
+              <ArrowLeftIcon className="w-5 h-5" />
+              <span className="font-medium">
+                Quay lại khóa học {course?.title}
+              </span>
+            </button>
             {loading ? (
               <div className="flex justify-center items-center h-full">
                 <Spin size="large" tip="Đang tải dữ liệu..." />
@@ -331,41 +417,26 @@ export default function QuizDetail() {
               />
             ) : (
             <div className="mx-auto flex flex-col gap-4 pb-24">
-              {/* Breadcrumbs */}
-              <div className="flex flex-wrap gap-2 text-sm">
-                <Link
-                  to="/teacher/courses"
-                  className="text-[#617589] dark:text-gray-400 font-medium hover:text-primary transition-colors"
-                >
-                  Khóa học
-                </Link>
-                <span className="text-[#617589] dark:text-gray-400 font-medium">
-                  /
-                </span>
-                <Link
-                  to={`/courses/${courseId}`}
-                  className="text-[#617589] dark:text-gray-400 font-medium hover:text-primary transition-colors"
-                >
-                  Chi tiết khóa học
-                </Link>
-                <span className="text-[#617589] dark:text-gray-400 font-medium">
-                  /
-                </span>
-                <span className="text-[#111418] dark:text-white font-medium">
-                  {isEditMode ? "Chỉnh sửa Quiz" : "Tạo Bài kiểm tra mới"}
-                </span>
-              </div>
-
               {/* Page Heading */}
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <h1 className="text-3xl font-black text-[#111418] dark:text-white tracking-tight">
-                    {isEditMode ? "Chỉnh sửa Quiz" : "Tạo Quiz mới"}
+                    {isViewMode ? "Xem Quiz" : (isEditMode ? "Chỉnh sửa Quiz" : "Tạo Quiz mới")}
                   </h1>
                   <p className="text-[#617589] dark:text-gray-400 mt-1">
                     Thiết lập bài kiểm tra trắc nghiệm cho khóa học này.
                   </p>
                 </div>
+                {isEditMode && isViewMode && (
+                  <Button
+                    type="primary"
+                    onClick={() => setIsViewMode(false)}
+                    className="px-6 py-2.5 h-10 rounded-lg font-bold flex items-center gap-2"
+                    icon={<PencilIcon className="h-4 w-4" />}
+                  >
+                    Chỉnh sửa
+                  </Button>
+                )}
               </div>
 
               {/* General Settings Card */}
@@ -373,6 +444,7 @@ export default function QuizDetail() {
                 layout="vertical"
                 form={form}
                 onFinish={handleFormSubmit}
+                className={isViewMode ? "view-mode-inputs" : ""}
                 initialValues={{
                   title: "",
                   description: "",
@@ -404,6 +476,7 @@ export default function QuizDetail() {
                     <Input
                       placeholder="Nhập tiêu đề bài kiểm tra..."
                       className="h-12"
+                      disabled={isViewMode}
                     />
                   </Form.Item>
                   {/* Duration */}
@@ -426,6 +499,7 @@ export default function QuizDetail() {
                       type="number"
                       className="h-12"
                       min={0}
+                      disabled={isViewMode}
                     />
                   </Form.Item>
                   {/* Min Pass Score */}
@@ -443,6 +517,7 @@ export default function QuizDetail() {
                       className="h-12"
                       min={0}
                       max={100}
+                      disabled={isViewMode}
                     />
                   </Form.Item>
                   {/* Max Attempts */}
@@ -459,7 +534,30 @@ export default function QuizDetail() {
                       type="number"
                       className="h-12"
                       min={0}
+                      disabled={isViewMode}
                     />
+                  </Form.Item>
+                  {/* Available From */}
+                  <Form.Item
+                    label={
+                      <span className="text-[#111418] dark:text-gray-200 text-base font-medium">
+                        Ngày mở (Tùy chọn)
+                      </span>
+                    }
+                    name="availableFrom"
+                  >
+                    <DatePicker showTime className="h-12 w-full" placeholder="Chọn ngày giờ mở" disabled={isViewMode} />
+                  </Form.Item>
+                  {/* Available Until */}
+                  <Form.Item
+                    label={
+                      <span className="text-[#111418] dark:text-gray-200 text-base font-medium">
+                        Ngày đóng (Tùy chọn)
+                      </span>
+                    }
+                    name="availableUntil"
+                  >
+                    <DatePicker showTime className="h-12 w-full" placeholder="Chọn ngày giờ đóng" disabled={isViewMode} />
                   </Form.Item>
                   {/* Description */}
                   <Form.Item
@@ -475,6 +573,7 @@ export default function QuizDetail() {
                       placeholder="Thêm hướng dẫn hoặc ngữ cảnh cho học viên..."
                       rows={4}
                       className="rounded-lg text-sm"
+                      disabled={isViewMode}
                     />
                   </Form.Item>
 
@@ -491,6 +590,7 @@ export default function QuizDetail() {
               </div>
 
               {/* Questions List */}
+              <div className={isViewMode ? "view-mode-inputs" : ""}>
               {quizData.questions.map((question, index) => (
                 <div
                   key={question.id}
@@ -522,12 +622,26 @@ export default function QuizDetail() {
                             { value: "ESSAY", label: "Tự luận" },
                           ]}
                         />
+                        {/* Points Input */}
+                        <div className="flex items-center gap-2 ml-4">
+                           <span className="text-sm font-medium text-[#617589] dark:text-gray-400">Điểm:</span>
+                           <Input
+                             type="number"
+                             min={1}
+                             defaultValue={1}
+                             value={question.points}
+                             onChange={(e) => handlePointsChange(question.id, e.target.value)}
+                             className="w-20"
+                             disabled={isViewMode}
+                           />
+                        </div>
                       </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDeleteQuestion(question.id)}
                           className="p-2 text-[#617589] dark:text-gray-400 hover:text-red-500 transition-colors"
                           title="Xóa câu hỏi"
+                          disabled={isViewMode}
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>
@@ -544,6 +658,7 @@ export default function QuizDetail() {
                         value={question.content}
                         onChange={(e) => handleQuestionChange(question.id, e.target.value)}
                         className="border border-gray-300 dark:border-gray-600 rounded"
+                        disabled={isViewMode}
                       />
                     </div>
                     {/* Answer Options */}
@@ -600,6 +715,7 @@ export default function QuizDetail() {
                                     : ""
                                 }`}
                                 status={option.isCorrect ? "success" : ""}
+                                disabled={isViewMode}
                               />
                               {option.isCorrect && (
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 dark:text-green-400 text-xs font-bold flex items-center gap-1">
@@ -615,6 +731,7 @@ export default function QuizDetail() {
                               }
                               className="opacity-0 group-hover:opacity-100 p-1 text-[#617589] hover:text-red-500 transition-all"
                               icon={<XMarkIcon className="h-5 w-5" />}
+                              disabled={isViewMode}
                             />
                           </div>
                         ))}
@@ -622,6 +739,7 @@ export default function QuizDetail() {
                         <button
                           onClick={() => handleAddOption(question.id)}
                           className="flex items-center gap-2 text-primary hover:text-blue-600 text-sm font-bold py-2 w-fit"
+                          disabled={isViewMode}
                         >
                           <PlusCircleIcon className="h-5 w-5" />
                           Thêm lựa chọn khác
@@ -631,11 +749,13 @@ export default function QuizDetail() {
                   </div>
                 </div>
               ))}
+              </div>
 
               {/* Add Question Button */}
               <button
                 onClick={handleAddQuestion}
                 className="w-full py-4 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 text-[#617589] dark:text-gray-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
+                disabled={isViewMode}
               >
                 <PlusCircleIcon className="h-8 w-8 group-hover:scale-110 transition-transform" />
                 <span className="font-bold">Thêm câu hỏi mới</span>
@@ -643,12 +763,13 @@ export default function QuizDetail() {
             </div>
             )}
           </div>
+              {/* </div> */}
 
           {/* Sticky Bottom Actions */}
-          {!loading && (
+          {!loading && !isViewMode && (
           <div className="w-full bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between md:justify-end gap-4 shrink-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
             <Button
-              onClick={() => navigate(-1)}
+              onClick={() => isEditMode ? setIsViewMode(true) : navigate(-1)}
               className="px-6 py-2.5 rounded-lg w-full md:w-auto"
               disabled={submitting}
             >
@@ -663,7 +784,7 @@ export default function QuizDetail() {
               disabled={submitting}
               loading={submitting}
             >
-              {submitting ? "Đang lưu..." : "Lưu & Xuất bản"}
+              {submitting ? "Đang lưu..." : (isEditMode ? "Cập nhật Quiz" : "Lưu & Xuất bản")}
             </Button>
           </div>
           )}

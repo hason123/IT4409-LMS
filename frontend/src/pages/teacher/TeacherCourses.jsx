@@ -7,7 +7,7 @@ import {
   MagnifyingGlassIcon,
   PlusCircleIcon,
 } from "@heroicons/react/24/outline";
-import { getAllCourses } from "../../api/course";
+import { getTeacherCourses } from "../../api/course";
 import { Spin, Alert } from "antd";
 
 export default function TeacherCourses() {
@@ -25,9 +25,8 @@ export default function TeacherCourses() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      // Assuming getAllCourses fetches all courses for now.
-      // In a real app, you might want an API endpoint specifically for the teacher's courses.
-      const response = await getAllCourses(1, 100);
+      // Fetch courses specifically for the teacher
+      const response = await getTeacherCourses(1, 100);
       setCourses(response.data.pageList);
     } catch (err) {
       setError(err.message);

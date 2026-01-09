@@ -73,11 +73,11 @@ export default function CourseContent() {
     }
   };
 
-  const handleQuizClick = (quizId) => {
+  const handleQuizClick = (quizId, chapterItemId) => {
     if (user?.role === "TEACHER") {
       navigate(`/teacher/courses/${id}/quizzes/${quizId}`);
     } else {
-      navigate(`/quizzes/${quizId}/attempt`);
+      navigate(`/quizzes/${quizId}/attempt`, { state: { chapterItemId } });
     }
   };
 
@@ -219,7 +219,7 @@ export default function CourseContent() {
                             if (item.type === "LESSON") {
                               handleEditLecture(item.item?.id);
                             } else if (item.type === "QUIZ") {
-                              handleQuizClick(item.item?.id);
+                              handleQuizClick(item.item?.id, item.id);
                             }
                           }}
                         >

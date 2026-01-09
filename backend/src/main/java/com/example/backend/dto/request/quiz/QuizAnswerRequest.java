@@ -6,6 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizAnswerRequest {
+    private Integer id;
     private String content;
     private Boolean isCorrect;
 }

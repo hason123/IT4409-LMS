@@ -160,9 +160,11 @@ public class ChapterItemServiceImpl implements ChapterItemService {
         // 3. Tạo questions và answers nếu có
         if (request.getQuestions() != null && !request.getQuestions().isEmpty()) {
             for (var questionReq : request.getQuestions()) {
+                System.out.println("Creating question: " + questionReq.getContent() + " with points: " + questionReq.getPoints());
                 QuizQuestion question = new QuizQuestion();
                 question.setContent(questionReq.getContent());
                 question.setType(questionReq.getType());
+                question.setPoints(questionReq.getPoints());
                 question.setQuiz(quiz);
                 
                 // Tạo answers nếu có

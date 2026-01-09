@@ -9,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizQuestionRequest {
+    private Integer id;
     private String content;
     private QuestionType type;
     private Integer points;

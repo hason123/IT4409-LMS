@@ -1,9 +1,9 @@
-const API_URL = "http://localhost:8080/api/v1/lms/courses";
+const API_URL = "http://localhost:8080/api/v1/lms";
 
 export async function getAllCourses(pageNumber = 1, pageSize = 10) {
   const token = localStorage.getItem("accessToken");
   const response = await fetch(
-    `${API_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    `${API_URL}/courses?pageNumber=${pageNumber}&pageSize=${pageSize}`,
     {
       method: "GET",
       headers: {
@@ -20,9 +20,89 @@ export async function getAllCourses(pageNumber = 1, pageSize = 10) {
   return await response.json();
 }
 
+export async function getAdminCourses(pageNumber = 1, pageSize = 10) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/admin/courses?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch admin courses");
+  }
+
+  return await response.json();
+}
+
+export async function getTeacherCourses(pageNumber = 1, pageSize = 10) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/teacher/courses?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch teacher courses");
+  }
+
+  return await response.json();
+}
+
+export async function getApprovedCourses(pageNumber = 1, pageSize = 10) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/courses/approved?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch approved courses");
+  }
+
+  return await response.json();
+}
+
+export async function getPendingCourses(pageNumber = 1, pageSize = 10) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/courses/pending?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch pending courses");
+  }
+
+  return await response.json();
+}
+
 export async function getCourseById(id) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_URL}/courses/${id}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -39,7 +119,7 @@ export async function getCourseById(id) {
 
 export async function createCourse(courseData) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(API_URL, {
+  const response = await fetch(`${API_URL}/courses`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -61,7 +141,7 @@ export async function uploadCourseImage(courseId, file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_URL}/${courseId}/avatar`, {
+  const response = await fetch(`${API_URL}/courses/${courseId}/avatar`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -78,7 +158,7 @@ export async function uploadCourseImage(courseId, file) {
 
 export async function updateCourse(id, courseData) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_URL}/courses/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -97,7 +177,7 @@ export async function updateCourse(id, courseData) {
 
 export async function deleteCourse(id) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_URL}/courses/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
