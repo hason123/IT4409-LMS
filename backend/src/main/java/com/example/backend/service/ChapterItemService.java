@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface ChapterItemService {
+    List<ChapterItemResponse> getItemsByChapterForStudent(Integer chapterId);
+
     @Transactional(readOnly = true)
     List<ChapterItemResponse> getItemsByChapter(Integer chapterId);
 
