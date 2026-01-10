@@ -73,16 +73,16 @@ export default function MyCourses() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-2">
             {courses.map((course) => (
               <CourseCard
                 key={course.id}
                 id={course.id}
-                title={course.title || course.courseName}
-                author={course.instructor?.fullName || course.author || "Unknown"}
-                image={course.avatar || course.image}
+                title={course.title}
+                author={course.teacherName}
+                image={course.imageUrl}
                 rating={course.rating || 0}
-                reviews={course.reviewCount?.toString() || "0"}
+                reviews={course.reviewCounts?.toString() || "0"}
               />
             ))}
           </div>

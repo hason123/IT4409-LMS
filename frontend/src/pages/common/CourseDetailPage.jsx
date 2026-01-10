@@ -36,8 +36,9 @@ export default function CourseDetailPage() {
         
         // Check enrollment status if user is a student
         if (isStudent) {
-          const data = await checkEnrollmentStatus(id);
-          setEnrollmentStatus(data.enrollmentStatus);
+          const res = await checkEnrollmentStatus(id);
+          // console.log("Enrollment status:", res);
+          setEnrollmentStatus(res.data.enrollmentStatus);
         }
       } catch (err) {
         setError(err.message);
@@ -221,7 +222,7 @@ export default function CourseDetailPage() {
                             {renderStars(course.rating)}
                           </div>
                           <span className="text-gray-500 dark:text-gray-400">
-                            (12,455 đánh giá)
+                            ({course.reviewCounts || 0} đánh giá)
                           </span>
                         </div>
                       </div>
@@ -319,17 +320,17 @@ export default function CourseDetailPage() {
                       )}
                       {!isTeacherOrAdmin && enrollmentStatus === "PENDING" && (
                         <div className="w-full h-12 bg-yellow-100 dark:bg-yellow-900 border-2 border-yellow-500 rounded-lg flex items-center justify-center text-yellow-700 dark:text-yellow-200 font-bold">
-                          ⏳ Chờ duyệt
+                          Chờ duyệt
                         </div>
                       )}
                       {!isTeacherOrAdmin && enrollmentStatus === "APPROVED" && (
                         <div className="w-full h-12 bg-green-100 dark:bg-green-900 border-2 border-green-500 rounded-lg flex items-center justify-center text-green-700 dark:text-green-200 font-bold">
-                          ✓ Đã đăng ký khóa học
+                          Đã đăng ký khóa học
                         </div>
                       )}
                       {!isTeacherOrAdmin && enrollmentStatus === "REJECTED" && (
                         <div className="w-full h-12 bg-red-100 dark:bg-red-900 border-2 border-red-500 rounded-lg flex items-center justify-center text-red-700 dark:text-red-200 font-bold">
-                          ✗ Yêu cầu bị từ chối
+                          Yêu cầu bị từ chối
                         </div>
                       )}
                     </div>

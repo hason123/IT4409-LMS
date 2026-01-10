@@ -7,8 +7,10 @@ import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
+import com.example.backend.entity.User;
 import com.example.backend.service.CourseService;
 import com.example.backend.service.EnrollmentService;
+import com.example.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
@@ -26,9 +28,11 @@ import java.util.Map;
 @Tag(name = "Enrollment Management", description = "APIs for managing course enrollments and student registrations")
 public class EnrollmentController {
     private final EnrollmentService enrollmentService;
+    private final UserService userService;
 
-    public EnrollmentController(EnrollmentService enrollmentService, CourseService courseService) {
+    public EnrollmentController(EnrollmentService enrollmentService, CourseService courseService, UserService userService) {
         this.enrollmentService = enrollmentService;
+        this.userService = userService;
     }
 
     // ================= STUDENT SELF-ENROLLMENT =================
@@ -126,6 +130,21 @@ public class EnrollmentController {
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
         PageResponse<EnrollmentResponse> response = enrollmentService.getEnrollmentPage(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Lấy danh sách enrollments của giáo viên", description = "Get all enrollments for teacher's courses")
+    @PreAuthorize("hasRole('TEACHER')")
+    @GetMapping("/teacher/enrollments")
+    public ResponseEntity<PageResponse<EnrollmentResponse>> getTeacherEnrollments(
+            @RequestParam(value = "courseId", required = false) Integer courseId,
+            @RequestParam(value = "approvalStatus", required = false) String approvalStatus,
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        User currentUser = userService.getCurrentUser();
+        Integer teacherId = currentUser.getId();
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        PageResponse<EnrollmentResponse> response = enrollmentService.getTeacherEnrollments(teacherId, courseId, approvalStatus, pageable);
         return ResponseEntity.ok(response);
     }
 

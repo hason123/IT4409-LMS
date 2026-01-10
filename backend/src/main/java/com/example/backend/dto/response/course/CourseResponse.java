@@ -22,6 +22,7 @@ public class CourseResponse {
     private String cloudinaryImageId;
     private String classCode;
     private Double rating;
+    private Long reviewCounts;
     @Enumerated(EnumType.STRING)
     private CourseStatus status;
 }

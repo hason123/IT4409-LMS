@@ -16,4 +16,8 @@ public interface CourseRatingRepository extends JpaRepository<CourseRating,Integ
     // Tính điểm trung bình của một khóa học
     @Query("SELECT AVG(cr.ratingValue) FROM CourseRating cr WHERE cr.course.id = :courseId")
     Double getAverageRating(@Param("courseId") Integer courseId);
+
+    // Đếm số lượng reviews của một khóa học
+    @Query("SELECT COUNT(cr.id) FROM CourseRating cr WHERE cr.course.id = :courseId")
+    Long countReviewsByCourse(@Param("courseId") Integer courseId);
 }

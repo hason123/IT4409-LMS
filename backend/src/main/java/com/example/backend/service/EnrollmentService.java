@@ -45,4 +45,6 @@ public interface EnrollmentService {
     PageResponse<UserViewResponse> searchStudentsNotInCourse(Integer courseId, SearchUserRequest request, Pageable pageable);
 
     void recalculateAndSaveProgress(Integer studentId, Integer courseId);
+
+    PageResponse<EnrollmentResponse> getTeacherEnrollments(Integer teacherId, Integer courseId, String approvalStatus, Pageable pageable);
 }

@@ -243,12 +243,130 @@ export async function checkEnrollmentStatus(courseId) {
       Authorization: `Bearer ${token}`,
     },
   });
+  return await response.json();
+
+  // if (!response.ok) {
+  //   // If endpoint doesn't exist or error, return false (not enrolled)
+  //   return false;
+  // }
+
+  // const data = await response.json();
+  // return data.enrolled || data.isEnrolled || false;
+}
+
+export async function getTeacherEnrollments(pageNumber = 1, pageSize = 10, courseId = null, approvalStatus = null) {
+  const token = localStorage.getItem("accessToken");
+  const params = new URLSearchParams();
+  params.append("pageNumber", pageNumber);
+  params.append("pageSize", pageSize);
+  if (courseId) params.append("courseId", courseId);
+  if (approvalStatus) params.append("approvalStatus", approvalStatus);
+
+  const response = await fetch(
+    `${API_URL}/teacher/enrollments?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   if (!response.ok) {
-    // If endpoint doesn't exist or error, return false (not enrolled)
-    return false;
+    throw new Error("Failed to fetch teacher enrollments");
   }
 
-  const data = await response.json();
-  return data.enrolled || data.isEnrolled || false;
+  return await response.json();
+}
+
+export async function getCourseEnrollments(courseId, pageNumber = 1, pageSize = 10) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/teacher/courses/${courseId}/enrollments?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch enrollments");
+  }
+
+  return await response.json();
+}
+
+export async function approveEnrollment(studentId, courseId) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/enrollments/approve`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        studentId,
+        courseId,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to approve enrollment");
+  }
+
+  return await response.json();
+}
+
+export async function rejectEnrollment(studentId, courseId) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/enrollments/reject`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        studentId,
+        courseId,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to reject enrollment");
+  }
+
+  return await response.json();
+}
+
+export async function deleteEnrollment(enrollmentId) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/enrollments/${enrollmentId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to delete enrollment");
+  }
+
+  return await response.json();
 }

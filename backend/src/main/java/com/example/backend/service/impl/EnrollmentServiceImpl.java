@@ -251,7 +251,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollment.setApprovalStatus(EnrollmentStatus.APPROVED);
         enrollmentRepository.save(enrollment);
 
-        String message = "Bạn đã được thêm vào khóa học" + course.getTitle();
+        String message = "Bạn đã được thêm vào khóa học " + course.getTitle();
         notificationService.createNotification(student, message);
         return convertEnrollmentToDTO(enrollment);
     }
@@ -408,14 +408,61 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     private EnrollmentResponse convertEnrollmentToDTO(Enrollment enrollment) {
         EnrollmentResponse response = new EnrollmentResponse();
-        response.setProgress(enrollment.getProgress());
-        response.setUserName(enrollment.getStudent().getUserName());
-        response.setStudentNumber(enrollment.getStudent().getFullName());
-        response.setCourseTitle(enrollment.getCourse().getTitle());
-        response.setFullName(enrollment.getStudent().getFullName());
         response.setId(enrollment.getId());
-        response.setApprovalStatus(enrollment.getApprovalStatus().toString());
+        response.setStudentId(enrollment.getStudent().getId());
+        response.setUserName(enrollment.getStudent().getUserName());
+        response.setFullName(enrollment.getStudent().getFullName());
+        response.setStudentNumber(enrollment.getStudent().getStudentNumber());
+        response.setStudentAvatar(enrollment.getStudent().getImageUrl());
+        response.setCourseTitle(enrollment.getCourse().getTitle());
+        response.setCourseCode(enrollment.getCourse().getClassCode());
         response.setCourseId(enrollment.getCourse().getId());
+        response.setProgress(enrollment.getProgress());
+        response.setApprovalStatus(enrollment.getApprovalStatus().toString());
         return response;
+    }
+
+    @Override
+    public PageResponse<EnrollmentResponse> getTeacherEnrollments(Integer teacherId, Integer courseId, String approvalStatus, Pageable pageable) {
+        Page<Enrollment> page;
+
+        if (courseId != null && approvalStatus != null) {
+            // Filter by both courseId and approvalStatus
+            EnrollmentStatus status = EnrollmentStatus.valueOf(approvalStatus.toUpperCase());
+            page = enrollmentRepository.findByTeacherIdAndCourseIdAndApprovalStatus(teacherId, courseId, status, pageable);
+        } else if (courseId != null) {
+            // Filter by courseId only
+            page = enrollmentRepository.findByTeacherIdAndCourseId(teacherId, courseId, pageable);
+        } else if (approvalStatus != null) {
+            // Filter by approvalStatus only
+            EnrollmentStatus status = EnrollmentStatus.valueOf(approvalStatus.toUpperCase());
+            page = enrollmentRepository.findByTeacherIdAndApprovalStatus(teacherId, status, pageable);
+        } else {
+            // No filters, get all enrollments for teacher
+            page = enrollmentRepository.findByTeacherId(teacherId, pageable);
+        }
+
+        List<EnrollmentResponse> responses = page.getContent().stream()
+                .map(enrollment -> new EnrollmentResponse(
+                        enrollment.getId(),
+                        enrollment.getStudent().getId(),
+                        enrollment.getStudent().getUserName(),
+                        enrollment.getStudent().getFullName(),
+                        enrollment.getStudent().getStudentNumber(),
+                        enrollment.getStudent().getImageUrl(),
+                        enrollment.getCourse().getTitle(),
+                        enrollment.getCourse().getClassCode(),
+                        enrollment.getCourse().getId(),
+                        enrollment.getProgress(),
+                        enrollment.getApprovalStatus().toString()
+                ))
+                .toList();
+
+        return new PageResponse<>(
+                page.getNumber() + 1,
+                page.getTotalPages(),
+                page.getTotalElements(),
+                responses
+        );
     }
 }

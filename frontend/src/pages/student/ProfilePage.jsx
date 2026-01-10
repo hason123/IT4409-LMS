@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/layout/Header";
 import MyCertificate from "../../components/student/profile/MyCertificate";
 import MyInformation from "../../components/student/profile/MyInformation";
@@ -23,6 +23,7 @@ import {
 
 export default function ProfilePage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const [profileData, setProfileData] = useState(null);
@@ -48,15 +49,41 @@ export default function ProfilePage() {
     fetchUserData();
   }, [user?.id]);
 
+  // Update active tab based on URL path
   useEffect(() => {
-    if (location.state && location.state.activeTab) {
-      setActiveTab(location.state.activeTab);
+    const path = location.pathname;
+    if (path.includes("information")) {
+      setActiveTab("profile");
+    } else if (path.includes("courses")) {
+      setActiveTab("courses");
+    } else if (path.includes("certificate")) {
+      setActiveTab("certificate");
+    } else if (path.includes("notifications")) {
+      setActiveTab("notifications");
+    } else if (path.includes("password")) {
+      setActiveTab("password");
+    } else if (path.includes("settings")) {
+      setActiveTab("settings");
+    } else {
+      setActiveTab("profile");
     }
-  }, [location.state]);
+  }, [location.pathname]);
 
   const handleProfileUpdate = (updatedData) => {
     setProfileData(updatedData);
     setUserData(updatedData);
+  };
+
+  const handleTabClick = (tabId) => {
+    const tabRoutes = {
+      profile: "/student/profile/information",
+      courses: "/student/profile/courses",
+      certificate: "/student/profile/certificate",
+      notifications: "/student/profile/notifications",
+      password: "/student/profile/password",
+      settings: "/student/profile/settings",
+    };
+    navigate(tabRoutes[tabId] || "/student/profile/information");
   };
 
   const tabs = [
@@ -132,7 +159,7 @@ export default function ProfilePage() {
                     return (
                       <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => handleTabClick(tab.id)}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                           activeTab === tab.id
                             ? "bg-primary/10 text-primary dark:bg-primary/20"

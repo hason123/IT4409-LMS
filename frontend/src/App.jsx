@@ -70,7 +70,7 @@ export default function App() {
             }
           />
           <Route
-            path="/profile"
+            path="/student/profile"
             element={
               <ProtectedRoute
                 element={<ProfilePage />}
@@ -78,6 +78,61 @@ export default function App() {
               />
             }
           />
+          <Route
+            path="/student/profile/information"
+            element={
+              <ProtectedRoute
+                element={<ProfilePage />}
+                allowedRoles={["STUDENT"]}
+              />
+            }
+          />
+          <Route
+            path="/student/profile/courses"
+            element={
+              <ProtectedRoute
+                element={<ProfilePage />}
+                allowedRoles={["STUDENT"]}
+              />
+            }
+          />
+          <Route
+            path="/student/profile/certificate"
+            element={
+              <ProtectedRoute
+                element={<ProfilePage />}
+                allowedRoles={["STUDENT"]}
+              />
+            }
+          />
+          <Route
+            path="/student/profile/notifications"
+            element={
+              <ProtectedRoute
+                element={<ProfilePage />}
+                allowedRoles={["STUDENT"]}
+              />
+            }
+          />
+          <Route
+            path="/student/profile/password"
+            element={
+              <ProtectedRoute
+                element={<ProfilePage />}
+                allowedRoles={["STUDENT"]}
+              />
+            }
+          />
+          <Route
+            path="/student/profile/settings"
+            element={
+              <ProtectedRoute
+                element={<ProfilePage />}
+                allowedRoles={["STUDENT"]}
+              />
+            }
+          />
+          <Route path="/profile" element={<Navigate to="/student/profile" replace />} />
           <Route
             path="/quizzes/:id/attempt"
             element={

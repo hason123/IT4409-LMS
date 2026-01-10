@@ -15,6 +15,7 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.CourseRepository;
+import com.example.backend.repository.CourseRatingRepository;
 import com.example.backend.repository.EnrollmentRepository;
 import com.example.backend.service.CloudinaryService;
 import com.example.backend.service.CourseService;
@@ -34,16 +35,18 @@ public class CourseServiceImpl implements CourseService {
     private final UserService userService;
     private final CloudinaryService cloudinaryService;
     private final EnrollmentRepository enrollmentRepository;
+    private final CourseRatingRepository courseRatingRepository;
 
     private static final String ALPHANUMERIC_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public CourseServiceImpl(CourseRepository courseRepository, CategoryRepository categoryRepository, UserService userService, CloudinaryService cloudinaryService, EnrollmentRepository enrollmentRepository) {
+    public CourseServiceImpl(CourseRepository courseRepository, CategoryRepository categoryRepository, UserService userService, CloudinaryService cloudinaryService, EnrollmentRepository enrollmentRepository, CourseRatingRepository courseRatingRepository) {
         this.courseRepository = courseRepository;
         this.categoryRepository = categoryRepository;
         this.userService = userService;
         this.cloudinaryService = cloudinaryService;
         this.enrollmentRepository = enrollmentRepository;
+        this.courseRatingRepository = courseRatingRepository;
     }
 
     @Override
@@ -105,17 +108,18 @@ public class CourseServiceImpl implements CourseService {
         boolean isAdmin = currentUser.getRole().getRoleName().equals(RoleType.ADMIN);
         Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học!"));
         boolean isCourseOwner = course.getTeacher().getId().equals(currentUser.getId());
+        
+        // Teacher có thể xem khóa học mình tạo
+        if(isCourseOwner || isAdmin) {
+            return convertEntityToDto(course);
+        }
+        
+        // Nếu khóa học là PRIVATE, chỉ admin và teacher owner được xem
         if(course.getStatus() == CourseStatus.PRIVATE){
-            if(!isAdmin && !isCourseOwner){
-                throw new UnauthorizedException("Bạn không được truy cập vào tài nguyên này!");
-            }
+            throw new UnauthorizedException("Bạn không được truy cập vào tài nguyên này!");
         }
-        else{ // FOR STUDENT
-            if(enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(currentUser.getId(), id, EnrollmentStatus.APPROVED) != null){
-                throw new UnauthorizedException("Bạn không được truy cập vào tài nguyên này!");
-            }
-        }
-
+        
+        // PUBLIC courses: ai cũng được xem
         return convertEntityToDto(course);
     }
 
@@ -232,6 +236,7 @@ public class CourseServiceImpl implements CourseService {
         response.setStatus(course.getStatus());
         response.setClassCode(course.getClassCode());
         response.setRating(course.getRating());
+        response.setReviewCounts(courseRatingRepository.countReviewsByCourse(course.getId()));
         return response;
     }
 
