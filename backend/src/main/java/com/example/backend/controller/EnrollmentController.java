@@ -57,6 +57,19 @@ public class EnrollmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+
+    @Operation(summary = "Hiển thị danh sách đánh giá một khóa học cụ thể")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/courses/{courseId}/rating")
+    public ResponseEntity<PageResponse<CourseRatingResponse>> getAllCourseRatings(
+            @PathVariable Integer courseId,
+            @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        PageResponse<CourseRatingResponse> response = enrollmentService.getAllCourseRatings(courseId, pageable);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @Operation(summary = "Sinh viên trong khóa đánh giá khóa hoọc")
     @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/courses/{courseId}/rating")

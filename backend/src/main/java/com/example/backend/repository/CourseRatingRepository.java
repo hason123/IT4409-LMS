@@ -1,6 +1,8 @@
 package com.example.backend.repository;
 
 import com.example.backend.entity.CourseRating;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,4 +22,6 @@ public interface CourseRatingRepository extends JpaRepository<CourseRating,Integ
     // Đếm số lượng reviews của một khóa học
     @Query("SELECT COUNT(cr.id) FROM CourseRating cr WHERE cr.course.id = :courseId")
     Long countReviewsByCourse(@Param("courseId") Integer courseId);
+
+    Page<CourseRating> findAllByCourse_Id(Integer courseId, Pageable pageable);
 }

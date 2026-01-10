@@ -189,6 +189,22 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return convertEntityToDTO(review);
     }
 
+    @Override
+    public PageResponse<CourseRatingResponse> getAllCourseRatings(Integer courseId, Pageable pageable) {
+        if(!courseRepository.existsById(courseId)){
+            throw new ResourceNotFoundException("Không tìm thấy khóa học");
+        }
+        Page<CourseRating> courseRatingPage = courseRatingRepository.findAllByCourse_Id(courseId, pageable);
+        Page<CourseRatingResponse> courseRatingResponsePage = courseRatingPage.map(this::convertEntityToDTO);
+        PageResponse<CourseRatingResponse> response = new PageResponse<>(
+                courseRatingResponsePage.getNumber() + 1,
+                courseRatingResponsePage.getTotalPages(),
+                courseRatingResponsePage.getNumberOfElements(),
+                courseRatingResponsePage.getContent()
+        );
+        return response;
+    }
+
     private CourseRatingResponse convertEntityToDTO(CourseRating entity) {
         return CourseRatingResponse.builder()
                 .id(entity.getId())
