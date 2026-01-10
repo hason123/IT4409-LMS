@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { PlusIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, EllipsisVerticalIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useParams, useNavigate } from "react-router-dom";
-import { getChaptersByCourseId, deleteChapter, getChapterItems } from "../../api/chapter";
+import { getChaptersByCourseId, deleteChapter, getChapterItems, updateChapterItemOrder, deleteChapterItem } from "../../api/chapter";
 import { Spin, Alert, Dropdown, Modal, message } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
@@ -18,6 +18,9 @@ export default function CourseContent() {
   const [expandedChapter, setExpandedChapter] = useState(null);
   const [chapterItems, setChapterItems] = useState({});
   const [loadingItems, setLoadingItems] = useState({});
+  const [updatingOrder, setUpdatingOrder] = useState(null);
+  const [deletingItem, setDeletingItem] = useState(null);
+  const [deleteItemId, setDeleteItemId] = useState(null);
 
   useEffect(() => {
     fetchChapters();
@@ -80,6 +83,60 @@ export default function CourseContent() {
       navigate(`/teacher/courses/${id}/quizzes/${quizId}`);
     } else {
       navigate(`/courses/${id}/quizzes/${quizId}/detail`, { state: { chapterItemId } });
+    }
+  };
+
+  const handleMoveItem = async (chapterId, itemIndex, direction) => {
+    const items = chapterItems[chapterId];
+    if (!items) return;
+
+    // Xác định index mới
+    const newIndex = direction === "up" ? itemIndex - 1 : itemIndex + 1;
+    
+    // Kiểm tra có valid không
+    if (newIndex < 0 || newIndex >= items.length) {
+      return;
+    }
+
+    try {
+      setUpdatingOrder(chapterId);
+      
+      // Swap 2 items trong local state
+      const newItems = [...items];
+      [newItems[itemIndex], newItems[newIndex]] = [newItems[newIndex], newItems[itemIndex]];
+      
+      // Lấy danh sách ID theo thứ tự mới
+      const orderedItemIds = newItems.map(item => item.id);
+      
+      // Gọi API update order
+      await updateChapterItemOrder(chapterId, orderedItemIds);
+      
+      // Update state
+      setChapterItems(prev => ({
+        ...prev,
+        [chapterId]: newItems
+      }));
+      
+      message.success("Cập nhật thứ tự thành công");
+    } catch (err) {
+      message.error(err.message || "Lỗi khi cập nhật thứ tự");
+    } finally {
+      setUpdatingOrder(null);
+    }
+  };
+
+  const handleDeleteItem = async (chapterId, itemId) => {
+    try {
+      setDeletingItem(itemId);
+      await deleteChapterItem(itemId);
+      message.success("Xóa thành công");
+      setDeleteItemId(null);
+      // Refresh chapter items
+      await fetchChapterItems(chapterId);
+    } catch (err) {
+      message.error(err.message || "Lỗi khi xóa");
+    } finally {
+      setDeletingItem(null);
     }
   };
 
@@ -213,10 +270,10 @@ export default function CourseContent() {
                     </div>
                   ) : chapterItems[chapter.id] && chapterItems[chapter.id].length > 0 ? (
                     <div className="space-y-2">
-                      {chapterItems[chapter.id].map((item) => (
+                      {chapterItems[chapter.id].map((item, itemIndex) => (
                         <div
                           key={item.id}
-                          className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                          className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer group"
                           onClick={() => {
                             if (item.type === "LESSON") {
                               handleEditLecture(item.item?.id);
@@ -225,14 +282,78 @@ export default function CourseContent() {
                             }
                           }}
                         >
-                          <div className="flex-1">
-                            <p className="font-medium text-[#111418] dark:text-white">
-                              {item.item?.title || "Không xác định"}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {item.type === "LESSON" ? "Bài giảng" : "Bài kiểm tra"}
-                            </p>
+                          <div className="flex-1 flex items-center gap-3">
+                            {/* Icon phân biệt loại */}
+                            {item.type === "LESSON" ? (
+                              <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 flex-shrink-0">
+                                description
+                              </span>
+                            ) : (
+                              <span className="material-symbols-outlined text-orange-600 dark:text-orange-400 flex-shrink-0">
+                                quiz
+                              </span>
+                            )}
+                            <div>
+                              <p className="font-medium text-[#111418] dark:text-white">
+                                {item.item?.title || "Không xác định"}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {item.type === "LESSON" ? "Bài giảng" : "Bài kiểm tra"}
+                              </p>
+                            </div>
                           </div>
+                          
+                          {/* Icon di chuyển lên/xuống và xóa (chỉ cho teacher) */}
+                          {user?.role === "TEACHER" && (
+                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {/* Move up */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveItem(chapter.id, itemIndex, "up");
+                                }}
+                                disabled={itemIndex === 0 || updatingOrder === chapter.id}
+                                className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                              >
+                                <ChevronUpIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                              </button>
+                              
+                              {/* Move down */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveItem(chapter.id, itemIndex, "down");
+                                }}
+                                disabled={itemIndex === chapterItems[chapter.id].length - 1 || updatingOrder === chapter.id}
+                                className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                              >
+                                <ChevronDownIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                              </button>
+                              
+                              {/* Delete */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteItemId(item.id);
+                                  Modal.confirm({
+                                    title: "Xác nhận xóa",
+                                    icon: <ExclamationCircleOutlined />,
+                                    content: `Bạn có chắc chắn muốn xóa ${item.type === "LESSON" ? "bài giảng" : "bài kiểm tra"} này?`,
+                                    okText: "Xóa",
+                                    cancelText: "Hủy",
+                                    okButtonProps: { danger: true },
+                                    onOk() {
+                                      handleDeleteItem(chapter.id, item.id);
+                                    },
+                                  });
+                                }}
+                                disabled={deletingItem === item.id}
+                                className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                              >
+                                <TrashIcon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

@@ -110,3 +110,42 @@ export async function getChapterItems(chapterId) {
 
   return await response.json();
 }
+
+export async function updateChapterItemOrder(chapterId, orderedItemIds) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`${API_URL}/${chapterId}/order-items`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      orderedItemIds: orderedItemIds,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to update item order");
+  }
+
+  return { success: true };
+}
+
+export async function deleteChapterItem(itemId) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`http://localhost:8080/api/v1/lms/chaptersItems/${itemId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to delete chapter item");
+  }
+
+  return { success: true };
+}
