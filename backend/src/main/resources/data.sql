@@ -1,0 +1,1 @@
+INSERT IGNORE INTO users (user_id, user_name, full_name, gmail, student_number, role_id, is_deleted, is_verified, pass_word) VALUES (5, 'admin2', 'ADMIN2', 'admin2@gmail.com', 'A124', 1, 0, 1, '$2a$10$8K1p/a06vIWBv9Qp6N6p7O.UaM8u8.vH8v8v8v8v8v8v8v8v8v8v');
