@@ -1,10 +1,12 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.request.EnrollmentRequest;
+import com.example.backend.dto.request.course.CourseRatingRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.course.CourseRatingResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +23,7 @@ public interface EnrollmentService {
 
     EnrollmentResponse enrollPrivateCourse(String classCode);
 
-    CourseResponse ratingCourse(Integer courseId, Double newRating);
+    CourseRatingResponse ratingCourse(Integer courseId, CourseRatingRequest request);
 
     @Transactional
     void completeLesson(Integer lessonId);
