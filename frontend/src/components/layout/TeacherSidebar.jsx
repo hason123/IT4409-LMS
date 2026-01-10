@@ -19,7 +19,7 @@ export default function TeacherSidebar() {
       <nav className="flex-1 px-4 py-6 space-y-2">
         <SidebarLink
           icon={<Squares2X2Icon className="h-6 w-6" />}
-          label="Bảng điều khiển"
+          label="Tổng quan"
           active={currentPath === "/teacher/dashboard"}
           to="/teacher/dashboard"
         />

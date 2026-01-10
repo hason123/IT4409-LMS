@@ -11,7 +11,8 @@ import {
   CloseOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { getTeacherEnrollments, approveEnrollment, rejectEnrollment, deleteEnrollment } from "../../api/course";
+import { getTeacherEnrollments, approveEnrollment, rejectEnrollment, deleteStudentsFromCourse, getStudentsNotInCourse, addStudentsToCourse } from "../../api/course";
+import AddStudentModal from "../../components/teacher/AddStudentModal";
 
 export default function TeacherStudentManagement() {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -24,6 +25,7 @@ export default function TeacherStudentManagement() {
   const [displayLoading, setDisplayLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const pageSize = 10;
 
   // Debounce loading state to avoid spinner flash for quick loads
@@ -125,7 +127,7 @@ export default function TeacherStudentManagement() {
     });
   };
 
-  const handleDelete = (enrollmentId) => {
+  const handleDelete = (enrollmentRecord) => {
     Modal.confirm({
       title: "Xóa học viên",
       content: "Bạn có chắc chắn muốn xóa học viên khỏi khóa học?",
@@ -134,14 +136,159 @@ export default function TeacherStudentManagement() {
       okButtonProps: { type: "primary", danger: true },
       async onOk() {
         try {
-          await deleteEnrollment(enrollmentId);
-          setEnrollments((prev) => prev.filter((e) => e.id !== enrollmentId));
+          setLoading(true);
+          await deleteStudentsFromCourse(enrollmentRecord.courseId, [enrollmentRecord.studentId]);
+          setEnrollments((prev) => prev.filter((e) => e.id !== enrollmentRecord.id));
           message.success("Xóa học viên thành công!");
         } catch (err) {
           message.error(err.message || "Lỗi khi xóa học viên");
+        } finally {
+          setLoading(false);
         }
       },
     });
+  };
+
+  // Bulk actions
+  const handleBulkApprove = () => {
+    if (selectedRows.length === 0) {
+      message.warning("Vui lòng chọn ít nhất một học viên");
+      return;
+    }
+
+    Modal.confirm({
+      title: "Duyệt hàng loạt",
+      content: `Bạn có chắc chắn muốn duyệt ${selectedRows.length} học viên đã chọn?`,
+      okText: "Duyệt",
+      cancelText: "Hủy",
+      okButtonProps: { type: "primary" },
+      async onOk() {
+        try {
+          setLoading(true);
+          const selectedEnrollments = enrollments.filter((e) => selectedRows.includes(e.key));
+          
+          // Perform approve for each selected enrollment
+          for (const enrollment of selectedEnrollments) {
+            await approveEnrollment(enrollment.studentId, enrollment.courseId);
+          }
+          
+          setEnrollments((prev) =>
+            prev.map((e) =>
+              selectedRows.includes(e.key) ? { ...e, approvalStatus: "APPROVED" } : e
+            )
+          );
+          setSelectedRows([]);
+          message.success(`Đã duyệt ${selectedRows.length} học viên thành công!`);
+        } catch (err) {
+          message.error(err.message || "Lỗi khi duyệt học viên");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
+  const handleBulkReject = () => {
+    if (selectedRows.length === 0) {
+      message.warning("Vui lòng chọn ít nhất một học viên");
+      return;
+    }
+
+    Modal.confirm({
+      title: "Từ chối hàng loạt",
+      content: `Bạn có chắc chắn muốn từ chối ${selectedRows.length} học viên đã chọn?`,
+      okText: "Từ chối",
+      cancelText: "Hủy",
+      okButtonProps: { type: "primary", danger: true },
+      async onOk() {
+        try {
+          setLoading(true);
+          const selectedEnrollments = enrollments.filter((e) => selectedRows.includes(e.key));
+          
+          for (const enrollment of selectedEnrollments) {
+            await rejectEnrollment(enrollment.studentId, enrollment.courseId);
+          }
+          
+          setEnrollments((prev) =>
+            prev.map((e) =>
+              selectedRows.includes(e.key) ? { ...e, approvalStatus: "REJECTED" } : e
+            )
+          );
+          setSelectedRows([]);
+          message.success(`Đã từ chối ${selectedRows.length} học viên thành công!`);
+        } catch (err) {
+          message.error(err.message || "Lỗi khi từ chối học viên");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedRows.length === 0) {
+      message.warning("Vui lòng chọn ít nhất một học viên");
+      return;
+    }
+
+    Modal.confirm({
+      title: "Xóa hàng loạt",
+      content: `Bạn có chắc chắn muốn xóa ${selectedRows.length} học viên đã chọn khỏi khóa học?`,
+      okText: "Xóa",
+      cancelText: "Hủy",
+      okButtonProps: { type: "primary", danger: true },
+      async onOk() {
+        try {
+          setLoading(true);
+          const selectedEnrollments = enrollments.filter((e) => selectedRows.includes(e.key));
+          
+          // Group by courseId to delete in batches per course
+          const groupedByCourse = {};
+          selectedEnrollments.forEach((enrollment) => {
+            if (!groupedByCourse[enrollment.courseId]) {
+              groupedByCourse[enrollment.courseId] = [];
+            }
+            groupedByCourse[enrollment.courseId].push(enrollment.studentId);
+          });
+          
+          // Delete students from each course
+          for (const [courseId, studentIds] of Object.entries(groupedByCourse)) {
+            await deleteStudentsFromCourse(parseInt(courseId), studentIds);
+          }
+          
+          setEnrollments((prev) =>
+            prev.filter((e) => !selectedRows.includes(e.key))
+          );
+          setSelectedRows([]);
+          message.success(`Đã xóa ${selectedRows.length} học viên thành công!`);
+        } catch (err) {
+          message.error(err.message || "Lỗi khi xóa học viên");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
+  // Validate selected enrollments status
+  const getSelectedEnrollmentsStatus = () => {
+    if (selectedRows.length === 0) return null;
+    
+    const selectedEnrollments = enrollments.filter((e) => selectedRows.includes(e.key));
+    const statuses = new Set(selectedEnrollments.map((e) => e.approvalStatus));
+    
+    // All selected are PENDING
+    if (statuses.size === 1 && statuses.has("PENDING")) {
+      return "PENDING";
+    }
+    
+    // All selected are APPROVED
+    if (statuses.size === 1 && statuses.has("APPROVED")) {
+      return "APPROVED";
+    }
+    
+    // Mixed statuses
+    return "MIXED";
   };
 
   const getStatusTag = (approvalStatus) => {
@@ -304,7 +451,7 @@ export default function TeacherStudentManagement() {
               size="large"
               danger
               icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record.id)}
+              onClick={() => handleDelete(record)}
               title="Xóa khỏi khóa học"
               style={{ borderRadius: "6px" }}
             />
@@ -321,6 +468,37 @@ export default function TeacherStudentManagement() {
 
     return matchSearch;
   });
+
+  const handleAddStudentsSuccess = async () => {
+    setIsAddModalVisible(false);
+    message.success("Thêm học viên vào khóa học thành công!");
+    // Refresh the enrollments list
+    setCurrentPage(1);
+    try {
+      setLoading(true);
+      const res = await getTeacherEnrollments(1, pageSize, courseFilter || null, statusFilter || null);
+      const enrollmentList = (res.data.pageList).map((enrollment, index) => ({
+        key: enrollment.id || index,
+        id: enrollment.id,
+        studentId: enrollment.studentId,
+        name: enrollment.fullName || "N/A",
+        username: enrollment.userName || "N/A",
+        email: enrollment.userName || "N/A",
+        avatar: enrollment.studentAvatar || "",
+        course: enrollment.courseTitle || "N/A",
+        courseId: enrollment.courseId || "",
+        courseCode: enrollment.courseCode || "",
+        progress: enrollment.progress || 0,
+        approvalStatus: enrollment.approvalStatus || "PENDING",
+        enrollmentDate: enrollment.createdAt || new Date().toISOString(),
+      }));
+      setEnrollments(enrollmentList);
+    } catch (err) {
+      console.log("Failed to refresh enrollments:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display">
@@ -343,6 +521,7 @@ export default function TeacherStudentManagement() {
                 type="primary"
                 size="large"
                 icon={<span style={{ marginRight: "8px" }}>+</span>}
+                onClick={() => setIsAddModalVisible(true)}
               >
                 Thêm học viên
               </Button>
@@ -392,6 +571,85 @@ export default function TeacherStudentManagement() {
               </div>
             </div>
 
+            {/* Bulk Actions Bar */}
+            {selectedRows.length > 0 && (
+              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                {getSelectedEnrollmentsStatus() === "MIXED" ? (
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                        ⚠️ Không thể thực hiện hành động chung. Các bản ghi được chọn có trạng thái khác nhau.
+                      </p>
+                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                        Vui lòng chỉ chọn các bản ghi có cùng trạng thái duyệt.
+                      </p>
+                    </div>
+                    <Button
+                      type="text"
+                      size="small"
+                      onClick={() => setSelectedRows([])}
+                    >
+                      Bỏ chọn
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                      Đã chọn {selectedRows.length} học viên
+                    </span>
+                    <Space>
+                      {getSelectedEnrollmentsStatus() === "PENDING" && (
+                        <>
+                          <Button
+                            type="primary"
+                            size="small"
+                            icon={<CheckOutlined />}
+                            onClick={handleBulkApprove}
+                            loading={loading}
+                          >
+                            Duyệt tất cả
+                          </Button>
+                          <Button
+                            danger
+                            size="small"
+                            icon={<CloseOutlined />}
+                            onClick={handleBulkReject}
+                            loading={loading}
+                            style={{
+                              backgroundColor: "#ff4d4f",
+                              borderColor: "#ff4d4f",
+                              color: "white",
+                            }}
+                          >
+                            Từ chối tất cả
+                          </Button>
+                        </>
+                      )}
+                      {getSelectedEnrollmentsStatus() === "APPROVED" && (
+                        <Button
+                          danger
+                          type="text"
+                          size="small"
+                          icon={<DeleteOutlined />}
+                          onClick={handleBulkDelete}
+                          loading={loading}
+                        >
+                          Xóa tất cả
+                        </Button>
+                      )}
+                      <Button
+                        type="text"
+                        size="small"
+                        onClick={() => setSelectedRows([])}
+                      >
+                        Bỏ chọn
+                      </Button>
+                    </Space>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Table */}
             <div className="bg-white dark:bg-[#1a2632] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <Spin spinning={displayLoading} tip="Đang tải...">
@@ -418,6 +676,14 @@ export default function TeacherStudentManagement() {
                 />
               </Spin>
             </div>
+
+            {/* Add Student Modal */}
+            <AddStudentModal
+              visible={isAddModalVisible}
+              onClose={() => setIsAddModalVisible(false)}
+              onSuccess={handleAddStudentsSuccess}
+              courses={courses}
+            />
           </div>
         </main>
       </div>

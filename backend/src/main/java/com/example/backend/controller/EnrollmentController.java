@@ -177,16 +177,22 @@ public class EnrollmentController {
     @Operation(summary = "Thêm trực tiếp sinh viên vào khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @PostMapping("/courses/{courseId}/students")
-    public ResponseEntity<String> addStudentsToCourse(@PathVariable Integer courseId, @RequestBody StudentCourseRequest request) {
+    public ResponseEntity<?> addStudentsToCourse(@PathVariable Integer courseId, @RequestBody StudentCourseRequest request) {
         enrollmentService.addStudentsToCourse(courseId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Students has been added");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new java.util.HashMap<String, String>() {{
+            put("code", "201");
+            put("message", "Students has been added successfully");
+        }});
     }
 
     @Operation(summary = "Xóa sinh viên khỏi khóa học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @DeleteMapping("/courses/{courseId}/students")
-    public ResponseEntity<String> removeStudentsInCourse(@PathVariable Integer courseId, @RequestBody StudentCourseRequest request) {
+    public ResponseEntity<?> removeStudentsInCourse(@PathVariable Integer courseId, @RequestBody StudentCourseRequest request) {
         enrollmentService.removeStudentsInCourse(courseId, request);
-        return ResponseEntity.ok("Students has been deleted");
+        return ResponseEntity.ok(new java.util.HashMap<String, String>() {{
+            put("code", "200");
+            put("message", "Students has been deleted successfully");
+        }});
     }
 }

@@ -223,9 +223,12 @@ public class AuthServiceImpl implements AuthService {
                 throw new IllegalArgumentException("Email not found in token");
             }
             
-            // Check if user exists
-            User googleUser = userService.handleGetUserByGmail(email);
-            if (googleUser == null) {
+            // Check if user exists, if not create new user automatically
+            User googleUser = null;
+            try {
+                googleUser = userService.handleGetUserByGmail(email);
+            } catch (Exception e) {
+                // User doesn't exist, create new user automatically
                 googleUser = userService.createGoogleUser(email, name != null ? name : email.split("@")[0]);
             }
             

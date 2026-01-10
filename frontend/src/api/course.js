@@ -370,3 +370,91 @@ export async function deleteEnrollment(enrollmentId) {
 
   return await response.json();
 }
+
+export async function deleteStudentsFromCourse(courseId, studentIds) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/courses/${courseId}/students`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        studentIds: studentIds,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to delete students from course");
+  }
+
+  // Response might be plain text or JSON, handle both cases
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await response.json();
+  } else {
+    return { message: await response.text() };
+  }
+}
+
+export async function getStudentsNotInCourse(courseId, searchRequest = {}, pageNumber = 1, pageSize = 10) {
+  const token = localStorage.getItem("accessToken");
+  const params = new URLSearchParams({
+    pageNumber,
+    pageSize,
+    ...(searchRequest.fullName && { fullName: searchRequest.fullName }),
+    ...(searchRequest.username && { username: searchRequest.username }),
+    ...(searchRequest.email && { email: searchRequest.email }),
+  });
+
+  const response = await fetch(
+    `${API_URL}/courses/${courseId}/students/not-available?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch available students");
+  }
+
+  return await response.json();
+}
+
+export async function addStudentsToCourse(courseId, studentIds) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/courses/${courseId}/students`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        studentIds: studentIds,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to add students to course");
+  }
+
+  // Response might be plain text or JSON, handle both cases
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await response.json();
+  } else {
+    return { message: await response.text() };
+  }
+}
