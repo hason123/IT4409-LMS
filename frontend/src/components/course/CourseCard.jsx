@@ -53,7 +53,7 @@ export default function CourseCard({
             )}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Mã lớp: {code}
+            Mã lớp: #{code}
           </p>
           <div className="flex-grow space-y-3 text-sm text-gray-600 dark:text-gray-300 mb-4">
             <div className="flex items-center gap-2">

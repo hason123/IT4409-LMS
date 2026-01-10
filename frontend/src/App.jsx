@@ -10,13 +10,13 @@ import NotificationsPage from "./pages/common/NotificationsPage";
 import QuizAttempt from "./pages/student/QuizAttempt";
 import QuizResult from "./pages/student/QuizResult";
 import QuizDetail from "./pages/student/QuizDetail";
+import StudentLectureDetail from "./pages/student/StudentLectureDetail";
 import ProfilePage from "./pages/student/ProfilePage";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherCourses from "./pages/teacher/TeacherCourses";
 import CreateCourse from "./pages/teacher/CreateCourse";
 import CreateChapter from "./pages/teacher/CreateChapter";
 import LectureDetail from "./pages/teacher/LectureDetail";
-import TeacherQuizDetail from "./pages/teacher/QuizDetail";
 import TeacherProfilePage from "./pages/teacher/TeacherProfilePage";
 import TeacherSettingsPage from "./pages/teacher/TeacherSettingsPage";
 import TeacherStudentManagement from "./pages/teacher/TeacherStudentManagement";
@@ -148,6 +148,15 @@ export default function App() {
             element={
               <ProtectedRoute
                 element={<QuizDetail />}
+                allowedRoles={["STUDENT"]}
+              />
+            }
+          />
+          <Route
+            path="/courses/:courseId/lectures/:lectureId"
+            element={
+              <ProtectedRoute
+                element={<StudentLectureDetail />}
                 allowedRoles={["STUDENT"]}
               />
             }

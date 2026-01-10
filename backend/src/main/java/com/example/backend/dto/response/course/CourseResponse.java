@@ -25,4 +25,5 @@ public class CourseResponse {
     private Long reviewCounts;
     @Enumerated(EnumType.STRING)
     private CourseStatus status;
+    private Long totalEnrollments;
 }

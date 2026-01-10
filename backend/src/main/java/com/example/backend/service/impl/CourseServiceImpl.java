@@ -237,6 +237,7 @@ public class CourseServiceImpl implements CourseService {
         response.setClassCode(course.getClassCode());
         response.setRating(course.getRating());
         response.setReviewCounts(courseRatingRepository.countReviewsByCourse(course.getId()));
+        response.setTotalEnrollments(enrollmentRepository.countApprovedEnrollmentsByCourseId(course.getId()));
         return response;
     }
 

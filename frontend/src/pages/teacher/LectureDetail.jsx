@@ -85,6 +85,7 @@ export default function LectureDetail() {
       [{ header: [1, 2, 3, false] }],
       ["bold", "italic", "underline", "strike"],
       [{ list: "ordered" }, { list: "bullet" }],
+      [{ align: [] }],
       [{ color: [] }, { background: [] }],
       ["link", "image"],
       ["clean"],
@@ -99,6 +100,7 @@ export default function LectureDetail() {
     "strike",
     "list",
     "bullet",
+    "align",
     "color",
     "background",
     "link",
@@ -113,8 +115,8 @@ export default function LectureDetail() {
         const courseResponse = await getCourseById(courseId);
         setCourse(courseResponse.data);
 
-        // If editing, fetch lesson data
-        if (isEditMode) {
+        // If has lectureId (editing or viewing), fetch lesson data
+        if (lectureId) {
           const lessonResponse = await getLessonById(lectureId);
           const lessonData = lessonResponse.data || lessonResponse;
           setLesson(lessonData);
@@ -161,7 +163,7 @@ export default function LectureDetail() {
     };
 
     init();
-  }, [courseId, lectureId, isEditMode, form]);
+  }, [courseId, lectureId, form]);
 
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files || []);

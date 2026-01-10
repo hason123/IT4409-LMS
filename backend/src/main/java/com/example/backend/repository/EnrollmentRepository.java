@@ -39,4 +39,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment,Integer> 
 
     @Query("SELECT e FROM Enrollment e WHERE e.course.teacher.id = :teacherId AND e.course.id = :courseId AND e.approvalStatus = :approvalStatus")
     Page<Enrollment> findByTeacherIdAndCourseIdAndApprovalStatus(@Param("teacherId") Integer teacherId, @Param("courseId") Integer courseId, @Param("approvalStatus") EnrollmentStatus approvalStatus, Pageable pageable);
+
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId AND e.approvalStatus = 'APPROVED'")
+    Long countApprovedEnrollmentsByCourseId(@Param("courseId") Integer courseId);
 }

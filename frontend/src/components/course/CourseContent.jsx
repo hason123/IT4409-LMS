@@ -70,6 +70,8 @@ export default function CourseContent() {
   const handleEditLecture = (lectureId) => {
     if (user?.role === "TEACHER") {
       navigate(`/teacher/courses/${id}/lectures/${lectureId}`, { state: { viewMode: true } });
+    } else {
+      navigate(`/courses/${id}/lectures/${lectureId}`);
     }
   };
 
