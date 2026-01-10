@@ -416,7 +416,7 @@ export default function QuizDetail() {
                 className="mb-4"
               />
             ) : (
-            <div className="mx-auto flex flex-col gap-4 pb-24">
+            <div className="mx-auto flex flex-col gap-4">
               {/* Page Heading */}
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -594,7 +594,7 @@ export default function QuizDetail() {
               {quizData.questions.map((question, index) => (
                 <div
                   key={question.id}
-                  className="bg-white dark:bg-card-dark rounded-xl border border-primary dark:border-primary shadow-lg ring-1 ring-primary/20 dark:ring-primary/20 transition-all"
+                  className="bg-white mb-2 dark:bg-card-dark rounded-xl border border-primary dark:border-primary shadow-lg ring-1 ring-primary/20 dark:ring-primary/20 transition-all"
                 >
                   <div className="p-4 md:p-6 flex flex-col gap-4">
                     {/* Header Row */}
@@ -752,14 +752,14 @@ export default function QuizDetail() {
               </div>
 
               {/* Add Question Button */}
-              <button
+              {!isViewMode && (<button
                 onClick={handleAddQuestion}
                 className="w-full py-4 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 text-[#617589] dark:text-gray-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
                 disabled={isViewMode}
               >
                 <PlusCircleIcon className="h-8 w-8 group-hover:scale-110 transition-transform" />
                 <span className="font-bold">Thêm câu hỏi mới</span>
-              </button>
+              </button>)}
             </div>
             )}
           </div>

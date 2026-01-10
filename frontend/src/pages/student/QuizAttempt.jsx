@@ -11,7 +11,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { FlagIcon as FlagIconSolid } from "@heroicons/react/24/solid";
-import { message, Spin } from "antd";
+import { message, Spin, Modal } from "antd";
 import { getCurrentAttempt, startQuizAttempt, submitAnswer, submitQuiz, getQuizById } from "../../api/quiz";
 
 export default function QuizAttempt() {
@@ -31,6 +31,7 @@ export default function QuizAttempt() {
   const [flaggedQuestions, setFlaggedQuestions] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   useEffect(() => {
     if (!chapterItemId) {
@@ -50,40 +51,48 @@ export default function QuizAttempt() {
 
       // 2. Get or Start Attempt
       if (chapterItemId) {
-          let attemptData;
-          try {
-             attemptData = await getCurrentAttempt(chapterItemId);
-          } catch(e) { /* ignore 404 */ }
+          let attemptData = null;
           
+          try {
+             const currentRes = await getCurrentAttempt(chapterItemId);
+             attemptData = currentRes?.data || currentRes;
+          } catch(e) { 
+            console.log("No current attempt found, will start new one");
+          }
+          
+          // If no current attempt, start a new one
           if (!attemptData) {
-            attemptData = await startQuizAttempt(id, chapterItemId);
+            const startRes = await startQuizAttempt(id, chapterItemId);
+            attemptData = startRes?.data || startRes;
           }
 
-          setAttempt(attemptData);
-          
-          // Map questions
-          if (attemptData.answers) {
-              const qs = attemptData.answers.map(a => ({
-                ...a.quizQuestion,
-                attemptAnswerId: a.id,
-                userSelectedAnswers: a.selectedAnswers || [],
-                userTextAnswer: a.textAnswer
-              }));
-              setQuestions(qs);
+          if (attemptData) {
+            setAttempt(attemptData);
+            
+            // Map questions from attempt answers
+            if (attemptData.answers && Array.isArray(attemptData.answers)) {
+                const qs = attemptData.answers.map(a => ({
+                  ...a.quizQuestion,
+                  attemptAnswerId: a.id,
+                  userSelectedAnswers: a.selectedAnswers || [],
+                  userTextAnswer: a.textAnswer
+                }));
+                setQuestions(qs);
 
-              // Initialize answers state from server data
-              const initialAnswers = {};
-              qs.forEach(q => {
-                 if (q.userSelectedAnswers && q.userSelectedAnswers.length > 0) {
-                     initialAnswers[q.id] = q.userSelectedAnswers.map(ans => ans.id);
-                 }
-              });
-              setAnswers(initialAnswers);
+                // Initialize answers state from server data
+                const initialAnswers = {};
+                qs.forEach(q => {
+                   if (q.userSelectedAnswers && q.userSelectedAnswers.length > 0) {
+                       initialAnswers[q.id] = q.userSelectedAnswers.map(ans => ans.id);
+                   }
+                });
+                setAnswers(initialAnswers);
+            }
           }
       }
 
       // Timer Setup
-      if (quiz.timeLimitMinutes) {
+      if (quiz?.timeLimitMinutes) {
           setTimeLeft(quiz.timeLimitMinutes * 60); 
       }
 
@@ -109,6 +118,32 @@ export default function QuizAttempt() {
     }, 1000);
     return () => clearInterval(timer);
   }, [timeLeft]);
+
+  const getQuestionTypeLabel = (type) => {
+    switch(type) {
+      case 'SINGLE_CHOICE':
+        return 'Trắc nghiệm 1 đáp án';
+      case 'MULTIPLE_CHOICE':
+        return 'Trắc nghiệm nhiều đáp án';
+      case 'ESSAY':
+        return 'Tự luận';
+      default:
+        return '';
+    }
+  };
+
+  const getQuestionTypeBgColor = (type) => {
+    switch(type) {
+      case 'SINGLE_CHOICE':
+        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400';
+      case 'MULTIPLE_CHOICE':
+        return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400';
+      case 'ESSAY':
+        return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+      default:
+        return '';
+    }
+  };
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -157,9 +192,11 @@ export default function QuizAttempt() {
       
       try {
           setSubmitting(true);
-          await submitQuiz(attempt.id);
+          const submitRes = await submitQuiz(attempt.id);
+          const result = submitRes?.data || submitRes;
           message.success("Nộp bài thành công!");
-          navigate(`/quizzes/${id}/result`, { state: { attemptId: attempt.id } });
+          // Navigate to result page with attempt ID
+          navigate(`/quizzes/${id}/result`, { state: { attemptId: result.id || attempt.id } });
       } catch (err) {
           message.error("Lỗi nộp bài: " + err.message);
           setSubmitting(false);
@@ -261,9 +298,14 @@ export default function QuizAttempt() {
                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-bold shadow-sm">
                       {currentQuestionIndex + 1}
                     </span>
-                    <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                      Câu hỏi {currentQuestionIndex + 1}
-                    </h2>
+                    <div className="flex flex-col gap-1">
+                      <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                        Câu hỏi {currentQuestionIndex + 1}
+                      </h2>
+                      <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${getQuestionTypeBgColor(currentQuestion.type)} w-fit`}>
+                        {getQuestionTypeLabel(currentQuestion.type)}
+                      </span>
+                    </div>
                   </div>
                   <button
                     onClick={toggleFlag}
@@ -288,33 +330,73 @@ export default function QuizAttempt() {
                   </p>
 
                   <div className="space-y-3">
-                    {currentQuestion.answers && currentQuestion.answers.map((option) => {
-                      const isSelected = answers[currentQuestion.id]?.includes(option.id);
-                      return (
-                      <label
-                        key={option.id}
-                        className="group block cursor-pointer relative"
-                      >
-                        <input
-                          className="peer sr-only"
-                          name={`question_${currentQuestion.id}`}
-                          type={currentQuestion.type === "MULTIPLE_CHOICE" ? "checkbox" : "radio"}
-                          value={option.id}
-                          checked={!!isSelected}
-                          onChange={() => handleAnswerSelect(currentQuestion.id, option.id)}
+                    {currentQuestion.type === 'ESSAY' ? (
+                      // Essay Question - Text Area
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          Nhập câu trả lời của bạn:
+                        </label>
+                        <textarea
+                          value={answers[currentQuestion.id]?.[0] || ''}
+                          onChange={(e) => {
+                            setAnswers({ ...answers, [currentQuestion.id]: [e.target.value] });
+                            // Auto-save to server
+                            if (attempt) {
+                              submitAnswer(attempt.id, currentQuestion.id, {
+                                questionId: currentQuestion.id,
+                                selectedAnswerIds: [],
+                                textAnswer: e.target.value
+                              }).catch(err => console.error("Failed to save answer", err));
+                            }
+                          }}
+                          placeholder="Viết câu trả lời của bạn ở đây..."
+                          className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none"
+                          rows="6"
                         />
-                        <div className="flex items-center p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 peer-checked:border-primary peer-checked:bg-primary/5 group-hover:border-primary/50">
-                          <div className={`w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-500 mr-4 flex-shrink-0 relative flex items-center justify-center ${isSelected ? "border-primary bg-primary" : ""}`}>
-                            {isSelected && (
-                              <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                            )}
-                          </div>
-                          <span className="text-slate-700 dark:text-slate-200 font-medium select-none">
-                            {option.content}
-                          </span>
-                        </div>
-                      </label>
-                    )})}
+                      </div>
+                    ) : (
+                      // Multiple/Single Choice - Radio/Checkbox
+                      currentQuestion.answers && currentQuestion.answers.map((option) => {
+                        const isSelected = answers[currentQuestion.id]?.includes(option.id);
+                        return (
+                          <label
+                            key={option.id}
+                            className="group block cursor-pointer relative"
+                          >
+                            <input
+                              className="peer sr-only"
+                              name={`question_${currentQuestion.id}`}
+                              type={currentQuestion.type === "MULTIPLE_CHOICE" ? "checkbox" : "radio"}
+                              value={option.id}
+                              checked={!!isSelected}
+                              onChange={() => handleAnswerSelect(currentQuestion.id, option.id)}
+                            />
+                            <div className="flex items-center p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 peer-checked:border-primary peer-checked:bg-primary/5 group-hover:border-primary/50">
+                              {currentQuestion.type === "MULTIPLE_CHOICE" ? (
+                                // Checkbox for Multiple Choice
+                                <div className={`w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-500 mr-4 flex-shrink-0 relative flex items-center justify-center ${isSelected ? "border-primary bg-primary" : ""}`}>
+                                  {isSelected && (
+                                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                </div>
+                              ) : (
+                                // Radio button for Single Choice
+                                <div className={`w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-500 mr-4 flex-shrink-0 relative flex items-center justify-center ${isSelected ? "border-primary bg-primary" : ""}`}>
+                                  {isSelected && (
+                                    <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                                  )}
+                                </div>
+                              )}
+                              <span className="text-slate-700 dark:text-slate-200 font-medium select-none">
+                                {option.content}
+                              </span>
+                            </div>
+                          </label>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
@@ -379,7 +461,7 @@ export default function QuizAttempt() {
 
           <div className="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
             <button
-              onClick={() => handleSubmit(false)}
+              onClick={handleSubmitClick}
               className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-primary/30 transition-all transform hover:-translate-y-0.5"
               disabled={submitting}
             >
@@ -396,6 +478,38 @@ export default function QuizAttempt() {
           <Squares2X2Icon className="h-6 w-6" />
         </button>
       </div>
+
+      {/* Submit Confirmation Modal */}
+      <Modal
+        title="Xác nhận nộp bài"
+        open={showSubmitConfirm}
+        onOk={handleConfirmSubmit}
+        onCancel={handleCancelSubmit}
+        okText="Có, nộp bài"
+        cancelText="Hủy"
+        confirmLoading={submitting}
+        centered
+        className="dark:bg-slate-900"
+      >
+        <div className="space-y-3">
+          <p className="text-base text-slate-700 dark:text-slate-300">
+            Bạn có chắc chắn muốn nộp bài quiz này không?
+          </p>
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 space-y-2">
+            <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">
+              Thông tin bài nộp:
+            </p>
+            <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
+              <li>• Tổng câu hỏi: <span className="font-bold">{questions.length}</span></li>
+              <li>• Câu đã làm: <span className="font-bold">{Object.keys(answers).length}</span></li>
+              <li>• Câu chưa làm: <span className="font-bold">{questions.length - Object.keys(answers).length}</span></li>
+            </ul>
+          </div>
+          <p className="text-sm text-orange-700 dark:text-orange-300 font-medium">
+            ⚠️ Lưu ý: Sau khi nộp bài, bạn không thể chỉnh sửa câu trả lời!
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }

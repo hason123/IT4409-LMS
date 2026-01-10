@@ -73,7 +73,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         checkQuizAvailability(chosenQuiz);
         // Check if exists attempt in progress
-        Optional<QuizAttempt> inProgressAttempt = quizAttemptRepository.findByChapterItem_IdAndStudent_IdAndStatus(
+        Optional<QuizAttempt> inProgressAttempt = quizAttemptRepository.findLatestByChapterItem_IdAndStudent_IdAndStatus(
                 chapterItem.getId(), currentUser.getId(), AttemptStatus.IN_PROGRESS);
 
         // Nếu đã có bài đang làm dở -> Trả về chi tiết bài đó luôn (để FE render)
@@ -229,7 +229,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     public QuizAttemptDetailResponse getCurrentAttempt(Integer chapterItemId) {
         User currentUser = userService.getCurrentUser();
         QuizAttempt attempt = quizAttemptRepository
-                .findByChapterItem_IdAndStudent_IdAndStatus(
+                .findLatestByChapterItem_IdAndStudent_IdAndStatus(
                         chapterItemId, currentUser.getId(), AttemptStatus.IN_PROGRESS
                 )
                 .orElseThrow(() -> new ResourceNotFoundException("Không có bài làm nào đang diễn ra"));

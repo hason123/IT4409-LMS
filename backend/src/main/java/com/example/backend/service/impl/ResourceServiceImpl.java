@@ -158,9 +158,9 @@ public class ResourceServiceImpl implements ResourceService {
         if (uploadResource.getType() != ResourceType.PDF) {
             throw new IllegalStateException("Resource is not PDF type");
         }
-        if (uploadResource.getSource() != ResourceSource.UPLOAD) {
-            throw new IllegalStateException("Resource is not UPLOAD type");
-        }
+        // if (uploadResource.getSource() != ResourceSource.UPLOAD) {
+        //     throw new IllegalStateException("Resource is not UPLOAD type");
+        // }
 
         FileUploadUtil.assertAllowed(file, "pdf");
         final String cloudinaryId = uploadResource.getCloudinaryId();

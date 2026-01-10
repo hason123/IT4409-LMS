@@ -25,6 +25,9 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt,Integer
 
     Optional<QuizAttempt> findByChapterItem_IdAndStudent_IdAndStatus(Integer chapterItemId, Integer studentId, AttemptStatus status);
 
+    @Query("SELECT qa FROM QuizAttempt qa WHERE qa.chapterItem.id = :chapterItemId AND qa.student.id = :studentId AND qa.status = :status ORDER BY qa.id DESC LIMIT 1")
+    Optional<QuizAttempt> findLatestByChapterItem_IdAndStudent_IdAndStatus(@Param("chapterItemId") Integer chapterItemId, @Param("studentId") Integer studentId, @Param("status") AttemptStatus status);
+
     int countByChapterItem_IdAndStudent_Id(Integer chapterItemId, Integer studentId);
 
     Page<QuizAttempt> findByChapterItem_IdAndStatusIn(

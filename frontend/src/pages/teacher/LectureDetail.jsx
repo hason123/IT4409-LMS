@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import TeacherHeader from "../../components/layout/TeacherHeader";
@@ -17,10 +17,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { Form, Input, Button, Spin, Alert, message } from "antd";
 import { getCourseById } from "../../api/course";
-import { getLessonById, createLessonInChapter, updateLesson, deleteLesson, uploadLessonFile } from "../../api/lesson";
+import { getLessonById, createLessonInChapter, updateLesson, deleteLesson } from "../../api/lesson";
+import { createResource, uploadVideoResource, uploadSlideResource, getResourcesByLessonId } from "../../api/resource";
+import { getResourceTypeFromFile, isVideoFile } from "../../utils/fileUtils";
 
 export default function LectureDetail() {
   const { courseId, lectureId, chapterId } = useParams();
+  const location = useLocation();
   const [course, setCourse] = useState(null);
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,13 +32,16 @@ export default function LectureDetail() {
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
-  const isEditMode = !!lectureId;
+  const isCreateMode = !lectureId;
+  const [isViewMode, setIsViewMode] = useState(location.state?.viewMode ?? false);
+  const isEditMode = lectureId && !isViewMode;
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [resources, setResources] = useState([]);
   const fileInputRef = React.useRef(null);
 
   const extractVideoId = (url) => {
@@ -119,6 +125,18 @@ export default function LectureDetail() {
           setVideoUrl(lessonData.videoUrl || "");
           setNotes(lessonData.notes || "");
           
+          // Fetch resources for this lesson
+          try {
+            const resourcesResponse = await getResourcesByLessonId(lectureId);
+            const resourcesList = Array.isArray(resourcesResponse) 
+              ? resourcesResponse 
+              : resourcesResponse.data || [];
+            setResources(resourcesList);
+          } catch (resourceErr) {
+            console.error("Failed to fetch resources:", resourceErr);
+            setResources([]);
+          }
+          
           // Populate uploaded files if any
           if (lessonData.attachments && Array.isArray(lessonData.attachments)) {
             setUploadedFiles(lessonData.attachments.map(file => ({
@@ -183,6 +201,9 @@ export default function LectureDetail() {
   };
 
   const handleSubmit = async () => {
+    // Prevent submission in view mode
+    if (isViewMode) return;
+    
     try {
       setSubmitting(true);
       
@@ -226,7 +247,27 @@ export default function LectureDetail() {
       if (newFiles.length > 0 && savedLesson?.id) {
         for (const file of newFiles) {
           try {
-            await uploadLessonFile(savedLesson.id, file.file);
+            // Detect resource type from file
+            const resourceType = getResourceTypeFromFile(file.file);
+            
+            // Step 1: Create resource
+            const resourceResponse = await createResource(savedLesson.id, {
+              title: file.name,
+              url: "",
+              type: resourceType
+            });
+            
+            // Step 2: Upload the actual file
+            if (resourceResponse?.id || resourceResponse?.data?.id) {
+              const resourceId = resourceResponse.id || resourceResponse.data.id;
+              
+              if (isVideoFile(file.file)) {
+                await uploadVideoResource(resourceId, file.file);
+              } else {
+                await uploadSlideResource(resourceId, file.file);
+              }
+              message.success(`Tải lên ${file.name} thành công`);
+            }
           } catch (uploadErr) {
             console.error("Failed to upload file:", uploadErr);
             message.warning(`Không thể tải lên file ${file.name}`);
@@ -320,18 +361,26 @@ export default function LectureDetail() {
                 <div className="flex flex-wrap justify-between items-start gap-4">
                   <div className="flex flex-col gap-1">
                     <h1 className="text-[#111418] dark:text-white text-3xl font-black leading-tight tracking-tight">
-                    {isEditMode ? "Chi tiết Bài giảng" : "Tạo Bài giảng mới"}
+                    {isViewMode ? "Chi tiết Bài giảng" : isEditMode ? "Chỉnh sửa Bài giảng" : "Tạo Bài giảng mới"}
                   </h1>
                   <p className="text-[#617589] dark:text-gray-400 text-base font-normal">
-                    Chỉnh sửa nội dung, media và bài tập cho bài giảng này.
+                    {isViewMode ? "Xem nội dung bài giảng" : "Chỉnh sửa nội dung, media và bài tập cho bài giảng này."}
                   </p>
                 </div>
-                {isEditMode && (
+                {(isEditMode || isViewMode) && (
                   <div className="flex items-center gap-3">
+                    {isViewMode && (
+                      <button 
+                        onClick={() => setIsViewMode(false)}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold"
+                      >
+                        Chỉnh sửa
+                      </button>
+                    )}
                     <button 
                       onClick={handleDelete}
                       disabled={submitting}
-                      className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-semibold disabled:opacity-50"
                     >
                       <TrashIcon className="h-[18px] w-[18px]" />
                       Xóa bài giảng
@@ -347,8 +396,8 @@ export default function LectureDetail() {
                     <label className="text-[#111418] dark:text-gray-200 text-base font-medium">
                       Thuộc khóa học
                     </label>
-                    <div className="px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-[#dbe0e6] dark:border-gray-600">
-                      <p className="text-[#111418] dark:text-white font-medium">
+                    <div className="px-4 py-3 rounded-lg bg-primary bg-gray-50 dark:bg-gray-700 border border-[#dbe0e6] dark:border-gray-600">
+                      <p className="text-white font-medium">
                         {course?.title}
                       </p>
                     </div>
@@ -377,7 +426,8 @@ export default function LectureDetail() {
                       placeholder="Nhập tiêu đề bài giảng..."
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="h-12 rounded-lg"
+                      disabled={isViewMode}
+                      className={`h-12 rounded-lg ${isViewMode ? 'disabled:bg-white dark:disabled:bg-gray-800 disabled:text-[#111418] dark:disabled:text-white' : ''}`}
                     />
                   </Form.Item>
 
@@ -406,7 +456,8 @@ export default function LectureDetail() {
                       onChange={setContent}
                       modules={modules}
                       formats={formats}
-                      className="h-[300px] mb-12"
+                      className="h-[300px] mb-12 [&_.ql-container]:bg-white [&_.ql-container]:dark:bg-gray-800"
+                      readOnly={isViewMode}
                     />
                   </Form.Item>
 
@@ -435,7 +486,8 @@ export default function LectureDetail() {
                             size="large"
                             value={videoUrl}
                             onChange={(e) => setVideoUrl(e.target.value)}
-                            className="flex-1 bg-[#f8f9fa] dark:bg-gray-800 border-[#dbe0e6] dark:border-gray-600"
+                            disabled={isViewMode}
+                            className={`flex-1 bg-[#f8f9fa] dark:bg-gray-800 border-[#dbe0e6] dark:border-gray-600 ${isViewMode ? 'disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-[#111418] dark:disabled:text-white' : ''}`}
                           />
                           {videoUrl && (
                             <Button
@@ -485,11 +537,13 @@ export default function LectureDetail() {
                       </div>
                       {/* Drag Drop Zone */}
                       <div
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex-1 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center p-6 bg-[#f8f9fa] dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer min-h-[200px]"
+                        onDragOver={isViewMode ? undefined : handleDragOver}
+                        onDragLeave={isViewMode ? undefined : handleDragLeave}
+                        onDrop={isViewMode ? undefined : handleDrop}
+                        onClick={() => !isViewMode && fileInputRef.current?.click()}
+                        className={`flex-1 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center p-6 bg-[#f8f9fa] dark:bg-gray-800/50 transition-colors min-h-[200px] ${
+                          !isViewMode && "hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                        } ${isViewMode && "opacity-60 bg-gray-50 dark:bg-gray-800"}`}
                       >
                         <CloudArrowUpIcon className="h-12 w-12 text-gray-400 mb-3" />
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
@@ -541,11 +595,46 @@ export default function LectureDetail() {
                           ))}
                         </div>
                       )}
+
+                      {/* Resources List Section */}
+                      {resources.length > 0 && (
+                        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                          <h3 className="text-sm font-semibold text-[#111418] dark:text-white mb-3">
+                            Tài nguyên đã tải lên
+                          </h3>
+                          <div className="space-y-2">
+                            {resources.map((resource) => (
+                              <div
+                                key={resource.id}
+                                className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+                              >
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                  <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded text-green-600 dark:text-green-400 shrink-0">
+                                    {resource.type === "VIDEO" ? (
+                                      <PlayCircleIcon className="h-5 w-5" />
+                                    ) : (
+                                      <DocumentTextIcon className="h-5 w-5" />
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                      {resource.title}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {resource.type || "File"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Quiz Management Section */}
-                  <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 p-6 rounded-xl border border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-6">
+                  {/* <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 p-6 rounded-xl border border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div className="flex items-start gap-4">
                       <div className="bg-white dark:bg-gray-800 p-3 rounded-full shadow-sm shrink-0 text-primary">
                         <ClipboardDocumentListIcon className="h-7 w-7" />
@@ -569,7 +658,7 @@ export default function LectureDetail() {
                       <PlusCircleIcon className="h-5 w-5" />
                       Tạo Quiz mới
                     </button>
-                  </div>
+                  </div> */}
 
                   {/* Notes Section */}
                   <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 p-6 rounded-xl">
@@ -578,7 +667,8 @@ export default function LectureDetail() {
                       Ghi chú giảng viên (Chỉ hiển thị cho bạn)
                     </label>
                     <textarea
-                      className="w-full bg-white dark:bg-gray-800 border border-yellow-200 dark:border-yellow-900/30 rounded-lg p-3 text-sm text-[#111418] dark:text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none min-h-[80px]"
+                      disabled={isViewMode}
+                      className={`w-full bg-white dark:bg-gray-800 border border-yellow-200 dark:border-yellow-900/30 rounded-lg p-3 text-sm text-[#111418] dark:text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none min-h-[80px] ${isViewMode ? 'disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-[#111418] dark:disabled:text-white' : ''}`}
                       placeholder="Nhập ghi chú cá nhân về bài giảng này..."
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
@@ -590,7 +680,7 @@ export default function LectureDetail() {
             </>
             )}
             {/* Sticky Footer Action Bar */}
-            <div className="fixed bottom-0 left-0 right-0 lg:ml-64 border-t border-[#e5e7eb] dark:border-gray-800 bg-white dark:bg-card-dark p-4 px-6 md:px-12 flex justify-between items-center z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <div className={`fixed bottom-0 left-0 right-0 lg:ml-64 border-t border-[#e5e7eb] dark:border-gray-800 bg-white dark:bg-card-dark p-4 px-6 md:px-12 flex justify-between items-center z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] ${isViewMode ? 'hidden' : ''}`}>
               <div className="hidden sm:flex flex-col">
                 {isEditMode && (
                   <>
@@ -605,16 +695,16 @@ export default function LectureDetail() {
               </div>
               <div className="flex gap-3 w-full sm:w-auto justify-end">
                 <button
-                  onClick={() => navigate(-1)}
+                  onClick={() => isViewMode ? navigate(-1) : setIsViewMode(true)}
                   disabled={submitting}
-                  className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-[#111418] dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-[#111418] dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm disabled:opacity-50"
                 >
                   Hủy
                 </button>
                 <button 
                   onClick={handleSubmit}
-                  disabled={submitting}
-                  className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold transition-all shadow-md shadow-primary/20 flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={submitting || isViewMode}
+                  className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold transition-all shadow-md shadow-primary/20 flex items-center gap-2 text-sm disabled:opacity-50"
                 >
                   {submitting ? (
                     <>

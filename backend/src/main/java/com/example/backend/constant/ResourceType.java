@@ -1,5 +1,5 @@
 package com.example.backend.constant;
 
 public enum ResourceType {
-    VIDEO, PDF, TEXT, IMAGE
+    VIDEO, PDF, DOCX, IMAGE
 }
