@@ -19,6 +19,8 @@ public class CommentResponse {
     private LocalDateTime updatedAt;
     private Integer lessonId;
     private Integer userId;
+    private String fullName;
+    private String avatar;
     private Integer parentId;
     private List<CommentResponse> replies;
 }

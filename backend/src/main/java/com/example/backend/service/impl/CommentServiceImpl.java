@@ -162,14 +162,12 @@ public class CommentServiceImpl implements CommentService {
         response.setUpdatedAt(comment.getUpdatedTime());
         response.setLessonId(comment.getLesson().getId());
         response.setUserId(comment.getUser().getId());
+        response.setFullName(comment.getUser().getFullName());
+        response.setAvatar(comment.getUser().getImageUrl());
         if (comment.getParent() != null) {
             response.setParentId(comment.getParent().getId());
         }
-        List<CommentResponse> replies = comment.getChildren()
-                .stream()
-                .map(this::convertEntityToDTO)
-                .collect(Collectors.toList());
-        response.setReplies(replies);
+        response.setReplies(new ArrayList<>()); // Khởi tạo replies trống, sẽ được xây dựng trong getCommentsByLesson
         return response;
     }
 }

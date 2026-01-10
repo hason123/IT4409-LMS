@@ -156,13 +156,13 @@ export default function CourseContent() {
               <PlusIcon className="h-4 w-4" />
               <span>Thêm chương</span>
             </button>
-            <button
+            {/* <button
               onClick={handleAddLecture}
               className="flex items-center gap-2 bg-primary text-white px-3 py-1.5 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors"
             >
               <PlusIcon className="h-4 w-4" />
               <span>Thêm bài giảng</span>
-            </button>
+            </button> */}
           </div>
         )}
       </div>

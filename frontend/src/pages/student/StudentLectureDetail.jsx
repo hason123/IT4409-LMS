@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../components/layout/Header";
+import LessonComments from "../../components/lesson/LessonComments";
 import { getLessonById } from "../../api/lesson";
 import { getResourcesByLessonId } from "../../api/resource";
 import { Spin, Alert, Button, message } from "antd";
@@ -156,7 +157,7 @@ export default function StudentLectureDetail() {
             <div className="col-span-2">
               {/* Lesson Content */}
               {lesson?.content && (
-                <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg p-8 shadow-md">
+                <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg px-6 py-4 shadow-md">
                   <h2 className="text-2xl font-bold text-[#111418] dark:text-white mb-4">
                     Nội dung bài giảng
                   </h2>
@@ -183,9 +184,9 @@ export default function StudentLectureDetail() {
             {/* Sidebar - Resources */}
             <div>
               {resources && resources.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md sticky top-24">
-                  <h3 className="text-sm font-semibold text-[#111418] dark:text-white mb-3">
-                    Tài nguyên đã tải lên
+                <div className="bg-white dark:bg-gray-800 rounded-lg px-6 py-4 shadow-md sticky top-24">
+                  <h3 className="text-md font-semibold text-[#111418] dark:text-white mb-3">
+                    Tài liệu bài giảng
                   </h3>
                   <div className="space-y-2">
                     {resources.map((resource) => (
@@ -218,6 +219,9 @@ export default function StudentLectureDetail() {
               )}
             </div>
           </div>
+
+          {/* Lesson Comments Section */}
+          <LessonComments lectureId={lectureId} />
         </div>
       </div>
     </div>
