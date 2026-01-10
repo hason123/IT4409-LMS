@@ -38,8 +38,8 @@ export default function TeacherSidebar() {
         <SidebarLink
           icon={<ChartBarIcon className="h-6 w-6" />}
           label="Báo cáo/Thống kê"
-          active={currentPath === "/teacher/reports"}
-          to="/teacher/reports"
+          active={currentPath === "/teacher/report"}
+          to="/teacher/report"
         />
         <SidebarLink
           icon={<BellIcon className="h-6 w-6" />}
