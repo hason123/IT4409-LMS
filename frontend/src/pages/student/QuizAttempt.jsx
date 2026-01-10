@@ -186,21 +186,30 @@ export default function QuizAttempt() {
     }
   };
 
-  const handleSubmit = async (force = false) => {
+  const handleSubmitClick = () => {
+    setShowSubmitConfirm(true);
+  };
+
+  const handleConfirmSubmit = async () => {
       if (submitting) return;
       if (!attempt) return;
+      
+      setShowSubmitConfirm(false);
       
       try {
           setSubmitting(true);
           const submitRes = await submitQuiz(attempt.id);
           const result = submitRes?.data || submitRes;
           message.success("Nộp bài thành công!");
-          // Navigate to result page with attempt ID
           navigate(`/quizzes/${id}/result`, { state: { attemptId: result.id || attempt.id } });
       } catch (err) {
           message.error("Lỗi nộp bài: " + err.message);
           setSubmitting(false);
       }
+  };
+
+  const handleCancelSubmit = () => {
+    setShowSubmitConfirm(false);
   };
   
   const toggleFlag = () => {

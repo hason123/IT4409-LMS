@@ -145,8 +145,23 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         QuizQuestion question = attemptAnswer.getQuestion();
 
+        // Xử lý Single Choice
+        if (question.getType() == QuestionType.SINGLE_CHOICE) {
+            List<QuizAnswer> selectedAnswers = quizAnswerRepository.findAllById(request.getSelectedAnswerIds());
+
+            if (selectedAnswers.size() != request.getSelectedAnswerIds().size()) {
+                throw new BusinessException("Một số đáp án không tồn tại");
+            }
+            for (QuizAnswer ans : selectedAnswers) {
+                if (!ans.getQuizQuestion().getId().equals(questionId)) {
+                    throw new BusinessException("Đáp án không thuộc về câu hỏi này");
+                }
+            }
+            attemptAnswer.setSelectedAnswers(selectedAnswers);
+            attemptAnswer.setTextAnswer(null);
+        }
         // Xử lý Multiple Choice
-        if (question.getType() == QuestionType.MULTIPLE_CHOICE) {
+        else if (question.getType() == QuestionType.MULTIPLE_CHOICE) {
             List<QuizAnswer> selectedAnswers = quizAnswerRepository.findAllById(request.getSelectedAnswerIds());
 
             if (selectedAnswers.size() != request.getSelectedAnswerIds().size()) {
@@ -325,8 +340,29 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             boolean isFullScore = false;
             double earnedPoints = 0.0;
 
-            // ===== 1. ESSAY (Giữ nguyên) =====
-            if (question.getType() == QuestionType.ESSAY) {
+            // ===== 1. SINGLE CHOICE =====
+            if (question.getType() == QuestionType.SINGLE_CHOICE) {
+                List<QuizAnswer> selectedAnswers = submitAnswer.getSelectedAnswers();
+
+                if (selectedAnswers != null && !selectedAnswers.isEmpty()) {
+                    answered++;
+
+                    // Lấy đáp án đúng của câu hỏi
+                    QuizAnswer correctAnswer = question.getAnswers().stream()
+                            .filter(a -> Boolean.TRUE.equals(a.getIsCorrect()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (correctAnswer != null && selectedAnswers.get(0).getId().equals(correctAnswer.getId())) {
+                        earnedPoints = questionPoints;
+                        isFullScore = true;
+                    } else {
+                        earnedPoints = 0;
+                    }
+                }
+            }
+            // ===== 2. ESSAY (Giữ nguyên) =====
+            else if (question.getType() == QuestionType.ESSAY) {
                 String userAnswer = submitAnswer.getTextAnswer();
                 if (userAnswer != null && !userAnswer.trim().isEmpty()) {
                     answered++;
@@ -339,7 +375,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                     }
                 }
             }
-            // ===== 2. MULTIPLE CHOICE (Sửa Logic) =====
+            // ===== 3. MULTIPLE CHOICE (Sửa Logic) =====
             else if (question.getType() == QuestionType.MULTIPLE_CHOICE) {
                 List<QuizAnswer> selectedAnswers = submitAnswer.getSelectedAnswers();
 
@@ -569,6 +605,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         response.setQuizId(attempt.getQuiz().getId());
         response.setStudentId(attempt.getStudent().getId());
         response.setChapterItemId(attempt.getChapterItem().getId());
+        response.setStartTime(attempt.getStartTime());
         response.setGrade(attempt.getGrade());
         response.setIsPassed(attempt.getIsPassed());
         response.setCompletedTime(attempt.getCompletedTime());
@@ -662,6 +699,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         if (attempt == null) return null;
         return QuizAttemptResponse.builder()
                 .id(attempt.getId())
+                .startTime(attempt.getStartTime())
                 .completedTime(attempt.getCompletedTime())
                 .grade(attempt.getGrade())
                 .isPassed(attempt.getIsPassed())

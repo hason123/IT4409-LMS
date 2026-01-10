@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class QuizAttemptResponse {
     private Integer id;
+    private LocalDateTime startTime;
     private LocalDateTime completedTime;
     private Integer grade;
     private Boolean isPassed;
