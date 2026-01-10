@@ -27,7 +27,8 @@ public class CourseRating extends BaseEntity {
     @JoinColumn(name = "student_id")
     private User student;
 
-    @Column(nullable = false)
+    @Column(name = "rating_value")
     private Double ratingValue;
 
+    private String description;
 }

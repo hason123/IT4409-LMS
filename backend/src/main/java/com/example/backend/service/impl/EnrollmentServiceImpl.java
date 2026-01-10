@@ -5,10 +5,12 @@ import com.example.backend.constant.EnrollmentStatus;
 import com.example.backend.constant.ItemType;
 import com.example.backend.constant.RoleType;
 import com.example.backend.dto.request.EnrollmentRequest;
+import com.example.backend.dto.request.course.CourseRatingRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.dto.response.EnrollmentResponse;
+import com.example.backend.dto.response.course.CourseRatingResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.*;
@@ -154,28 +156,29 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     @Transactional
-    public CourseResponse ratingCourse(Integer courseId, Double newRating) {
-        if (newRating < 1 || newRating > 5) {
+    public CourseRatingResponse ratingCourse(Integer courseId, CourseRatingRequest request) {
+        if (request.getRatingValue() < 1 || request.getRatingValue() > 5) {
             throw new BusinessException("Điểm đánh giá phải từ 1 đến 5!");
         }
         User currentUser = userService.getCurrentUser();
-        // 2. Check quyền (Giữ nguyên logic của ông nhưng tối ưu query chút)
         boolean isEnrolled = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
                 currentUser.getId(), courseId, EnrollmentStatus.APPROVED);
-
         if (!isEnrolled) {
             throw new BusinessException("Bạn phải tham gia khóa học mới được đánh giá!");
         }
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học"));
-        // 3. Lưu/Cập nhật Review cá nhân
+
         CourseRating review = courseRatingRepository.findByStudent_IdAndCourse_Id(currentUser.getId(), courseId)
                 .orElse(CourseRating.builder()
                         .student(currentUser)
                         .course(course)
+                        .ratingValue(request.getRatingValue())
+                        .description(request.getDescription())
                         .build());
 
-        review.setRatingValue(newRating);
+        review.setRatingValue(request.getRatingValue());
+        review.setDescription(request.getDescription());
         courseRatingRepository.save(review);
         Double avgRating = courseRatingRepository.getAverageRating(courseId);
         // 5. Làm tròn (nếu muốn, ví dụ 1 số thập phân)
@@ -183,7 +186,19 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         double roundedRating = (avgRating != null) ? Math.round(avgRating * 10.0) / 10.0 : 0.0;
         course.setRating(roundedRating);
         courseRepository.save(course);
-        return courseService.convertEntityToDto(course);
+        return convertEntityToDTO(review);
+    }
+
+    private CourseRatingResponse convertEntityToDTO(CourseRating entity) {
+        return CourseRatingResponse.builder()
+                .id(entity.getId())
+                .courseId(entity.getCourse().getId())
+                .courseName(entity.getCourse().getTitle())
+                .studentId(entity.getStudent().getId())
+                .studentCode(entity.getStudent().getStudentNumber())
+                .studentUsername(entity.getStudent().getUserName())
+                .studentFullname(entity.getStudent().getFullName())
+                .build();
     }
 
     @Transactional

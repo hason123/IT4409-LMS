@@ -1,10 +1,12 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.request.EnrollmentRequest;
+import com.example.backend.dto.request.course.CourseRatingRequest;
 import com.example.backend.dto.request.course.StudentCourseRequest;
 import com.example.backend.dto.request.search.SearchUserRequest;
 import com.example.backend.dto.response.EnrollmentResponse;
 import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.course.CourseRatingResponse;
 import com.example.backend.dto.response.course.CourseResponse;
 import com.example.backend.dto.response.user.UserViewResponse;
 import com.example.backend.entity.User;
@@ -55,13 +57,12 @@ public class EnrollmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "Đăng ký tham gia khóa học Private")
+    @Operation(summary = "Sinh viên trong khóa đánh giá khóa hoọc")
     @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/courses/{courseId}/rating")
-    public ResponseEntity<CourseResponse> ratingCourse(@PathVariable Integer courseId, @RequestBody Map<String, String> requestBody) {
-        Double rating = Double.valueOf(requestBody.get("rating"));
-        CourseResponse response = enrollmentService.ratingCourse(courseId, rating);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<CourseRatingResponse> ratingCourse(@PathVariable Integer courseId, @RequestBody CourseRatingRequest request) {
+        CourseRatingResponse response = enrollmentService.ratingCourse(courseId, request);
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Đánh dấu hoàn thành LESSON")
