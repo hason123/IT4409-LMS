@@ -38,6 +38,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private final ChapterItemRepository chapterItemRepository;
     private final ProgressRepository progressRepository;
     private final EnrollmentService enrollmentService;
+    private final CourseRepository courseRepository;
 
 
     // =========================================================================
@@ -437,6 +438,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         quizAttemptRepository.save(attempt);
     }
 
+    // LẤY KẾT QUẢ CỦA BẢN THÂN SINH VIÊN THEO 1 QUIZ
     @Override
     public List<QuizAttemptResponse> getStudentAttemptsHistory(Integer chapterItemId) {
         User currentUser = userService.getCurrentUser();
@@ -447,6 +449,8 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .toList();
     }
 
+
+    // LẤY KẾT QUẢ CỦA TẤT CẢ MỌI NGƯỜI THEO 1 QUIZ
     @Override
     public PageResponse<QuizAttemptResponse> getAttemptsForTeacherOrAdmin(Integer chapterItemId, Pageable pageable) {
         User currentUser = userService.getCurrentUser();
@@ -466,6 +470,8 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         return new PageResponse<>(dtoPage.getNumber() + 1, dtoPage.getTotalPages(), dtoPage.getNumberOfElements(), dtoPage.getContent());
     }
+
+    //LẤY KẾT QUẢ
 
     @Override
     public Integer getStudentBestScore(Integer chapterItemId) {
@@ -512,6 +518,47 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         }
 
         return false;
+    }
+
+    // =========================================================================
+    // GRADEBOOK / BẢNG ĐIỂM
+    // =========================================================================
+
+    /**
+     * API cho Sinh viên xem bảng điểm cá nhân của mình (Tất cả quiz đã làm)
+     */
+    @Override
+    public List<StudentQuizResultResponse> getMyGradeBook(Integer courseId) { // Thêm tham số courseId
+        User currentUser = userService.getCurrentUser();
+
+        boolean isEnrolled = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
+                currentUser.getId(), courseId, EnrollmentStatus.APPROVED);
+        if (!isEnrolled) {
+            throw new BusinessException("Bạn không có quyền truy cập vào tài nguyên này!");
+        }
+
+        return quizAttemptRepository.findMaxGradesByStudentAndCourse(currentUser.getId(), courseId);
+    }
+    /**
+     * API cho Giáo viên/Admin xem bảng điểm của khóa học
+     */
+    @Override
+    public List<CourseQuizResultResponse> getCourseGradeBook(Integer courseId) {
+        User currentUser = userService.getCurrentUser();
+
+        // 1. Validate quyền truy cập
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+
+        boolean isAdmin = currentUser.getRole().getRoleName() == RoleType.ADMIN;
+        boolean isTeacher = course.getTeacher().getId().equals(currentUser.getId());
+
+        if (!isAdmin && !isTeacher) {
+            throw new UnauthorizedException("Bạn không có quyền xem bảng điểm của khóa học này");
+        }
+
+        // 2. Gọi Repository lấy dữ liệu tổng hợp
+        return quizAttemptRepository.findMaxGradesByCourse(courseId);
     }
 
     private QuizAttemptDetailResponse convertToDetailResponse(QuizAttempt attempt) {

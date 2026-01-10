@@ -2,8 +2,10 @@ package com.example.backend.service;
 
 import com.example.backend.dto.request.quiz.QuizAttemptAnswerRequest;
 import com.example.backend.dto.response.PageResponse;
+import com.example.backend.dto.response.quiz.CourseQuizResultResponse;
 import com.example.backend.dto.response.quiz.QuizAttemptDetailResponse;
 import com.example.backend.dto.response.quiz.QuizAttemptResponse;
+import com.example.backend.dto.response.quiz.StudentQuizResultResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,10 @@ public interface QuizAttemptService {
     );
 
     Integer getStudentBestScore(Integer chapterItemId);
+
+    List<StudentQuizResultResponse> getMyGradeBook(Integer courseId);
+
+    List<CourseQuizResultResponse> getCourseGradeBook(Integer courseId);
 
 
 
