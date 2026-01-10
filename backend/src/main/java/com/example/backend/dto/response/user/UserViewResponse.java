@@ -14,5 +14,8 @@ public class UserViewResponse {
     private String gmail;
     private String imageUrl;
     private String cloudinaryImageId;
-
+    private String workPlace;
+    private Integer yearsOfExperience;
+    private String fieldOfExpertise;
+    private String bio;
 }

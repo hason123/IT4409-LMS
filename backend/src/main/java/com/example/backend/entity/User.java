@@ -46,6 +46,14 @@ public class User extends BaseEntity {
     private String imageUrl;
     @Column(name = "cloudinary_image_id")
     private String cloudinaryImageId;
+    @Column(name = "work_place")
+    private String workPlace;
+    @Column(name = "years_of_experience")
+    private Integer yearsOfExperience;
+    @Column(name = "field_of_expertise")
+    private String fieldOfExpertise;
+    @Column(name = "bio", columnDefinition = "LONGTEXT")
+    private String bio;
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;

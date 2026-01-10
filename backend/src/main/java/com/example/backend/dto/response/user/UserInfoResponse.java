@@ -19,4 +19,8 @@ public class UserInfoResponse {
     private String roleName;
     private String imageUrl;
     private String cloudinaryImageId;
+    private String workPlace;
+    private Integer yearsOfExperience;
+    private String fieldOfExpertise;
+    private String bio;
 }

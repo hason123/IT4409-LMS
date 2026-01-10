@@ -16,4 +16,8 @@ public class RegisterRequest {
     private String roleName;
     private String password;
     private String studentNumber;
+    private String workPlace;
+    private Integer yearsOfExperience;
+    private String fieldOfExpertise;
+    private String bio;
 }

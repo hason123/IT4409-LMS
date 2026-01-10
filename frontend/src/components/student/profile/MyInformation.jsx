@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CameraIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { Input, InputNumber, Button, Space, DatePicker, message } from "antd";
+import dayjs from "dayjs";
 import { updateUser, uploadUserAvatar } from "../../../api/user";
 import { useAuth } from "../../../contexts/AuthContext";
 import useUserStore from "../../../store/useUserStore";
@@ -19,6 +21,10 @@ export default function MyInformation({
     phoneNumber: "",
     birthday: "",
     address: "",
+    workPlace: "",
+    yearsOfExperience: "",
+    fieldOfExpertise: "",
+    bio: "",
   });
   const [loading, setLoading] = useState(parentLoading || true);
   const [error, setError] = useState("");
@@ -36,6 +42,10 @@ export default function MyInformation({
         phoneNumber: userData.phoneNumber || "",
         birthday: userData.birthday || "",
         address: userData.address || "",
+        workPlace: userData.workPlace || "",
+        yearsOfExperience: userData.yearsOfExperience || "",
+        fieldOfExpertise: userData.fieldOfExpertise || "",
+        bio: userData.bio || "",
       });
       console.log("User Data in MyInformation:", userData);
       // Map image_uri from backend to avatar for display
@@ -52,6 +62,10 @@ export default function MyInformation({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAntdChange = (fieldName, value) => {
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
   };
 
   const handleAvatarChange = (e) => {
@@ -121,6 +135,10 @@ export default function MyInformation({
         phoneNumber: initialData.phoneNumber || "",
         birthday: initialData.birthday || "",
         address: initialData.address || "",
+        workPlace: initialData.workPlace || "",
+        yearsOfExperience: initialData.yearsOfExperience || "",
+        fieldOfExpertise: initialData.fieldOfExpertise || "",
+        bio: initialData.bio || "",
       });
       setAvatarPreview(initialData.avatar || initialData.image_url || null);
       setAvatarFile(null);
@@ -155,13 +173,14 @@ export default function MyInformation({
           </p>
         </div>
         {!isEditing && (
-          <button
+          <Button 
+            type="primary"
+            icon={<PencilIcon className="h-4 w-4" />}
             onClick={() => setIsEditing(true)}
-            className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#f0f2f5] dark:bg-gray-700 text-[#111418] dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#e0e2e5] dark:hover:bg-gray-600 transition-colors"
+            className="h-10"
           >
-            <PencilIcon className="h-4 w-4 mr-2" />
-            <span className="truncate">Chỉnh sửa</span>
-          </button>
+            Chỉnh sửa
+          </Button>
         )}
       </div>
 
@@ -188,7 +207,7 @@ export default function MyInformation({
         </div>
       )}
 
-      <div className="py-6 flex flex-col gap-6">
+      <div className={`py-6 flex flex-col gap-6 ${!isEditing ? "disabled-form" : ""}`}>
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <div className="relative group">
             <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 border-2 border-gray-100 dark:border-gray-600">
@@ -222,16 +241,14 @@ export default function MyInformation({
               <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
                 Họ và tên
               </p>
-              <div className="flex w-full flex-1 items-stretch rounded-lg">
-                <input
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="Nhập họ và tên của bạn"
-                />
-              </div>
+              <Input
+                name="fullName"
+                value={formData.fullName}
+                onChange={(e) => handleAntdChange("fullName", e.target.value)}
+                disabled={!isEditing}
+                placeholder="Nhập họ và tên của bạn"
+                size="large"
+              />
             </label>
           </div>
         </div>
@@ -240,82 +257,140 @@ export default function MyInformation({
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
               Email
             </p>
-            <div className="flex w-full flex-1 items-stretch rounded-lg">
-              <input
-                name="gmail"
-                value={formData.gmail}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                placeholder="Nhập email của bạn"
-                type="email"
-              />
-            </div>
+            <Input
+              name="gmail"
+              value={formData.gmail}
+              onChange={(e) => handleAntdChange("gmail", e.target.value)}
+              disabled={!isEditing}
+              placeholder="Nhập email của bạn"
+              type="email"
+              size="large"
+            />
           </label>
           <label className="flex flex-col min-w-40">
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
               Số điện thoại
             </p>
-            <div className="flex w-full flex-1 items-stretch rounded-lg">
-              <input
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                placeholder="Nhập số điện thoại của bạn"
-                type="tel"
-              />
-            </div>
+            <Input
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={(e) => handleAntdChange("phoneNumber", e.target.value)}
+              disabled={!isEditing}
+              placeholder="Nhập số điện thoại của bạn"
+              type="tel"
+              size="large"
+            />
           </label>
           <label className="flex flex-col min-w-40">
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
               Ngày sinh
             </p>
-            <div className="flex w-full flex-1 items-stretch rounded-lg">
-              <input
-                name="birthday"
-                value={formData.birthday}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                type="date"
-              />
-            </div>
+            <DatePicker
+              value={formData.birthday ? dayjs(formData.birthday) : null}
+              onChange={(date) => handleAntdChange("birthday", date ? date.format("YYYY-MM-DD") : "")}
+              disabled={!isEditing}
+              format="DD/MM/YYYY"
+              className="w-full"
+              placeholder="Chọn ngày sinh của bạn"
+              size="large"
+            />
           </label>
           <label className="flex flex-col min-w-40">
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
               Địa chỉ
             </p>
-            <div className="flex w-full flex-1 items-stretch rounded-lg">
-              <input
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
+            <Input
+              name="address"
+              value={formData.address}
+              onChange={(e) => handleAntdChange("address", e.target.value)}
+              disabled={!isEditing}
+              placeholder="Nhập địa chỉ của bạn"
+              size="large"
+            />
+          </label>
+        </div>
+
+        {/* Teacher-specific fields */}
+        <div className="mt-6 pt-6 border-t border-black/10 dark:border-white/10">
+          <h3 className="text-lg font-semibold text-[#111418] dark:text-white mb-4">
+            Thông tin giáo viên
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <label className="flex flex-col min-w-40">
+              <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
+                Nơi công tác
+              </p>
+              <Input
+                name="workPlace"
+                value={formData.workPlace}
+                onChange={(e) => handleAntdChange("workPlace", e.target.value)}
                 disabled={!isEditing}
-                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white bg-transparent focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-primary h-11 placeholder:text-[#617589] dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal border border-black/10 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                placeholder="Nhập địa chỉ của bạn"
+                placeholder="Ví dụ: Trường Đại học ABC"
+                size="large"
               />
-            </div>
+            </label>
+            <label className="flex flex-col min-w-40">
+              <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
+                Số năm kinh nghiệm
+              </p>
+              <InputNumber
+                name="yearsOfExperience"
+                value={formData.yearsOfExperience ? parseInt(formData.yearsOfExperience) : undefined}
+                onChange={(value) => handleAntdChange("yearsOfExperience", value || "")}
+                disabled={!isEditing}
+                min={0}
+                placeholder="Ví dụ: 5"
+                className="w-full"
+                size="large"
+              />
+            </label>
+            <label className="flex flex-col min-w-40">
+              <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
+                Lĩnh vực chuyên môn
+              </p>
+              <Input
+                name="fieldOfExpertise"
+                value={formData.fieldOfExpertise}
+                onChange={(e) => handleAntdChange("fieldOfExpertise", e.target.value)}
+                disabled={!isEditing}
+                placeholder="Ví dụ: Lập trình Web, Toán học"
+                size="large"
+              />
+            </label>
+          </div>
+          <label className="flex flex-col min-w-40 mt-6">
+            <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
+              Giới thiệu về bản thân
+            </p>
+            <Input.TextArea
+              name="bio"
+              value={formData.bio}
+              onChange={(e) => handleAntdChange("bio", e.target.value)}
+              disabled={!isEditing}
+              rows={4}
+              placeholder="Chia sẻ thêm về bản thân, kinh nghiệm và những điều bạn đam mê..."
+              size="large"
+            />
           </label>
         </div>
       </div>
       {isEditing && (
         <div className="flex justify-end gap-4 pt-6 border-t border-black/10 dark:border-white/10">
-          <button
-            onClick={handleCancel}
-            disabled={loading}
-            className="flex items-center justify-center h-10 px-6 rounded-lg bg-background-light dark:bg-white/10 text-black dark:text-white text-sm font-bold leading-normal tracking-[-0.015em] hover:bg-black/5 dark:hover:bg-white/20 transition-colors disabled:opacity-50"
-          >
-            Hủy
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="flex items-center justify-center h-10 px-6 rounded-lg bg-primary text-white text-sm font-bold leading-normal tracking-[-0.015em] hover:bg-primary/90 transition-colors disabled:opacity-50"
-          >
-            {loading ? "Đang lưu..." : "Lưu thay đổi"}
-          </button>
+          <Space>
+            <Button 
+              onClick={handleCancel}
+              disabled={loading}
+            >
+              Hủy
+            </Button>
+            <Button 
+              type="primary"
+              onClick={handleSave}
+              loading={loading}
+            >
+              {loading ? "Đang lưu..." : "Lưu thay đổi"}
+            </Button>
+          </Space>
         </div>
       )}
     </>

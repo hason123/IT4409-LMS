@@ -332,6 +332,46 @@ textarea {
   color: rgba(0, 0, 0, 0.45) !important;
 }
 
+/* InputNumber disabled styles */
+.disabled-form .ant-input-number-disabled,
+.disabled-form .ant-input-number-disabled:hover {
+  background-color: #ffffff !important;
+  border-color: #d9d9d9 !important;
+  cursor: default !important;
+}
+
+.disabled-form .ant-input-number-disabled .ant-input-number-input {
+  background-color: #ffffff !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+  cursor: text !important;
+}
+
+.disabled-form .ant-input-number-disabled .ant-input-number-input::placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.disabled-form .ant-input-number-disabled .ant-input-number-handler {
+  cursor: default !important;
+}
+
+/* DatePicker disabled styles */
+.disabled-form .ant-picker-disabled,
+.disabled-form .ant-picker-disabled:hover {
+  background-color: #ffffff !important;
+  border-color: #d9d9d9 !important;
+  cursor: default !important;
+}
+
+.disabled-form .ant-picker-disabled .ant-picker-input {
+  background-color: #ffffff !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+  cursor: text !important;
+}
+
+.disabled-form .ant-picker-disabled .ant-picker-input::placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
 .disabled-form input:disabled,
 .disabled-form textarea:disabled,
 .disabled-form select:disabled {
@@ -386,5 +426,37 @@ textarea {
 }
 
 .dark .disabled-form .ant-select-disabled .ant-select-selection-placeholder {
+  color: rgb(156, 163, 175) !important;
+}
+
+/* Dark mode InputNumber disabled styles */
+.dark .disabled-form .ant-input-number-disabled,
+.dark .disabled-form .ant-input-number-disabled:hover {
+  background-color: #1f2937 !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .disabled-form .ant-input-number-disabled .ant-input-number-input {
+  background-color: #1f2937 !important;
+  color: rgb(243, 244, 246) !important;
+}
+
+.dark .disabled-form .ant-input-number-disabled .ant-input-number-input::placeholder {
+  color: rgb(156, 163, 175) !important;
+}
+
+/* Dark mode DatePicker disabled styles */
+.dark .disabled-form .ant-picker-disabled,
+.dark .disabled-form .ant-picker-disabled:hover {
+  background-color: #1f2937 !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .disabled-form .ant-picker-disabled .ant-picker-input {
+  background-color: #1f2937 !important;
+  color: rgb(243, 244, 246) !important;
+}
+
+.dark .disabled-form .ant-picker-disabled .ant-picker-input::placeholder {
   color: rgb(156, 163, 175) !important;
 }

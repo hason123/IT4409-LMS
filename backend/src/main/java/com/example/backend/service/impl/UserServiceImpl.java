@@ -140,24 +140,30 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("User not found");
         }
 
-        if (request.getUserName() != null) {
+        if (request.getUserName() != null && !request.getUserName().equals(updatedUser.getUserName())) {
             if(userRepository.findByUserName(request.getUserName()) != null){
                 throw new BusinessException("Tên người dùng đã được sử dụng, vui lòng chọn tên khác");
             } else updatedUser.setUserName(request.getUserName());
+        } else if(request.getUserName() != null){
+            updatedUser.setUserName(request.getUserName());
         } else{
             updatedUser.setUserName(updatedUser.getUserName());
         }
 
-        if(request.getStudentNumber() != null) {
+        if(request.getStudentNumber() != null && !request.getStudentNumber().equals(updatedUser.getStudentNumber())) {
             if(userRepository.findByStudentNumber(request.getStudentNumber()) != null){
                 throw new BusinessException("Mã số này đã được sử dụng");
             } else updatedUser.setStudentNumber(request.getStudentNumber());
+        } else if(request.getStudentNumber() != null){
+            updatedUser.setStudentNumber(request.getStudentNumber());
         } else updatedUser.setStudentNumber(updatedUser.getStudentNumber());
 
-        if(request.getGmail() != null) {
+        if(request.getGmail() != null && !request.getGmail().equals(updatedUser.getGmail())) {
             if(userRepository.findByGmail(request.getGmail()) != null){
                 throw new BusinessException("Gmail này đã được sử dụng");
             } else updatedUser.setGmail(request.getGmail());
+        } else if(request.getGmail() != null){
+            updatedUser.setGmail(request.getGmail());
         }
 
         if (request.getBirthday() != null) {
@@ -169,6 +175,20 @@ public class UserServiceImpl implements UserService {
         if (request.getPhoneNumber() != null) {
             updatedUser.setPhoneNumber(request.getPhoneNumber());
         } else updatedUser.setPhoneNumber(updatedUser.getPhoneNumber());
+        
+        // Update teacher-specific fields
+        if (request.getWorkPlace() != null) {
+            updatedUser.setWorkPlace(request.getWorkPlace());
+        }
+        if (request.getYearsOfExperience() != null) {
+            updatedUser.setYearsOfExperience(request.getYearsOfExperience());
+        }
+        if (request.getFieldOfExpertise() != null) {
+            updatedUser.setFieldOfExpertise(request.getFieldOfExpertise());
+        }
+        if (request.getBio() != null) {
+            updatedUser.setBio(request.getBio());
+        }
 
         userRepository.save(updatedUser);
         return convertUserInfoToDTO(updatedUser);
@@ -234,6 +254,21 @@ public class UserServiceImpl implements UserService {
         user.setAddress(request.getAddress());
         user.setFullName(request.getFullName());
         user.setVerified(false);
+        
+        // Set teacher-specific fields if provided
+        if (request.getWorkPlace() != null) {
+            user.setWorkPlace(request.getWorkPlace());
+        }
+        if (request.getYearsOfExperience() != null) {
+            user.setYearsOfExperience(request.getYearsOfExperience());
+        }
+        if (request.getFieldOfExpertise() != null) {
+            user.setFieldOfExpertise(request.getFieldOfExpertise());
+        }
+        if (request.getBio() != null) {
+            user.setBio(request.getBio());
+        }
+        
         userRepository.save(user);
         return convertUserInfoToDTO(user);
     }
@@ -321,6 +356,10 @@ public class UserServiceImpl implements UserService {
         userDTO.setRoleName(user.getRole().getRoleName().toString());
         userDTO.setImageUrl(user.getImageUrl());
         userDTO.setCloudinaryImageId(user.getCloudinaryImageId());
+        userDTO.setWorkPlace(user.getWorkPlace());
+        userDTO.setYearsOfExperience(user.getYearsOfExperience());
+        userDTO.setFieldOfExpertise(user.getFieldOfExpertise());
+        userDTO.setBio(user.getBio());
         return userDTO;
     }
 
@@ -334,6 +373,10 @@ public class UserServiceImpl implements UserService {
         userDTO.setGmail(user.getGmail());
         userDTO.setImageUrl(user.getImageUrl());
         userDTO.setCloudinaryImageId(user.getCloudinaryImageId());
+        userDTO.setWorkPlace(user.getWorkPlace());
+        userDTO.setYearsOfExperience(user.getYearsOfExperience());
+        userDTO.setFieldOfExpertise(user.getFieldOfExpertise());
+        userDTO.setBio(user.getBio());
         return userDTO;
     }
 

@@ -6,6 +6,7 @@ import CourseTabs from "../../components/course/CourseTabs";
 import DescriptionCourse from "../../components/course/DescriptionCourse";
 import CourseContent from "../../components/course/CourseContent";
 import ReviewTab from "../../components/course/ReviewTab";
+import TeacherTab from "../../components/course/TeacherTab";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { getCourseById, publishCourse, enrollCourse, checkEnrollmentStatus } from "../../api/course";
@@ -245,7 +246,7 @@ export default function CourseDetailPage() {
                             label: "Nội dung khóa học",
                             content: <CourseContent />,
                           },
-                          { label: "Giảng viên", content: <div>...</div> },
+                          { label: "Giảng viên", content: <TeacherTab course={course} /> },
                           { label: "Đánh giá", content: <ReviewTab /> },
                         ]}
                         defaultIndex={0}
