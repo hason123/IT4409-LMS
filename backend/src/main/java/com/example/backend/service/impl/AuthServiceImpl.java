@@ -6,6 +6,7 @@ import com.example.backend.dto.response.LoginResponse;
 import com.example.backend.dto.response.user.UserInfoResponse;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BusinessException;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService;
 import com.example.backend.service.OtpService;
@@ -99,7 +100,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse verifyOtp(OtpVerificationRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new BusinessException("Người dùng không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
         boolean valid = otpService.validateOtp(
                 user,
                 request.getCode(),
@@ -141,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
         }
         User user = userService.handleGetUserByGmail(request.getGmail());
         if (user == null) {
-            throw new BusinessException("Người dùng không tồn tại");
+            throw new ResourceNotFoundException("Người dùng không tồn tại");
         }
         boolean validOtp = otpService.validateOtp(
                 user,
@@ -165,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
     public void resendRegisterOtp(String gmail) {
         User user = userService.handleGetUserByGmail(gmail);
         if (user == null) {
-            throw new BusinessException("Người dùng không tồn tại");
+            throw new ResourceNotFoundException("Người dùng không tồn tại");
         }
         if (user.isVerified()) {
             throw new BusinessException("Tài khoản đã được xác thực");
@@ -177,7 +178,7 @@ public class AuthServiceImpl implements AuthService {
     public void resendResetPasswordOtp(String gmail) {
         User user = userService.handleGetUserByGmail(gmail);
         if (user == null) {
-            throw new BusinessException("Người dùng không tồn tại");
+            throw new ResourceNotFoundException("Người dùng không tồn tại");
         }
         otpService.resendOtp(user, OtpType.PASSWORD_RESET);
     }

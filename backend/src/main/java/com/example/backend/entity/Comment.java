@@ -35,11 +35,6 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
-/*
-    @ManyToOne
-    @JoinColumn(name = "quiz_id")
-    private Quiz quiz;
-*/
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Comment parent;

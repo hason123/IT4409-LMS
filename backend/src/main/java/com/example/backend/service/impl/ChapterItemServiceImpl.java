@@ -10,6 +10,7 @@ import com.example.backend.dto.response.quiz.QuizResponse;
 import com.example.backend.entity.*;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
 import com.example.backend.service.ChapterItemService;
 import com.example.backend.service.LessonService;
@@ -71,7 +72,7 @@ public class ChapterItemServiceImpl implements ChapterItemService {
 
         if(!enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
                 currentUser.getId(), chapter.getCourse().getId(), EnrollmentStatus.APPROVED)){
-            throw new BusinessException("Bạn không nằm trong khóa học này!");
+            throw new UnauthorizedException("Bạn không nằm trong khóa học này!");
         }
         // 2. Lấy danh sách ID bài đã học xong (Query mới thêm)
         List<Integer> completedIds = progressRepository.findCompletedItemIdsByUserAndChapter(
@@ -122,7 +123,6 @@ public class ChapterItemServiceImpl implements ChapterItemService {
         return response;
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<ChapterItemResponse> getItemsByChapter(Integer chapterId) {
         // Lấy danh sách Item đã sort

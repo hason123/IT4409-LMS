@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     public User handleGetUserByGmail(String email) {
         User user = userRepository.findByGmail(email); // trả về User, có thể null
         if (user == null) {
-            throw new BusinessException("Người dùng không tồn tại");
+            throw new ResourceNotFoundException("Người dùng không tồn tại");
         }
         return user;
     }
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
     public User handleGetUserByUserName(String username) {
         User user = userRepository.findByUserName(username); // trả về User, có thể null
         if (user == null) {
-            throw new BusinessException("Người dùng không tồn tại");
+            throw new ResourceNotFoundException("Người dùng không tồn tại");
         }
         return user;
     }

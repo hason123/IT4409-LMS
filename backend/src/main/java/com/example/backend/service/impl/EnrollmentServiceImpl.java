@@ -164,7 +164,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         boolean isEnrolled = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
                 currentUser.getId(), courseId, EnrollmentStatus.APPROVED);
         if (!isEnrolled) {
-            throw new BusinessException("Bạn phải tham gia khóa học mới được đánh giá!");
+            throw new UnauthorizedException("Bạn phải tham gia khóa học mới được đánh giá!");
         }
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học"));
@@ -346,7 +346,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         User currentStudent = userService.getCurrentUser();
         Enrollment enrollment = enrollmentRepository.findByStudent_IdAndCourse_IdAndApprovalStatus(currentStudent.getId(), courseId, EnrollmentStatus.APPROVED);
         if(enrollment == null){
-            throw new BusinessException("Bạn không nằm trong khóa học này!");
+            throw new UnauthorizedException("Bạn không nằm trong khóa học này!");
         }
         return convertEnrollmentToDTO(enrollment);
     }

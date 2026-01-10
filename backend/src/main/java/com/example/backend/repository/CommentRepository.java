@@ -18,4 +18,6 @@ public interface CommentRepository extends JpaRepository<Comment,Integer> {
 
     List<Comment> findAllByLesson_Id(Integer lessonId);
 
+
+
 }

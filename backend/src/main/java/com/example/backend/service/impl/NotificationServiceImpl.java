@@ -1,12 +1,15 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.dto.response.NotificationResponse;
+import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.Notification;
 import com.example.backend.entity.User;
 import com.example.backend.repository.NotificationRepository;
 import com.example.backend.service.NotificationService;
 import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -50,6 +53,35 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setReadStatus(true);
             notificationRepository.save(notification);
         }
+    }
+
+    @Override
+    public PageResponse<NotificationResponse> getMyNotificationsPage(Pageable pageable) {
+        User currentUser = userService.getCurrentUser();
+        Page<Notification> notificationPage =
+                notificationRepository.findByRecipient_IdOrderByCreatedAtDesc(
+                        currentUser.getId(),
+                        pageable
+                );
+        Page<NotificationResponse> responsePage =
+                notificationPage.map(this::convertEntityToDTO);
+        return new PageResponse<>(
+                responsePage.getNumber() + 1,
+                responsePage.getTotalPages(),
+                responsePage.getNumberOfElements(),
+                responsePage.getContent()
+        );
+    }
+
+    @Override
+    public void deleteNotification(Integer id) {
+        User currentUser = userService.getCurrentUser();
+
+        Notification notification = notificationRepository
+                .findByIdAndRecipient_Id(id, currentUser.getId())
+                .orElseThrow(() -> new RuntimeException("Không có quyền xóa thông báo này"));
+
+        notificationRepository.delete(notification);
     }
 
     private NotificationResponse convertEntityToDTO(Notification notification) {

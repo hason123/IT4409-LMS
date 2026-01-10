@@ -58,13 +58,13 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .orElseThrow(() -> new BusinessException("Quiz chưa được thêm vào chương tương ứng"));
 
         if (chapterItem.getType() != ItemType.QUIZ || !chapterItem.getRefId().equals(quizId)) {
-            throw new BusinessException("Quiz không tồn tại");
+            throw new ResourceNotFoundException("Quiz không tồn tại");
         }
 
         boolean isEnrolled = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
                 currentUser.getId(), chapterItem.getChapter().getCourse().getId(), EnrollmentStatus.APPROVED);
         if (!isEnrolled) {
-            throw new BusinessException("Bạn không có quyền truy cập vào tài nguyên này!");
+            throw new UnauthorizedException("Bạn không có quyền truy cập vào tài nguyên này!");
         }
 
         // Validate Quiz
@@ -570,7 +570,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         boolean isEnrolled = enrollmentRepository.existsByStudent_IdAndCourse_IdAndApprovalStatus(
                 currentUser.getId(), courseId, EnrollmentStatus.APPROVED);
         if (!isEnrolled) {
-            throw new BusinessException("Bạn không có quyền truy cập vào tài nguyên này!");
+            throw new UnauthorizedException("Bạn không có quyền truy cập vào tài nguyên này!");
         }
 
         return quizAttemptRepository.findMaxGradesByStudentAndCourse(currentUser.getId(), courseId);
