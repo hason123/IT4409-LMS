@@ -74,10 +74,10 @@ export default function CourseContent() {
   };
 
   const handleQuizClick = (quizId, chapterItemId) => {
-    if (user?.role === "TEACHER") {
+    if (user?.role === "TEACHER" || user?.role === "ADMIN") {
       navigate(`/teacher/courses/${id}/quizzes/${quizId}`);
     } else {
-      navigate(`/quizzes/${quizId}/attempt`, { state: { chapterItemId } });
+      navigate(`/courses/${id}/quizzes/${quizId}/detail`, { state: { chapterItemId } });
     }
   };
 

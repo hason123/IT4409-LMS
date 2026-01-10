@@ -9,13 +9,14 @@ import CourseDetailPage from "./pages/common/CourseDetailPage";
 import NotificationsPage from "./pages/common/NotificationsPage";
 import QuizAttempt from "./pages/student/QuizAttempt";
 import QuizResult from "./pages/student/QuizResult";
+import QuizDetail from "./pages/student/QuizDetail";
 import ProfilePage from "./pages/student/ProfilePage";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherCourses from "./pages/teacher/TeacherCourses";
 import CreateCourse from "./pages/teacher/CreateCourse";
 import CreateChapter from "./pages/teacher/CreateChapter";
 import LectureDetail from "./pages/teacher/LectureDetail";
-import QuizDetail from "./pages/teacher/QuizDetail";
+import TeacherQuizDetail from "./pages/teacher/QuizDetail";
 import TeacherProfilePage from "./pages/teacher/TeacherProfilePage";
 import TeacherSettingsPage from "./pages/teacher/TeacherSettingsPage";
 import TeacherStudentManagement from "./pages/teacher/TeacherStudentManagement";
@@ -134,7 +135,7 @@ export default function App() {
           />
           <Route path="/profile" element={<Navigate to="/student/profile" replace />} />
           <Route
-            path="/quizzes/:id/attempt"
+            path="/courses/:courseId/quizzes/:id/attempt"
             element={
               <ProtectedRoute
                 element={<QuizAttempt />}
@@ -143,7 +144,16 @@ export default function App() {
             }
           />
           <Route
-            path="/quizzes/:id/result"
+            path="/courses/:courseId/quizzes/:id/detail"
+            element={
+              <ProtectedRoute
+                element={<QuizDetail />}
+                allowedRoles={["STUDENT"]}
+              />
+            }
+          />
+          <Route
+            path="/courses/:courseId/quizzes/:id/result"
             element={
               <ProtectedRoute
                 element={<QuizResult />}

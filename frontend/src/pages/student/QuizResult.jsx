@@ -13,7 +13,7 @@ import { getAttemptDetail } from "../../api/quiz";
 import Header from "../../components/layout/Header";
 
 export default function QuizResult() {
-  const { id } = useParams();
+  const { id, courseId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const attemptId = location.state?.attemptId;
@@ -103,11 +103,11 @@ export default function QuizResult() {
   }
 
   const handleRetake = () => {
-    navigate(`/quizzes/${id}/attempt`);
+    navigate(`/courses/${courseId}/quizzes/${id}/detail`);
   };
 
   const handleBackToCourse = () => {
-    navigate(`/courses`); // Or specific course ID if available
+    navigate(`/courses/${courseId}`);
   };
 
   return (

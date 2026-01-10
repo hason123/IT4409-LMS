@@ -190,3 +190,20 @@ export async function getAttemptDetail(attemptId) {
   return await response.json();
 }
 
+export async function getStudentAttemptsHistory(chapterItemId) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`http://localhost:8080/api/v1/lms/chapterItem/${chapterItemId}/my-attempts`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to get attempts history");
+  }
+
+  return await response.json();
+}

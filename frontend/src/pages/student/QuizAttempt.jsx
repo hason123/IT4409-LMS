@@ -15,7 +15,7 @@ import { message, Spin, Modal } from "antd";
 import { getCurrentAttempt, startQuizAttempt, submitAnswer, submitQuiz, getQuizById } from "../../api/quiz";
 
 export default function QuizAttempt() {
-  const { id } = useParams(); // quizId
+  const { id, courseId } = useParams(); // quizId
   const navigate = useNavigate();
   const location = useLocation();
   const chapterItemId = location.state?.chapterItemId;
@@ -201,7 +201,7 @@ export default function QuizAttempt() {
           const submitRes = await submitQuiz(attempt.id);
           const result = submitRes?.data || submitRes;
           message.success("Nộp bài thành công!");
-          navigate(`/quizzes/${id}/result`, { state: { attemptId: result.id || attempt.id } });
+          navigate(`/courses/${courseId}/quizzes/${id}/result`, { state: { attemptId: result.id || attempt.id } });
       } catch (err) {
           message.error("Lỗi nộp bài: " + err.message);
           setSubmitting(false);
