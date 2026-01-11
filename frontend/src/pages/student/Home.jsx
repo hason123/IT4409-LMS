@@ -1,16 +1,55 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Header from '../../components/layout/Header'
 import CourseCard from '../../components/course/CourseCard'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom';
+import { getAllCourses } from '../../api/course';
+import { getAllCategories } from '../../api/category';
+import { Spin } from 'antd';
+import { FolderIcon } from '@heroicons/react/24/outline';
 
 export default function Home() {
   const navigate = useNavigate();
+  const [featuredCourses, setFeaturedCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Fetch courses
+      const coursesResponse = await getAllCourses(1, 8);
+      const coursesList = coursesResponse.data?.pageList || [];
+      setFeaturedCourses(coursesList);
+      
+      // Fetch categories
+      const categoriesResponse = await getAllCategories(1, 10);
+      const categoriesList = categoriesResponse.data?.pageList || [];
+      setCategories(categoriesList);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Lỗi khi tải dữ liệu');
+      // Fallback to empty arrays so page still renders
+      setFeaturedCourses([]);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
       <Header />
       <main className="flex-1">
-        <section className="flex justify-center py-10 sm:py-20 px-4 sm:px-6 lg:px-8">
+        <section className="flex justify-center sm:py-20 px-4 sm:px-6 lg:px-8 mb-10">
           <div className="w-full max-w-7xl">
             <div className="container mx-auto">
               <div className="flex flex-col-reverse gap-8 lg:flex-row lg:items-center">
@@ -31,50 +70,74 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="flex justify-center py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
+        <section className="flex justify-center px-4 sm:px-6 lg:px-8 mb-8">
           <div className="flex flex-col w-full max-w-7xl">
             <h2 className="text-3xl font-bold leading-tight px-4 pb-6 text-[#111418] dark:text-white">Khóa học nổi bật</h2>
-            <div className="flex overflow-x-auto -mx-4 scrollbar-hide p-4 gap-6">
-              <CourseCard title="Lập trình Python từ A-Z" author="David Lee" image="https://lh3.googleusercontent.com/aida-public/AB6AXuCfD-fWit_3AeqC8pJ15UQIPvprKcQceL26YH9rQyHXGquY7WGPMKBo3NvJCndm9qWnAyXE-JzYQ04M1WGNF0IJb69Dc8QHwyH11LSbR01deQHB0W_m3OqWE_CPu871mRTY8EKsCq4QKe4v3uCVFJsuHcoO19vsFq-4kB6AVQGEPrUpLX3AbNbYlBVvk_9hbA_hto8EkQ41KS1IXth0LCEHsIsDuDnPeqZtoMVrKJCl8gKT9AcHJ2HKBxrI_mV4qdut2-1oUfjEkD4" />
-              <CourseCard title="Digital Marketing 101" author="Sophia Chen" image="https://lh3.googleusercontent.com/aida-public/AB6AXuDebluiKD58d8uQuaMBGD-xMo9yeAWGN91qCKPdXlVA1-mHwhhPaeg-5dai34Xov9mUVrssbSwVSpxqKME5gdAfV9brcs6U1-MNYA1bg_THAEAc_otZ7mdxKiR9Fhf5plr3oM1BbSLWXd10ETOG_CigywoAAEAZhTBj7T0nXj_corSxGByHYFUCuQAdj1Jy6hAIR8L88LBzTwwt0ioX_FZlcDiptDvh7HmJmK8wTQlrhEGM_oUQBwixjU0k_Fd4vNK95D7vJaI6288" />
-              <CourseCard title="Thiết kế UI/UX cho ứng dụng" author="Michael Brown" image="https://lh3.googleusercontent.com/aida-public/AB6AXuDbNZqSr9tAeugmnYLzWtP--wvyZSLgW76WodBgWCygQIzdnIjXfuzvybqNQeFhlcRM0xaHPxOf7aX5Z8Y6-nMM8qwRBysMUDdOvribbxH_88DruqEEM5Oyro1DFU5P0xhKtnf671Geal0ejbnJgJ7Pq4soOJQR4RVglHAKvGeDI2rotpGkzWqTHfuEH8dZh_2evM5wXe-NpOVqWOAOOZiHNcwDVtKo1pT0EMatyQ6nZkBepOWw2ysirPFsfrVrOt3Oyhw_q-iGUYM" />
-            </div>
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <Spin />
+              </div>
+            ) : (
+              <div className="flex overflow-x-auto -mx-4 scrollbar-hide p-4 gap-6">
+                {featuredCourses.length > 0 ? (
+                  featuredCourses.map((course) => (
+                    <CourseCard
+                      key={course.id}
+                      id={course.id}
+                      title={course.name}
+                      author={course.teacherName}
+                      image={course.imageUrl}
+                      rating={course.rating || 0}
+                      reviews={course.reviewCounts || 0}
+                      type={course.description || 'Unknown'}
+                      status={course.status || 'published'}
+                      code={course.courseCode}
+                      studentsCount={course.studentsCount || 0}
+                      schedule="Weekly"
+                    />
+                  ))
+                ) : (
+                  <p className="text-gray-600 dark:text-gray-400">Không có khóa học nào</p>
+                )}
+              </div>
+            )}
           </div>
         </section>
 
-        <section className="flex justify-center py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
+        <section className="flex justify-center px-4 sm:px-6 lg:px-8 mb-10">
           <div className="flex flex-col w-full max-w-7xl">
             <h2 className="text-3xl font-bold leading-tight px-4 pb-6 text-[#111418] dark:text-white">Danh mục khóa học</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
-              <div className="flex items-center gap-4 rounded-xl p-4 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-lg transition-shadow duration-300">
-                <div className="flex items-center justify-center size-12 rounded-lg bg-primary/20 text-primary">
-                  <span className="material-symbols-outlined !text-3xl">code</span>
-                </div>
-                <span className="font-bold text-lg text-[#111418] dark:text-white">Lập trình</span>
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <Spin />
               </div>
-              <div className="flex items-center gap-4 rounded-xl p-4 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-lg transition-shadow duration-300">
-                <div className="flex items-center justify-center size-12 rounded-lg bg-primary/20 text-primary">
-                  <span className="material-symbols-outlined !text-3xl">campaign</span>
-                </div>
-                <span className="font-bold text-lg text-[#111418] dark:text-white">Marketing</span>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
+                {categories.length > 0 ? (
+                  categories.map((category) => (
+                    <div 
+                      key={category.id}
+                      onClick={() => navigate(`/courses?category=${category.id}`)}
+                      className="flex items-center gap-4 rounded-xl p-4 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                    >
+                      <div className="flex items-center justify-center size-12 rounded-lg bg-primary/20 text-primary flex-shrink-0">
+                        <FolderIcon className="w-6 h-6" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-lg text-[#111418] dark:text-white">{category.title}</span>
+                        <span className="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">{category.description}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-600 dark:text-gray-400 col-span-full">Không có danh mục nào</p>
+                )}
               </div>
-              <div className="flex items-center gap-4 rounded-xl p-4 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-lg transition-shadow duration-300">
-                <div className="flex items-center justify-center size-12 rounded-lg bg-primary/20 text-primary">
-                  <span className="material-symbols-outlined !text-3xl">design_services</span>
-                </div>
-                <span className="font-bold text-lg text-[#111418] dark:text-white">Thiết kế</span>
-              </div>
-              <div className="flex items-center gap-4 rounded-xl p-4 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-lg transition-shadow duration-300">
-                <div className="flex items-center justify-center size-12 rounded-lg bg-primary/20 text-primary">
-                  <span className="material-symbols-outlined !text-3xl">translate</span>
-                </div>
-                <span className="font-bold text-lg text-[#111418] dark:text-white">Ngoại ngữ</span>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 
-        <section className="flex justify-center py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
+        <section className="flex justify-center px-4 sm:px-6 lg:px-8 py-20">
           <div className="flex flex-col items-center text-center w-full max-w-7xl gap-10">
             <div className="flex flex-col gap-2">
               <h2 className="text-3xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">Tại sao chọn LearnOnline?</h2>

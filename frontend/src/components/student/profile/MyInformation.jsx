@@ -310,7 +310,8 @@ export default function MyInformation({
           </label>
         </div>
 
-        {/* Teacher-specific fields */}
+        {/* Teacher-specific fields - Only show for teachers */}
+        {user?.role === "TEACHER" && (
         <div className="mt-6 pt-6 border-t border-black/10 dark:border-white/10">
           <h3 className="text-lg font-semibold text-[#111418] dark:text-white mb-4">
             Thông tin giáo viên
@@ -373,6 +374,7 @@ export default function MyInformation({
             />
           </label>
         </div>
+        )}
       </div>
       {isEditing && (
         <div className="flex justify-end gap-4 pt-6 border-t border-black/10 dark:border-white/10">

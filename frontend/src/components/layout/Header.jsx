@@ -29,9 +29,9 @@ export default function Header({ menuItems }) {
 
   const defaultMenuItems = [
     { label: "Khóa học", path: "/courses" },
-    { label: "Lộ trình học", path: "#" },
     { label: "Giới thiệu", path: "/home" },
     { label: "Liên hệ", path: "#" },
+    { label: "Trang cá nhân", path: "/profile" },
   ];
 
   const itemsToRender = menuItems || defaultMenuItems;
