@@ -135,7 +135,6 @@ export default function App() {
               />
             }
           />
-          <Route path="/profile" element={<Navigate to="/student/profile" replace />} />
           <Route
             path="/courses/:courseId/quizzes/:id/attempt"
             element={

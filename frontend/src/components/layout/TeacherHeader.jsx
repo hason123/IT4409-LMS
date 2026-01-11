@@ -141,19 +141,9 @@ export default function TeacherHeader({ toggleSidebar }) {
           </button>
 
           <div className="flex items-center gap-3 text-primary">
-            <div className="size-8 text-primary">
-              <svg
-                fill="none"
-                viewBox="0 0 48 48"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-full"
-              >
-                <path
-                  d="M6 6H42L36 24L42 42H6L12 24L6 6Z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </div>
+            <span className="material-symbols-outlined text-primary text-3xl">
+                school
+              </span>
             <h2 className="hidden sm:block text-xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">
               LearnOnline
             </h2>

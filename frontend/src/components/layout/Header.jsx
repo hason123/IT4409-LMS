@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Avatar from "../common/Avatar";
 import ConfirmModal from "../common/ConfirmModal";
+import NotificationDetailModal from "../common/NotificationDetailModal";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import useUserStore from "../../store/useUserStore";
@@ -24,6 +25,8 @@ export default function Header({ menuItems }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isNotificationDetailOpen, setIsNotificationDetailOpen] = useState(false);
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
@@ -31,7 +34,7 @@ export default function Header({ menuItems }) {
     { label: "Khóa học", path: "/courses" },
     { label: "Giới thiệu", path: "/home" },
     { label: "Liên hệ", path: "#" },
-    { label: "Trang cá nhân", path: "/profile" },
+    { label: "Trang cá nhân", path: "/student/profile" },
   ];
 
   const itemsToRender = menuItems || defaultMenuItems;
@@ -200,8 +203,8 @@ export default function Header({ menuItems }) {
                           <div
                             key={notification.id}
                             className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0 relative transition-colors"
-                            onClick={() => {
-                              if (!notification.isRead) {
+                            onClick={() => {                              setSelectedNotification(notification);
+                              setIsNotificationDetailOpen(true);                              if (!notification.isRead) {
                                 handleMarkAsRead(notification.id);
                               }
                             }}
@@ -232,7 +235,7 @@ export default function Header({ menuItems }) {
                       </div>
                       <div className="border-t border-gray-100 dark:border-gray-700">
                         <Link
-                          to="/notifications"
+                          to="/student/profile/notifications"
                           className="block px-4 py-2 text-xs font-medium text-center text-primary hover:text-primary/80"
                         >
                           Xem tất cả thông báo
@@ -260,7 +263,7 @@ export default function Header({ menuItems }) {
                   {isDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
                       <Link
-                        to="/profile"
+                        to="/student/profile"
                         state={{ activeTab: "profile" }}
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsDropdownOpen(false)}
@@ -268,7 +271,7 @@ export default function Header({ menuItems }) {
                         Hồ sơ
                       </Link>
                       <Link
-                        to="/profile"
+                        to="/student/profile/settings"
                         state={{ activeTab: "settings" }}
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsDropdownOpen(false)}
@@ -329,6 +332,14 @@ export default function Header({ menuItems }) {
         onConfirm={handleLogoutConfirm}
         onCancel={() => setShowLogoutConfirm(false)}
         isLoading={isLoggingOut}
+      />
+      <NotificationDetailModal
+        open={isNotificationDetailOpen}
+        notification={selectedNotification}
+        onClose={() => {
+          setIsNotificationDetailOpen(false);
+          setSelectedNotification(null);
+        }}
       />
     </>
   );
