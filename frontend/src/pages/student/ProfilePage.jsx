@@ -89,7 +89,7 @@ export default function ProfilePage() {
   const tabs = [
     { id: "profile", label: "Thông tin cá nhân", icon: UserIcon },
     { id: "courses", label: "Khóa học của tôi", icon: BookOpenIcon },
-    { id: "certificate", label: "Chứng chỉ của tôi", icon: AcademicCapIcon },
+    // { id: "certificate", label: "Chứng chỉ của tôi", icon: AcademicCapIcon },
     { id: "notifications", label: "Thông báo", icon: BellIcon },
     // {
     //   id: "transactions",

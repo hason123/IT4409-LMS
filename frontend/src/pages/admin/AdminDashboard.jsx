@@ -223,12 +223,12 @@ export default function AdminDashboard() {
                 Chào mừng quay trở lại, Quản trị viên!
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <button className="flex items-center justify-center gap-2 px-4 h-10 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors">
                 <DocumentArrowDownIcon className="h-5 w-5" />
                 <span>Tạo báo cáo</span>
               </button>
-            </div>
+            </div> */}
           </div>
 
           {/* Stats Grid */}

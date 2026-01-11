@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
-import { getTeacherCourses } from "../../api/course";
+import AdminSidebar from "../../components/layout/AdminSidebar";
+import { getTeacherCourses, getAdminCourses } from "../../api/course";
 import {
   getCourseGradeBook,
   getCourseApprovedStudents,
@@ -18,7 +19,7 @@ import {
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 
-export default function TeacherReport() {
+export default function TeacherReport({ isAdmin = false }) {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
@@ -42,7 +43,8 @@ export default function TeacherReport() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const response = await getTeacherCourses(1, 100);
+      // Use different API based on role (admin gets all courses, teacher gets only their courses)
+      const response = isAdmin ? await getAdminCourses(1, 100) : await getTeacherCourses(1, 100);
       const coursesList = response.data.pageList;
       setCourses(coursesList);
       if (coursesList.length > 0) {
@@ -307,7 +309,7 @@ export default function TeacherReport() {
       <TeacherHeader />
 
       <div className="flex">
-        <TeacherSidebar />
+        {isAdmin ? <AdminSidebar /> : <TeacherSidebar />}
 
         <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16">
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-7xl mx-auto">

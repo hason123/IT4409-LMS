@@ -254,6 +254,26 @@ export async function checkEnrollmentStatus(courseId) {
   // return data.enrolled || data.isEnrolled || false;
 }
 
+export async function getAllEnrollments(pageNumber = 1, pageSize = 10) {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(
+    `${API_URL}/enrollments?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch all enrollments");
+  }
+
+  return await response.json();
+}
+
 export async function getTeacherEnrollments(pageNumber = 1, pageSize = 10, courseId = null, approvalStatus = null) {
   const token = localStorage.getItem("accessToken");
   const params = new URLSearchParams();

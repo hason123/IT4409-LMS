@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
+import AdminSidebar from "../../components/layout/AdminSidebar";
 import { Table, Input, Select, Button, Space, Tag, Modal, Breadcrumb, Spin, message } from "antd";
 import CustomAvatar from "../../components/common/Avatar";
 import {
@@ -11,10 +12,10 @@ import {
   CloseOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { getTeacherEnrollments, approveEnrollment, rejectEnrollment, deleteStudentsFromCourse, getStudentsNotInCourse, addStudentsToCourse } from "../../api/course";
+import { getTeacherEnrollments, getAllEnrollments, approveEnrollment, rejectEnrollment, deleteStudentsFromCourse, getStudentsNotInCourse, addStudentsToCourse } from "../../api/course";
 import AddStudentModal from "../../components/teacher/AddStudentModal";
 
-export default function TeacherStudentManagement() {
+export default function TeacherStudentManagement({ isAdmin = false }) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
@@ -46,7 +47,10 @@ export default function TeacherStudentManagement() {
       try {
         setLoading(true);
         setError(null);
-        const res = await getTeacherEnrollments(currentPage, pageSize, courseFilter || null, statusFilter || null);
+        // Use different API based on role (admin gets all enrollments, teacher gets only their enrollments)
+        const res = isAdmin
+          ? await getAllEnrollments(currentPage, pageSize)
+          : await getTeacherEnrollments(currentPage, pageSize, courseFilter || null, statusFilter || null);
         const enrollmentList = (res.data.pageList).map((enrollment, index) => ({
           key: enrollment.id || index,
           id: enrollment.id,
@@ -476,7 +480,10 @@ export default function TeacherStudentManagement() {
     setCurrentPage(1);
     try {
       setLoading(true);
-      const res = await getTeacherEnrollments(1, pageSize, courseFilter || null, statusFilter || null);
+      // Use different API based on role
+      const res = isAdmin
+        ? await getAllEnrollments(1, pageSize)
+        : await getTeacherEnrollments(1, pageSize, courseFilter || null, statusFilter || null);
       const enrollmentList = (res.data.pageList).map((enrollment, index) => ({
         key: enrollment.id || index,
         id: enrollment.id,
@@ -502,12 +509,12 @@ export default function TeacherStudentManagement() {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark font-display">
-      {/* Teacher Header */}
+      {/* Header */}
       <TeacherHeader />
 
       <div className="flex">
-        {/* Sidebar */}
-        <TeacherSidebar />
+        {/* Sidebar - Admin or Teacher */}
+        {isAdmin ? <AdminSidebar /> : <TeacherSidebar />}
 
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 pt-16">

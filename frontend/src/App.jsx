@@ -390,6 +390,33 @@ export default function App() {
               />
             }
           />
+          <Route
+            path="/admin/courses"
+            element={
+              <ProtectedRoute
+                element={<TeacherCourses isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/students"
+            element={
+              <ProtectedRoute
+                element={<TeacherStudentManagement isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute
+                element={<TeacherReport isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
         </Routes>
       </AuthProvider>
     </GoogleOAuthProvider>

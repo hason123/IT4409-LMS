@@ -37,9 +37,9 @@ export default function AdminSidebar() {
         />
         <SidebarLink
           icon={<CheckCircleIcon className="h-6 w-6" />}
-          label="Duyệt nội dung"
-          active={currentPath === "/admin/approvals"}
-          to="/admin/approvals"
+          label="Quản lý học viên"
+          active={currentPath.startsWith("/admin/students")}
+          to="/admin/students"
         />
         <SidebarLink
           icon={<ChartBarIcon className="h-6 w-6" />}

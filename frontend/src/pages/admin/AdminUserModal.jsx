@@ -126,7 +126,7 @@ export default function AdminUserModal({
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">Email (Read-only)</label>
+            <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">Email</label>
             <Input
               size="large"
               type="email"

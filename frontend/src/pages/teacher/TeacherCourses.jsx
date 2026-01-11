@@ -7,10 +7,11 @@ import {
   MagnifyingGlassIcon,
   PlusCircleIcon,
 } from "@heroicons/react/24/outline";
-import { getTeacherCourses } from "../../api/course";
+import { getTeacherCourses, getAdminCourses } from "../../api/course";
 import { Spin, Alert } from "antd";
+import AdminSidebar from "../../components/layout/AdminSidebar";
 
-export default function TeacherCourses() {
+export default function TeacherCourses({ isAdmin = false }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all"); // 'all', 'active', 'draft', 'archived'
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,8 +26,10 @@ export default function TeacherCourses() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      // Fetch courses specifically for the teacher
-      const response = await getTeacherCourses(1, 100);
+      // Fetch all courses for admin, or teacher's courses for teacher
+      const response = isAdmin
+        ? await getAdminCourses(1, 100)
+        : await getTeacherCourses(1, 100);
       setCourses(response.data.pageList);
     } catch (err) {
       setError(err.message);
@@ -67,7 +70,7 @@ export default function TeacherCourses() {
 
       <div className="flex">
         {/* Sidebar - Reused structure from TeacherDashboard */}
-        <TeacherSidebar />
+        {isAdmin ? <AdminSidebar /> : <TeacherSidebar />}
 
         {/* Main Content */}
         <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16">
@@ -76,19 +79,23 @@ export default function TeacherCourses() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
               <div>
                 <h1 className="text-2xl md:text-3xl text-[#111418] dark:text-white font-bold leading-tight tracking-[-0.015em]">
-                  Khóa học của tôi
+                  {isAdmin ? "Quản lý khóa học" : "Khóa học của tôi"}
                 </h1>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Quản lý tất cả các khóa học của bạn tại một nơi.
+                  {isAdmin
+                    ? "Quản lý tất cả các khóa học trong hệ thống."
+                    : "Quản lý tất cả các khóa học của bạn tại một nơi."}
                 </p>
               </div>
-              <button
-                onClick={handleCreateCourse}
-                className="flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors"
-              >
-                <PlusCircleIcon className="h-5 w-5" />
-                <span>Tạo khóa học mới</span>
-              </button>
+              {/* {!isAdmin && ( */}
+                <button
+                  onClick={handleCreateCourse}
+                  className="flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors"
+                >
+                  <PlusCircleIcon className="h-5 w-5" />
+                  <span>Tạo khóa học mới</span>
+                </button>
+              {/* )} */}
             </div>
 
             {/* Toolbar & Filters */}
@@ -166,16 +173,20 @@ export default function TeacherCourses() {
                     Chưa có khóa học nào
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 mb-6">
-                    Bắt đầu tạo khóa học của bạn để bắt đầu giảng dạy
+                    {isAdmin
+                      ? "Không có khóa học nào trong hệ thống"
+                      : "Bắt đầu tạo khóa học của bạn để bắt đầu giảng dạy"}
                   </p>
                 </div>
-                <button
-                  onClick={handleCreateCourse}
-                  className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-                >
-                  <PlusCircleIcon className="h-5 w-5" />
-                  <span>Tạo khóa học mới</span>
-                </button>
+                {!isAdmin && (
+                  <button
+                    onClick={handleCreateCourse}
+                    className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                  >
+                    <PlusCircleIcon className="h-5 w-5" />
+                    <span>Tạo khóa học mới</span>
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
