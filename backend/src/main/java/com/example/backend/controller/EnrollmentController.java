@@ -64,10 +64,11 @@ public class EnrollmentController {
     public ResponseEntity<PageResponse<CourseRatingResponse>> getAllCourseRatings(
             @PathVariable Integer courseId,
             @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "ratingValue", required = false) Integer ratingValue) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
-        PageResponse<CourseRatingResponse> response = enrollmentService.getAllCourseRatings(courseId, pageable);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        PageResponse<CourseRatingResponse> response = enrollmentService.getAllCourseRatings(courseId, ratingValue, pageable);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Sinh viên trong khóa đánh giá khóa hoọc")
@@ -76,6 +77,13 @@ public class EnrollmentController {
     public ResponseEntity<CourseRatingResponse> ratingCourse(@PathVariable Integer courseId, @RequestBody CourseRatingRequest request) {
         CourseRatingResponse response = enrollmentService.ratingCourse(courseId, request);
         return ResponseEntity.ok().body(response);
+    }
+
+    @PreAuthorize("hasRole('STUDENT')")
+    @DeleteMapping("/courses/{courseId}/rating")
+    public ResponseEntity<Void> deleteReview(@PathVariable Integer courseId) {
+        enrollmentService.deleteReview(courseId);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Đánh dấu hoàn thành LESSON")

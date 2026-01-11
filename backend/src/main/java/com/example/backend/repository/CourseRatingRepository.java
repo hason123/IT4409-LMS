@@ -24,4 +24,7 @@ public interface CourseRatingRepository extends JpaRepository<CourseRating,Integ
     Long countReviewsByCourse(@Param("courseId") Integer courseId);
 
     Page<CourseRating> findAllByCourse_Id(Integer courseId, Pageable pageable);
+
+    // Find ratings by course and rating value (for filtering)
+    Page<CourseRating> findAllByCourse_IdAndRatingValue(Integer courseId, Integer ratingValue, Pageable pageable);
 }

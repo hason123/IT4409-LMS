@@ -28,29 +28,27 @@ export default function CourseDetailPage() {
   const [enrolling, setEnrolling] = useState(false);
   const [enrollmentStatus, setEnrollmentStatus] = useState(null);
 
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        setLoading(true);
-        const response = await getCourseById(id);
-        console.log("Fetched course details:", response);
-        setCourse(response.data);
-        
-        // Check enrollment status if user is a student
-        if (isStudent) {
-          const res = await checkEnrollmentStatus(id);
-          // console.log("Enrollment status:", res);
-          setEnrollmentStatus(res.data.enrollmentStatus);
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchCourse = async () => {
+    try {
+      const response = await getCourseById(id);
+      console.log("Fetched course details:", response);
+      setCourse(response.data);
+      
+      // Check enrollment status if user is a student
+      if (isStudent) {
+        const res = await checkEnrollmentStatus(id);
+        // console.log("Enrollment status:", res);
+        setEnrollmentStatus(res.data.enrollmentStatus);
       }
-    };
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
+  useEffect(() => {
     if (id) {
-      fetchCourse();
+      setLoading(true);
+      fetchCourse().finally(() => setLoading(false));
     }
   }, [id, isStudent]);
 
@@ -247,7 +245,7 @@ export default function CourseDetailPage() {
                             content: <CourseContent />,
                           },
                           { label: "Giảng viên", content: <TeacherTab course={course} /> },
-                          { label: "Đánh giá", content: <ReviewTab /> },
+                          { label: "Đánh giá", content: <ReviewTab enrollmentStatus={enrollmentStatus} onReviewChanged={fetchCourse} /> },
                         ]}
                         defaultIndex={0}
                       />

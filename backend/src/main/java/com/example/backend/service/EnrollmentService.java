@@ -25,7 +25,9 @@ public interface EnrollmentService {
 
     CourseRatingResponse ratingCourse(Integer courseId, CourseRatingRequest request);
 
-    PageResponse<CourseRatingResponse> getAllCourseRatings(Integer courseId, Pageable pageable);
+    void deleteReview(Integer courseId);
+
+    PageResponse<CourseRatingResponse> getAllCourseRatings(Integer courseId, Integer ratingValue, Pageable pageable);
 
     @Transactional
     void completeLesson(Integer lessonId);

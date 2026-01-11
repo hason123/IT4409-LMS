@@ -190,11 +190,38 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public PageResponse<CourseRatingResponse> getAllCourseRatings(Integer courseId, Pageable pageable) {
+    public void deleteReview(Integer courseId) {
+        User currentUser = userService.getCurrentUser();
+        CourseRating review = courseRatingRepository.findByStudent_IdAndCourse_Id(currentUser.getId(), courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá của bạn cho khóa học này"));
+        
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học"));
+        
+        courseRatingRepository.delete(review);
+        
+        // Update course average rating
+        Double avgRating = courseRatingRepository.getAverageRating(courseId);
+        double roundedRating = (avgRating != null) ? Math.round(avgRating * 10.0) / 10.0 : 0.0;
+        course.setRating(roundedRating);
+        courseRepository.save(course);
+    }
+
+    @Override
+    public PageResponse<CourseRatingResponse> getAllCourseRatings(Integer courseId, Integer ratingValue, Pageable pageable) {
         if(!courseRepository.existsById(courseId)){
             throw new ResourceNotFoundException("Không tìm thấy khóa học");
         }
-        Page<CourseRating> courseRatingPage = courseRatingRepository.findAllByCourse_Id(courseId, pageable);
+        
+        Page<CourseRating> courseRatingPage;
+        if (ratingValue != null && ratingValue > 0) {
+            // Filter by rating value if provided
+            courseRatingPage = courseRatingRepository.findAllByCourse_IdAndRatingValue(courseId, ratingValue, pageable);
+        } else {
+            // Get all ratings if no filter
+            courseRatingPage = courseRatingRepository.findAllByCourse_Id(courseId, pageable);
+        }
+        
         Page<CourseRatingResponse> courseRatingResponsePage = courseRatingPage.map(this::convertEntityToDTO);
         PageResponse<CourseRatingResponse> response = new PageResponse<>(
                 courseRatingResponsePage.getNumber() + 1,
@@ -214,6 +241,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .studentCode(entity.getStudent().getStudentNumber())
                 .studentUsername(entity.getStudent().getUserName())
                 .studentFullname(entity.getStudent().getFullName())
+                .ratingValue(entity.getRatingValue())
+                .description(entity.getDescription())
                 .build();
     }
 
