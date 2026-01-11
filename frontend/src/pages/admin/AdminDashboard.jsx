@@ -16,6 +16,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState([
     {
       label: "Tổng số người dùng",
@@ -65,6 +66,16 @@ export default function AdminDashboard() {
       message: "Xem xét và phê duyệt các yêu cầu đăng ký khóa học của học viên.",
     },
   ]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
@@ -205,7 +216,9 @@ export default function AdminDashboard() {
       <TeacherHeader toggleSidebar={toggleSidebar} />
       <AdminSidebar />
       
-      <main className="lg:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+      <main className={`lg:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+        sidebarCollapsed ? "pl-20" : "pl-64"
+      }`}>
         <div className="mx-auto max-w-7xl">
           {error && (
             <div className="mb-6 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4">

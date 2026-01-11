@@ -40,6 +40,17 @@ export default function CreateCourse() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   /* ------------------ FETCH CATEGORIES ------------------ */
   useEffect(() => {
@@ -181,7 +192,9 @@ export default function CreateCourse() {
       <div className="flex">
         <TeacherSidebar />
 
-        <main className="flex-1 lg:ml-64 pt-16 bg-slate-50 dark:bg-slate-900">
+        <main className={`flex-1 pt-16 bg-slate-50 dark:bg-slate-900 transition-all duration-300 ${
+          sidebarCollapsed ? "pl-20" : "pl-64"
+        }`}>
           <div className="max-w-7xl mx-auto px-6 py-8">
             <header className="mb-8 flex justify-between items-center">
               <h1 className="text-3xl font-bold">

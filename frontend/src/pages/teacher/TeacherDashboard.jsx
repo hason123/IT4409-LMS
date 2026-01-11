@@ -25,6 +25,17 @@ export default function TeacherDashboard() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     fetchTeacherCourses();
@@ -59,7 +70,9 @@ export default function TeacherDashboard() {
         <TeacherSidebar />
 
         {/* Main Content */}
-        <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16">
+        <main className={`flex-1 bg-slate-50 dark:bg-slate-900 pt-16 transition-all duration-300 ${
+          sidebarCollapsed ? "pl-20" : "pl-64"
+        }`}>
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
               <div>

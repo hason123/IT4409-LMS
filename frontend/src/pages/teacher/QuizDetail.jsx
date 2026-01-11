@@ -26,6 +26,17 @@ export default function QuizDetail() {
   const [error, setError] = useState(null);
   const [isViewMode, setIsViewMode] = useState(isEditMode);
   const [course, setCourse] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const [quizData, setQuizData] = useState({
     title: "",
@@ -392,7 +403,9 @@ export default function QuizDetail() {
       <TeacherHeader />
       <div className="flex">
         <TeacherSidebar />
-        <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 flex flex-col h-screen">
+        <main className={`flex-1 bg-slate-50 dark:bg-slate-900 pt-16 flex flex-col h-screen transition-all duration-300 ${
+          sidebarCollapsed ? "pl-20" : "pl-64"
+        }`}>
           <div className="flex-1 overflow-y-auto p-6 md:px-12 md:py-8">
             <button
               onClick={() => navigate(`/teacher/courses/${courseId}`)}

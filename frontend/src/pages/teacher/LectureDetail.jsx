@@ -30,6 +30,7 @@ export default function LectureDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [form] = Form.useForm();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navigate = useNavigate();
   const isCreateMode = !lectureId;
@@ -43,6 +44,16 @@ export default function LectureDetail() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [resources, setResources] = useState([]);
   const fileInputRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const extractVideoId = (url) => {
     if (!url) return null;
@@ -333,7 +344,9 @@ export default function LectureDetail() {
       <TeacherHeader />
       <div className="flex">
         <TeacherSidebar />
-        <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 flex flex-col h-screen pb-[4.5rem]">
+        <main className={`flex-1 bg-slate-50 dark:bg-slate-900 pt-16 flex flex-col h-screen pb-[4.5rem] transition-all duration-300 ${
+          sidebarCollapsed ? "pl-20" : "pl-64"
+        }`}>
           <div className="flex-1 overflow-y-auto p-6 md:px-12 md:py-8">
             {loading ? (
               <div className="flex justify-center items-center h-full">

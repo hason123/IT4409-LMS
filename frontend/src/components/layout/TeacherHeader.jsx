@@ -133,12 +133,12 @@ export default function TeacherHeader({ toggleSidebar }) {
       <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between bg-white dark:bg-background-dark border-b border-solid border-slate-200 dark:border-slate-800 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
           {/* Mobile Sidebar Toggle (Optional, if we want mobile support later) */}
-          <button
+          {/* <button
             className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
             onClick={toggleSidebar}
           >
             <Bars3Icon className="h-6 w-6" />
-          </button>
+          </button> */}
 
           <div className="flex items-center gap-3 text-primary">
             <span className="material-symbols-outlined text-primary text-3xl">

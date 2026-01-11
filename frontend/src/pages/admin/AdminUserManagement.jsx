@@ -16,6 +16,7 @@ import {
 
 export default function AdminUserManagement() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -23,6 +24,16 @@ export default function AdminUserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const [modalMode, setModalMode] = useState("view"); // "view" or "edit"
   const [selectedUser, setSelectedUser] = useState(null);
   const hasInitialized = useRef(false);
@@ -185,7 +196,9 @@ export default function AdminUserManagement() {
       <TeacherHeader toggleSidebar={toggleSidebar} />
       <AdminSidebar />
 
-      <main className="lg:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+      <main className={`lg:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+        sidebarCollapsed ? "pl-20" : "pl-64"
+      }`}>
         <div className="mx-auto max-w-7xl">
           {/* Page Header */}
           <div className="flex flex-wrap mt-3 items-center justify-between gap-4 mb-6">

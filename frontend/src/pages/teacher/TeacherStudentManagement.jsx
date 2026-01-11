@@ -27,7 +27,19 @@ export default function TeacherStudentManagement({ isAdmin = false }) {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const pageSize = 10;
+
+  // Track sidebar collapse state
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Debounce loading state to avoid spinner flash for quick loads
   useEffect(() => {
@@ -526,7 +538,9 @@ export default function TeacherStudentManagement({ isAdmin = false }) {
         {isAdmin ? <AdminSidebar /> : <TeacherSidebar />}
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-64 pt-16">
+        <main className={`flex-1 pt-16 transition-all duration-300 ${
+          sidebarCollapsed ? "pl-20" : "pl-64"
+        }`}>
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-7xl mx-auto">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">

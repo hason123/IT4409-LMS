@@ -9,6 +9,17 @@ export default function TeacherProfilePage() {
   const { user } = useAuth();
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,7 +52,9 @@ export default function TeacherProfilePage() {
         <TeacherSidebar />
 
         {/* Main Content */}
-        <main className="flex-1 bg-slate-50 dark:bg-slate-900 lg:ml-64 pt-16 overflow-y-auto">
+        <main className={`flex-1 bg-slate-50 dark:bg-slate-900 pt-16 overflow-y-auto transition-all duration-300 ${
+          sidebarCollapsed ? "pl-20" : "pl-64"
+        }`}>
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full mx-auto">
             <div className="mb-8">
               <h1 className="text-2xl md:text-3xl text-[#111418] dark:text-white font-bold leading-tight tracking-[-0.015em]">

@@ -27,6 +27,17 @@ export default function CreateChapter() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [addLessons, setAddLessons] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     fetchCourse();
@@ -83,7 +94,9 @@ export default function CreateChapter() {
         <TeacherHeader />
         <div className="flex">
           <TeacherSidebar />
-          <main className="flex-1 lg:ml-64 pt-16 flex items-center justify-center">
+          <main className={`flex-1 pt-16 flex items-center justify-center transition-all duration-300 ${
+            sidebarCollapsed ? "pl-20" : "pl-64"
+          }`}>
             <Spin size="large" />
           </main>
         </div>
@@ -98,7 +111,9 @@ export default function CreateChapter() {
       <div className="flex">
         <TeacherSidebar />
 
-        <main className="flex-1 lg:ml-64 pt-16 overflow-y-auto">
+        <main className={`flex-1 pt-16 overflow-y-auto transition-all duration-300 ${
+          sidebarCollapsed ? "pl-20" : "pl-64"
+        }`}>
           <div className="px-4 sm:px-6 lg:px-8 py-8">
             {/* Back Button */}
             <button
