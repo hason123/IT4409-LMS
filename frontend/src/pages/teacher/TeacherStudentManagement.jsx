@@ -12,7 +12,7 @@ import {
   CloseOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { getTeacherEnrollments, getAllEnrollments, approveEnrollment, rejectEnrollment, deleteStudentsFromCourse, getStudentsNotInCourse, addStudentsToCourse } from "../../api/course";
+import { getTeacherEnrollments, getAllEnrollments, approveEnrollment, rejectEnrollment, deleteStudentsFromCourse, getStudentsNotInCourse, addStudentsToCourse, getTeacherCourses, getAllCourses } from "../../api/course";
 import AddStudentModal from "../../components/teacher/AddStudentModal";
 
 export default function TeacherStudentManagement({ isAdmin = false }) {
@@ -68,11 +68,20 @@ export default function TeacherStudentManagement({ isAdmin = false }) {
         }));
         setEnrollments(enrollmentList);
         
-        // Extract unique courses for the filter
-        const uniqueCourses = [...new Map(
-          enrollmentList.map(e => [e.courseId, { id: e.courseId, name: e.course }])
-        ).values()];
-        setCourses(uniqueCourses.filter(c => c.id));
+        // Fetch courses from API instead of extracting from enrollmentList
+        try {
+          const coursesRes = isAdmin
+            ? await getAllCourses(1, 1000)
+            : await getTeacherCourses(1, 1000);
+          const courseList = (coursesRes.data?.pageList || []).map(course => ({
+            id: course.id,
+            name: course.title || course.name || "N/A"
+          }));
+          setCourses(courseList);
+        } catch (courseErr) {
+          console.log("Failed to fetch courses:", courseErr);
+          setCourses([]);
+        }
       } catch (err) {
         console.log("Failed to fetch enrollments:", err);
         setError(err.message);

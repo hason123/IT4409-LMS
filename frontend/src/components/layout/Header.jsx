@@ -12,6 +12,23 @@ import {
   markNotificationAsRead,
 } from "../../api/notification";
 
+// Format timestamp to readable format (HH:mm:ss DD/MM/YYYY)
+const formatNotificationTime = (timestamp) => {
+  if (!timestamp) return "N/A";
+  try {
+    const date = new Date(timestamp);
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+  } catch (err) {
+    return timestamp;
+  }
+};
+
 export default function Header({ menuItems }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,7 +74,12 @@ export default function Header({ menuItems }) {
     try {
       setIsLoadingNotifications(true);
       const response = await getMyNotifications();
-      setNotifications(response.data);
+      // Format the time field for each notification
+      const formattedNotifications = response.data.map((notification) => ({
+        ...notification,
+        time: formatNotificationTime(notification.time),
+      }));
+      setNotifications(formattedNotifications);
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
       setNotifications([]);
@@ -218,7 +240,7 @@ export default function Header({ menuItems }) {
                                   {notification.message}
                                 </p>
                                 <p className="text-xs text-gray-400 mt-1">
-                                  {notification.time}
+                                  Thời gian gửi: {notification.time}
                                 </p>
                               </div>
                               {!notification.isRead && (

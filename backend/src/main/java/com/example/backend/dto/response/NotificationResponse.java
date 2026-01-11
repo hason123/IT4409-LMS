@@ -13,8 +13,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class NotificationResponse {
     private Integer id;
+    private String title;
     private String message;
+    private String description;
+    private String type;
+    private String actionUrl;
+    @JsonProperty("isRead")
     private boolean readStatus;
+    @JsonProperty("time")
     private LocalDateTime createdAt;
 
 }

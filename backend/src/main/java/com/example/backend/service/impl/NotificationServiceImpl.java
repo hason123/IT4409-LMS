@@ -23,10 +23,19 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserService userService;
 
     @Override
-    public void createNotification(User recipient, String message) {
+    public void createNotification(User recipient, String title, String message) {
+        createNotification(recipient, title, message, "SYSTEM", null, null);
+    }
+
+    @Override
+    public void createNotification(User recipient, String title, String message, String type, String description, String actionUrl) {
         Notification notification = Notification.builder()
                 .recipient(recipient)
+                .title(title)
                 .message(message)
+                .description(description)
+                .type(type)
+                .actionUrl(actionUrl)
                 .readStatus(false)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -87,7 +96,11 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationResponse convertEntityToDTO(Notification notification) {
         NotificationResponse response = new NotificationResponse();
         response.setId(notification.getId());
+        response.setTitle(notification.getTitle());
         response.setMessage(notification.getMessage());
+        response.setDescription(notification.getDescription());
+        response.setType(notification.getType());
+        response.setActionUrl(notification.getActionUrl());
         response.setReadStatus(notification.isReadStatus());
         response.setCreatedAt(notification.getCreatedAt());
         return response;

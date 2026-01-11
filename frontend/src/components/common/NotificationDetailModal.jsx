@@ -11,14 +11,6 @@ export default function NotificationDetailModal({ open, notification, onClose })
       footer={null}
       closeIcon={<XMarkIcon className="h-5 w-5" />}
       width={500}
-      bodyStyle={{
-        padding: '24px',
-      }}
-      styles={{
-        body: {
-          padding: '24px',
-        },
-      }}
     >
       {notification && (
         <div className="flex flex-col gap-4">
@@ -26,8 +18,8 @@ export default function NotificationDetailModal({ open, notification, onClose })
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
               {notification.title}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              {notification.time}
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Thời gian gửi: {notification.time}
             </p>
           </div>
 

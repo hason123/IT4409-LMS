@@ -22,11 +22,25 @@ public class Notification extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "title", length = 255)
+    private String title;
+
+    @Column(name = "message", columnDefinition = "TEXT")
     private String message;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "type", length = 50)
+    private String type;
+
+    @Column(name = "action_url", length = 500)
+    private String actionUrl;
+
+    @Column(name = "read_status")
     private boolean readStatus;
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

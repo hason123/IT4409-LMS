@@ -65,7 +65,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollmentRepository.saveAll(progresses);
         for(User u : users){
             String message = "Bạn đã được thêm vào khóa học " + course.getTitle();
-            notificationService.createNotification(u, message);
+            notificationService.createNotification(u, "Được thêm vào khóa học", message, "ENROLLMENT", null, null);
         }
     }
 
@@ -82,7 +82,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollmentRepository.deleteAll(progresses);
         for(User u : users){
             String message = "Bạn đã bị xóa tên khỏi danh sách lớp " + course.getTitle();
-            notificationService.createNotification(u, message);
+            notificationService.createNotification(u, "Bị xóa khỏi khóa học", message, "ENROLLMENT", null, null);
         }
     }
 
@@ -120,7 +120,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollmentRepository.save(newEnrollment);
 
         String message = "Sinh viên " + currentUser.getFullName() + " đã yêu cầu tham gia khóa học: " + course.getTitle();
-        notificationService.createNotification(course.getTeacher(), message);
+        notificationService.createNotification(course.getTeacher(), "Yêu cầu tham gia khóa học", message, "ENROLLMENT_REQUEST", null, null);
 
         return convertEnrollmentToDTO(newEnrollment);
     }
@@ -149,7 +149,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollmentRepository.save(newEnrollment);
 
         String message = "Sinh viên " + currentUser.getFullName() + " đã yêu cầu tham gia khóa học: " + course.getTitle();
-        notificationService.createNotification(course.getTeacher(), message);
+        notificationService.createNotification(course.getTeacher(), "Yêu cầu tham gia khóa học", message, "ENROLLMENT_REQUEST", null, null);
 
         return convertEnrollmentToDTO(newEnrollment);
     }
@@ -312,7 +312,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollmentRepository.save(enrollment);
 
         String message = "Bạn đã được thêm vào khóa học " + course.getTitle();
-        notificationService.createNotification(student, message);
+        notificationService.createNotification(student, "Được thêm vào khóa học", message, "ENROLLMENT", null, null);
         return convertEnrollmentToDTO(enrollment);
     }
 
@@ -334,8 +334,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new UnauthorizedException("Bạn không có quyền từ chối yêu cầu này!");
         }
         enrollmentRepository.delete(enrollment);
-        String message = "Yêu cầu tham gia khóa học" + course.getTitle() + "của bạn đã bị từ chối";
-        notificationService.createNotification(student, message);
+        String message = "Yêu cầu tham gia khóa học " + course.getTitle() + " của bạn đã bị từ chối";
+        notificationService.createNotification(student, "Yêu cầu bị từ chối", message, "ENROLLMENT_REJECTED", null, null);
     }
 
     @Override

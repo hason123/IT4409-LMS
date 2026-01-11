@@ -89,7 +89,7 @@ public class CommentServiceImpl implements CommentService {
             if (!parentAuthor.getId().equals(currentUser.getId())) {
                 String msg = String.format("%s %s đã trả lời bình luận của bạn trong bài giảng %s trong khóa học %s",
                         getRoleDisplayName(currentRole), currentUser.getFullName(), lesson.getTitle(), course.getTitle());
-                notificationService.createNotification(parentAuthor, msg);
+                notificationService.createNotification(parentAuthor, "Có trả lời bình luận mới", msg, "COMMENT", null, null);
             }
             return;
         }
@@ -99,7 +99,7 @@ public class CommentServiceImpl implements CommentService {
         if (currentRole == RoleType.STUDENT) {
             String msg = String.format("Học viên %s đã bình luận bài giảng %s trong khóa học %s",
                     currentUser.getFullName(), lesson.getTitle(),  course.getTitle());
-            notificationService.createNotification(teacher, msg);
+            notificationService.createNotification(teacher, "Có bình luận mới từ học viên", msg, "COMMENT", null, null);
             return;
         }
 
@@ -112,10 +112,10 @@ public class CommentServiceImpl implements CommentService {
             String msg = String.format("%s %s có thông báo mới trong bài giảng %s trong khóa học %s",
                     getRoleDisplayName(currentRole), currentUser.getFullName(), lesson.getTitle(), course.getTitle());
 
-            enrollments.forEach(e -> notificationService.createNotification(e.getStudent(), msg));
+            enrollments.forEach(e -> notificationService.createNotification(e.getStudent(), "Có thông báo mới từ giáo viên", msg, "COMMENT", null, null));
 
             if (currentRole == RoleType.ADMIN && !teacher.getId().equals(currentUser.getId())) {
-                notificationService.createNotification(teacher, msg);
+                notificationService.createNotification(teacher, "Có thông báo mới từ quản trị viên", msg, "COMMENT", null, null);
             }
         }
     }
