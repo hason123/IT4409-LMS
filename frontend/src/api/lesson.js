@@ -1,4 +1,8 @@
-const API_URL = "http://localhost:8080/api/v1/lms/lessons";
+//const API_URL = "http://localhost:8080/api/v1/lms/lessons";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+
+const API_URL = `${BACKEND_URL}/api/v1/lms/lessons`;
 
 export async function getLessonsByChapterId(chapterId) {
   const token = localStorage.getItem("accessToken");

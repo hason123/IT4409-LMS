@@ -1,4 +1,7 @@
-const API_URL = 'http://localhost:8080/api/v1/lms/categories';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+
+const API_URL = `${BACKEND_URL}/api/v1/lms/categories`;
 
 export async function getAllCategories(pageNumber = 1, pageSize = 100) {
   const token = localStorage.getItem('accessToken');

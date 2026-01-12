@@ -1,4 +1,7 @@
-const API_URL = "http://localhost:8080/api/v1/lms/quizzes";
+//const API_URL = "http://localhost:8080/api/v1/lms/quizzes";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+
+const API_URL = `${BACKEND_URL}/api/v1/lms/quizzes`;
 
 export async function createQuiz(quizData) {
   const token = localStorage.getItem("accessToken");
