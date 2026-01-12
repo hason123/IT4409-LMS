@@ -3,17 +3,16 @@ import { Select } from "antd";
 import { PencilIcon } from "@heroicons/react/24/solid";
 
 export default function AccountSettings() {
-  // const [isDarkMode, setIsDarkMode] = useState(() => {
-  //   if (typeof window !== "undefined") {
-  //     return (
-  //       localStorage.getItem("theme") === "dark" ||
-  //       (!("theme" in localStorage) &&
-  //         window.matchMedia("(prefers-color-scheme: dark)").matches)
-  //     );
-  //   }
-  //   return false;
-  // });
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return (
+        localStorage.getItem("theme") === "dark" ||
+        (!("theme" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      );
+    }
+    return false;
+  });
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -98,7 +97,7 @@ export default function AccountSettings() {
         </div>
 
         {/* Notification Settings */}
-        <div className="flex gap-4 items-center">
+        {/* <div className="flex gap-4 items-center">
           <h3 className="text-lg font-bold text-[#111418] dark:text-white">
             Thông báo:
           </h3>
@@ -117,7 +116,7 @@ export default function AccountSettings() {
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary/80 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
             </label>
           </div>
-        </div>
+        </div> */}
       </div>
       {isEditing && (
         <div className="flex justify-end gap-4 pt-6 border-t border-black/10 dark:border-white/10">

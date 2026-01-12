@@ -21,20 +21,45 @@ export default function CoursesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
+  const [filters, setFilters] = useState({
+    categories: [],
+    rating: null
+  });
 
   useEffect(() => {
-    fetchCourses(currentPage);
+    fetchCourses(1); // Reset to page 1 when filters change
+  }, [filters]);
+
+  useEffect(() => {
+    if (currentPage > 1) {
+      fetchCourses(currentPage);
+    }
   }, [currentPage]);
 
   const fetchCourses = async (page) => {
     try {
       setLoading(true);
       const response = await getAllCourses(page, 10); // Default page size 10
-      const data = response.data;
-      setCourses(data.pageList);
-      console.log("Fetched courses:", data.pageList);
-      setTotalPages(data.totalPage);
-      setTotalElements(data.totalElements);
+      let filteredCourses = response.data.pageList;
+
+      // Apply filters locally
+      if (filters.categories && filters.categories.length > 0) {
+        filteredCourses = filteredCourses.filter(course => 
+          filters.categories.includes(course.categoryName || course.category)
+        );
+      }
+
+      if (filters.rating) {
+        const minRating = parseFloat(filters.rating);
+        filteredCourses = filteredCourses.filter(course => 
+          (course.rating || 0) >= minRating
+        );
+      }
+
+      setCourses(filteredCourses);
+      console.log("Fetched courses:", response.data.pageList);
+      setTotalPages(response.data.totalPage);
+      setTotalElements(filteredCourses.length);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,6 +71,11 @@ export default function CoursesPage() {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
   };
 
   return (
@@ -70,7 +100,7 @@ export default function CoursesPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <aside className="lg:col-span-1">
                       <div className="sticky top-20">
-                        <CourseFilters />
+                        <CourseFilters onFilterChange={handleFilterChange} />
                       </div>
                     </aside>
 
@@ -201,7 +231,7 @@ export default function CoursesPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                   <aside className="lg:col-span-1">
                     <div className="sticky top-20">
-                      <CourseFilters />
+                      <CourseFilters onFilterChange={handleFilterChange} />
                     </div>
                   </aside>
 

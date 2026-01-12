@@ -176,6 +176,10 @@ public class UserServiceImpl implements UserService {
             updatedUser.setPhoneNumber(request.getPhoneNumber());
         } else updatedUser.setPhoneNumber(updatedUser.getPhoneNumber());
         
+        if (request.getFullName() != null) {
+            updatedUser.setFullName(request.getFullName());
+        }
+        
         // Update teacher-specific fields
         if (request.getWorkPlace() != null) {
             updatedUser.setWorkPlace(request.getWorkPlace());

@@ -5,7 +5,13 @@ import NotificationDetailModal from "../common/NotificationDetailModal";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import useUserStore from "../../store/useUserStore";
-import { MagnifyingGlassIcon, BellIcon } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  BellIcon,
+  BookOpenIcon,
+  HomeIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/outline";
 import {
   getMyNotifications,
   countUnreadNotifications,
@@ -48,10 +54,10 @@ export default function Header({ menuItems }) {
   const notificationRef = useRef(null);
 
   const defaultMenuItems = [
-    { label: "Khóa học", path: "/courses" },
-    { label: "Giới thiệu", path: "/home" },
-    { label: "Liên hệ", path: "#" },
-    { label: "Trang cá nhân", path: "/student/profile" },
+    { label: "Khóa học", path: "/courses", icon: BookOpenIcon },
+    { label: "Giới thiệu", path: "/home", icon: HomeIcon },
+    // { label: "Liên hệ", path: "#" },
+    { label: "Trang cá nhân", path: "/student/profile", icon: UserCircleIcon },
   ];
 
   const itemsToRender = menuItems || defaultMenuItems;
@@ -159,7 +165,7 @@ export default function Header({ menuItems }) {
               <span className="material-symbols-outlined text-primary text-3xl">
                 school
               </span>
-              <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">
+              <h2 className="hidden sm:block text-xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">
                 LearnOnline
               </h2>
             </div>
@@ -178,10 +184,29 @@ export default function Header({ menuItems }) {
                 </Link>
               ))}
             </nav>
+            <nav className="flex lg:hidden items-center gap-6">
+              {itemsToRender.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={index}
+                    to={item.path}
+                    className={`transition-colors ${
+                      isActive(item.path) && item.path !== "#"
+                        ? "text-primary"
+                        : "text-[#111418] dark:text-white/90 hover:text-primary"
+                    }`}
+                    title={item.label}
+                  >
+                    {Icon && <Icon className="h-6 w-6" />}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
 
           <div className="flex flex-1 justify-end gap-2 sm:gap-4 items-center">
-            <label className="hidden sm:flex flex-col min-w-40 !h-10 max-w-64">
+            <label className="hidden sm:flex flex-col min-w-40 !h-10 max-w-64 ml-4">
               <div className="flex w-full items-stretch rounded-lg">
                 <div className="text-[#617589] flex border border-r-0 border-[#dbe0e6] dark:border-gray-600 bg-white dark:bg-gray-800 items-center justify-center pl-3.5 pr-3.5 rounded-l-lg h-10">
                   <MagnifyingGlassIcon className="h-5 w-5" />

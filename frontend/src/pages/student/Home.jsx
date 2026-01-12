@@ -97,7 +97,7 @@ export default function Home() {
                     />
                   ))
                 ) : (
-                  <p className="text-gray-600 dark:text-gray-400">Không có khóa học nào</p>
+                  <p className="text-gray-600 dark:text-gray-400 col-span-full ml-4">Không có khóa học nào</p>
                 )}
               </div>
             )}
