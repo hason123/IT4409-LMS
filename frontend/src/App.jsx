@@ -400,6 +400,96 @@ export default function App() {
             }
           />
           <Route
+            path="/admin/courses/:id"
+            element={
+              <ProtectedRoute
+                element={<CourseDetailPage />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/create"
+            element={
+              <ProtectedRoute
+                element={<CreateCourse isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/edit/:id"
+            element={
+              <ProtectedRoute
+                element={<CreateCourse isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/:courseId/chapters/create"
+            element={
+              <ProtectedRoute
+                element={<CreateChapter isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/:courseId/lectures/create"
+            element={
+              <ProtectedRoute
+                element={<LectureDetail isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/:courseId/chapters/:chapterId/lectures/create"
+            element={
+              <ProtectedRoute
+                element={<LectureDetail isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/:courseId/lectures/:lectureId"
+            element={
+              <ProtectedRoute
+                element={<LectureDetail isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/:courseId/quizzes/create"
+            element={
+              <ProtectedRoute
+                element={<TeacherQuizDetail isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/:courseId/chapters/:chapterId/quizzes/create"
+            element={
+              <ProtectedRoute
+                element={<TeacherQuizDetail isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
+            path="/admin/courses/:courseId/quizzes/:quizId"
+            element={
+              <ProtectedRoute
+                element={<TeacherQuizDetail isAdmin={true} />}
+                allowedRoles={["ADMIN"]}
+              />
+            }
+          />
+          <Route
             path="/admin/students"
             element={
               <ProtectedRoute

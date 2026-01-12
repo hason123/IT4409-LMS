@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
 import CourseCard from "../../components/course/CourseCard";
@@ -13,6 +14,8 @@ import AdminSidebar from "../../components/layout/AdminSidebar";
 
 export default function TeacherCourses({ isAdmin = false }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const userRole = user?.role.toLowerCase();
   const [activeTab, setActiveTab] = useState("all"); // 'all', 'active', 'draft', 'archived'
   const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState([]);
@@ -64,15 +67,15 @@ export default function TeacherCourses({ isAdmin = false }) {
   });
 
   const handleCreateCourse = () => {
-    navigate("/teacher/courses/create");
+    navigate(`/${userRole}/courses/create`);
   };
 
   const handleEditCourse = (id) => {
-    navigate(`/teacher/courses/edit/${id}`);
+    navigate(`/${userRole}/courses/edit/${id}`);
   };
 
   const handlePreviewCourse = (id) => {
-    navigate(`/teacher/courses/${id}`);
+    navigate(`/${userRole}/courses/${id}`);
   };
 
   return (

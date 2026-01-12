@@ -242,7 +242,7 @@ export default function CourseDetailPage() {
                           },
                           {
                             label: "Nội dung khóa học",
-                            content: <CourseContent />,
+                            content: <CourseContent enrollmentStatus={enrollmentStatus} />,
                           },
                           { label: "Giảng viên", content: <TeacherTab course={course} /> },
                           { label: "Đánh giá", content: <ReviewTab enrollmentStatus={enrollmentStatus} onReviewChanged={fetchCourse} /> },

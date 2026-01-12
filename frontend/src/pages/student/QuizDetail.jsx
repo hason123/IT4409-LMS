@@ -84,7 +84,7 @@ export default function QuizDetail() {
 
   const handleConfirmStart = () => {
     setShowConfirmModal(false);
-    navigate(`/quizzes/${id}/attempt`, { state: { chapterItemId } });
+    navigate(`/courses/${courseId}/quizzes/${id}/attempt`, { state: { chapterItemId } });
   };
 
   const handleCancelStart = () => {

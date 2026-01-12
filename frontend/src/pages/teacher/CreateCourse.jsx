@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Form, Input, Select, Spin, Alert, Upload, message, Modal } from "antd";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   PhotoIcon,
   PencilSquareIcon,
@@ -23,9 +24,11 @@ const whiteSpinner = (
   <LoadingOutlined style={{ fontSize: 16, color: "#fff" }} spin />
 );
 
-export default function CreateCourse() {
+export default function CreateCourse({ isAdmin = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const userRole = user?.role.toLowerCase();
   const isExistingCourse = !!id;
 
   const [form] = Form.useForm();
@@ -154,7 +157,7 @@ export default function CreateCourse() {
         message.success("Tải ảnh khóa học thành công");
         setShowImageModal(false);
         setImageFile(null);
-        navigate("/teacher/courses");
+        navigate(`/${userRole}/courses`);
       } catch (err) {
         message.error(err.message || "Lỗi khi tải ảnh");
       } finally {
@@ -167,7 +170,7 @@ export default function CreateCourse() {
   const handleImageModalSkip = () => {
     setShowImageModal(false);
     setImageFile(null);
-    navigate("/teacher/courses");
+    navigate(`/${userRole}/courses`);
   };
 
   /* ------------------ HANDLE DELETE COURSE ------------------ */
@@ -176,7 +179,7 @@ export default function CreateCourse() {
       setDeleting(true);
       await deleteCourse(id);
       message.success("Khóa học đã được xóa thành công");
-      navigate("/teacher/courses");
+      navigate(`/${userRole}/courses`);
     } catch (err) {
       message.error(err.message || "Lỗi khi xóa khóa học");
     } finally {
@@ -298,7 +301,7 @@ export default function CreateCourse() {
                       // onClick={() => setIsEditMode(false)}
                       onClick={() => {
                         if(!isCreateMode) setIsEditMode(false);
-                        else navigate("/teacher/courses");
+                        else navigate(`/${userRole}/courses`);
                       }}
                       className="px-6 py-2 rounded-lg bg-slate-100"
                     >

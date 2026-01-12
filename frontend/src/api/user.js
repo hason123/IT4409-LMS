@@ -73,3 +73,18 @@ export async function uploadUserAvatar(userId, file) {
   return await response.json();
 }
 
+export async function changePassword(passwordData) {
+  const response = await fetch(`${API_URL}/auth/change-password`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(passwordData)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Không thể đổi mật khẩu');
+  }
+
+  return await response.json();
+}
+

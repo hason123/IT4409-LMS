@@ -161,9 +161,20 @@ export default function QuizDetail() {
   const handleQuestionTypeChange = (questionId, type) => {
     setQuizData({
       ...quizData,
-      questions: quizData.questions.map((q) =>
-        q.id === questionId ? { ...q, type } : q
-      ),
+      questions: quizData.questions.map((q) => {
+        if (q.id === questionId) {
+          // If changing to ESSAY, initialize with empty model answer
+          if (type === "ESSAY" && (q.answers.length === 0 || q.type !== "ESSAY")) {
+            return {
+              ...q,
+              type,
+              answers: [{ id: Date.now(), content: "", isCorrect: true }]
+            };
+          }
+          return { ...q, type };
+        }
+        return q;
+      }),
     });
   };
 
@@ -292,7 +303,24 @@ export default function QuizDetail() {
           setSubmitting(false);
           return;
         }
-        if (q.type !== "ESSAY") {
+        
+        if (q.type === "ESSAY") {
+          // Validate essay answers
+          if (!q.answers || q.answers.length === 0) {
+            message.error(`Câu hỏi tự luận ${quizData.questions.indexOf(q) + 1} không có đáp án mẫu`);
+            setSubmitting(false);
+            return;
+          }
+          // Validate answer content
+          for (let a of q.answers) {
+            if (!a.content || a.content.trim() === "") {
+              message.error(`Câu hỏi tự luận ${quizData.questions.indexOf(q) + 1} có đáp án không có nội dung`);
+              setSubmitting(false);
+              return;
+            }
+          }
+        } else {
+          // Validate multiple choice/single choice
           if (!q.answers || q.answers.length === 0) {
             message.error(`Câu hỏi ${quizData.questions.indexOf(q) + 1} không có đáp án`);
             setSubmitting(false);
@@ -675,90 +703,133 @@ export default function QuizDetail() {
                       />
                     </div>
                     {/* Answer Options */}
-                    {question.type !== "ESSAY" && (
-                      <div className="flex flex-col gap-3 mt-2">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#617589] dark:text-gray-400">
-                          Các lựa chọn
-                        </label>
-                        {question.answers.map((option) => (
-                          <div
-                            key={option.id}
-                            className="flex items-center gap-3 group"
-                          >
-                            <div className="shrink-0 flex items-center justify-center">
-                              {question.type === "SINGLE_CHOICE" ? (
-                                <Radio
-                                  name={`q${question.id}_correct`}
-                                  checked={option.isCorrect}
-                                  onChange={() =>
-                                    handleCorrectOptionChange(
-                                      question.id,
-                                      option.id
-                                    )
-                                  }
-                                  title="Đánh dấu là đáp án đúng"
-                                />
-                              ) : (
-                                <Checkbox
-                                  checked={option.isCorrect}
-                                  onChange={() =>
-                                    handleCorrectOptionChange(
-                                      question.id,
-                                      option.id
-                                    )
-                                  }
-                                  title="Đánh dấu là đáp án đúng"
-                                />
-                              )}
-                            </div>
-                            <div className="flex-1 relative">
-                              <Input
-                                placeholder="Lựa chọn"
-                                value={option.content}
-                                onChange={(e) =>
-                                  handleOptionChange(
-                                    question.id,
-                                    option.id,
-                                    e.target.value
-                                  )
-                                }
-                                className={`rounded ${
-                                  option.isCorrect
-                                    ? "!border-green-500/50 !bg-green-50 dark:!bg-green-900/10"
-                                    : ""
-                                }`}
-                                status={option.isCorrect ? "success" : ""}
-                                disabled={isViewMode}
-                              />
-                              {option.isCorrect && (
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 dark:text-green-400 text-xs font-bold flex items-center gap-1">
-                                  <CheckCircleIcon className="h-4 w-4" /> Đúng
-                                </span>
-                              )}
-                            </div>
-                            <Button
-                              type="text"
-                              danger
-                              onClick={() =>
-                                handleDeleteOption(question.id, option.id)
+                    <div className="flex flex-col gap-3 mt-2">
+                      {question.type === "ESSAY" ? (
+                        // Essay answer input
+                        <div className="flex flex-col gap-2">
+                          <label className="block text-xs font-bold uppercase tracking-wider text-[#617589] dark:text-gray-400">
+                            Đáp án mẫu (mô tả cách trả lời đúng)
+                          </label>
+                          <Input.TextArea
+                            placeholder="Nhập đáp án mẫu hoặc hướng dẫn chấm điểm..."
+                            rows={4}
+                            value={question.answers[0]?.content || ""}
+                            onChange={(e) => {
+                              const existingAnswers = question.answers || [];
+                              if (existingAnswers.length > 0) {
+                                handleOptionChange(question.id, existingAnswers[0].id, e.target.value);
+                              } else {
+                                // Create first answer if not exists
+                                setQuizData({
+                                  ...quizData,
+                                  questions: quizData.questions.map((q) =>
+                                    q.id === question.id
+                                      ? {
+                                          ...q,
+                                          answers: [{ id: Date.now(), content: e.target.value, isCorrect: true }]
+                                        }
+                                      : q
+                                  ),
+                                });
                               }
-                              className="opacity-0 group-hover:opacity-100 p-1 text-[#617589] hover:text-red-500 transition-all"
-                              icon={<XMarkIcon className="h-5 w-5" />}
+                            }}
+                            className="rounded border border-gray-300 dark:border-gray-600"
+                            disabled={isViewMode}
+                          />
+                          {question.answers.length > 0 && question.answers[0].content && (
+                            <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                              <CheckCircleIcon className="h-4 w-4" /> Đã nhập đáp án
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        // Multiple choice/single choice options
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-[#617589] dark:text-gray-400 mb-3">
+                            Các lựa chọn
+                          </label>
+                          <div className="flex flex-col gap-3">
+                            {question.answers.map((option) => (
+                              <div
+                                key={option.id}
+                                className="flex items-center gap-3 group"
+                              >
+                                <div className="shrink-0 flex items-center justify-center">
+                                  {question.type === "SINGLE_CHOICE" ? (
+                                    <Radio
+                                      name={`q${question.id}_correct`}
+                                      checked={option.isCorrect}
+                                      onChange={() =>
+                                        handleCorrectOptionChange(
+                                          question.id,
+                                          option.id
+                                        )
+                                      }
+                                      title="Đánh dấu là đáp án đúng"
+                                    />
+                                  ) : (
+                                    <Checkbox
+                                      checked={option.isCorrect}
+                                      onChange={() =>
+                                        handleCorrectOptionChange(
+                                          question.id,
+                                          option.id
+                                        )
+                                      }
+                                      title="Đánh dấu là đáp án đúng"
+                                    />
+                                  )}
+                                </div>
+                                <div className="flex-1 relative">
+                                  <Input
+                                    placeholder="Lựa chọn"
+                                    value={option.content}
+                                    onChange={(e) =>
+                                      handleOptionChange(
+                                        question.id,
+                                        option.id,
+                                        e.target.value
+                                      )
+                                    }
+                                    className={`rounded ${
+                                      option.isCorrect
+                                        ? "!border-green-500/50 !bg-green-50 dark:!bg-green-900/10"
+                                        : ""
+                                    }`}
+                                    status={option.isCorrect ? "success" : ""}
+                                    disabled={isViewMode}
+                                  />
+                                  {option.isCorrect && (
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 dark:text-green-400 text-xs font-bold flex items-center gap-1">
+                                      <CheckCircleIcon className="h-4 w-4" /> Đúng
+                                    </span>
+                                  )}
+                                </div>
+                                <Button
+                                  type="text"
+                                  danger
+                                  onClick={() =>
+                                    handleDeleteOption(question.id, option.id)
+                                  }
+                                  className="opacity-0 group-hover:opacity-100 p-1 text-[#617589] hover:text-red-500 transition-all"
+                                  icon={<XMarkIcon className="h-5 w-5" />}
+                                  disabled={isViewMode}
+                                />
+                              </div>
+                            ))}
+                            {/* Add Option Button */}
+                            <button
+                              onClick={() => handleAddOption(question.id)}
+                              className="flex items-center gap-2 text-primary hover:text-blue-600 text-sm font-bold py-2 w-fit"
                               disabled={isViewMode}
-                            />
+                            >
+                              <PlusCircleIcon className="h-5 w-5" />
+                              Thêm lựa chọn khác
+                            </button>
                           </div>
-                        ))}
-                        {/* Add Option Button */}
-                        <button
-                          onClick={() => handleAddOption(question.id)}
-                          className="flex items-center gap-2 text-primary hover:text-blue-600 text-sm font-bold py-2 w-fit"
-                          disabled={isViewMode}
-                        >
-                          <PlusCircleIcon className="h-5 w-5" />
-                          Thêm lựa chọn khác
-                        </button>
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

@@ -5,11 +5,29 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Header from "../../components/layout/Header";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
+import NotificationDetailModal from "../../components/common/NotificationDetailModal";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   getMyNotifications,
   markNotificationAsRead,
 } from "../../api/notification";
+
+// Format timestamp to readable format (HH:mm:ss DD/MM/YYYY)
+const formatNotificationTime = (timestamp) => {
+  if (!timestamp) return "N/A";
+  try {
+    const date = new Date(timestamp);
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+  } catch (err) {
+    return timestamp;
+  }
+};
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
@@ -23,6 +41,8 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isNotificationDetailOpen, setIsNotificationDetailOpen] = useState(false);
   const pageSize = 10;
 
   useEffect(() => {
@@ -33,7 +53,12 @@ export default function NotificationsPage() {
     try {
       setLoading(true);
       const response = await getMyNotifications();
-      setNotifications(response.data);
+      // Format the time field for each notification
+      const formattedNotifications = response.data.map((notification) => ({
+        ...notification,
+        time: formatNotificationTime(notification.time),
+      }));
+      setNotifications(formattedNotifications);
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
       setError(err.message);
@@ -152,6 +177,8 @@ export default function NotificationsPage() {
                           : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
                       } hover:shadow-md`}
                       onClick={() => {
+                        setSelectedNotification(notification);
+                        setIsNotificationDetailOpen(true);
                         if (!notification.isRead) {
                           handleMarkAsRead(notification.id);
                         }
@@ -204,6 +231,16 @@ export default function NotificationsPage() {
           </div>
         </main>
       </div>
+      <NotificationDetailModal
+        open={isNotificationDetailOpen}
+        notification={selectedNotification}
+        onClose={() => {
+          setIsNotificationDetailOpen(false);
+          setSelectedNotification(null);
+          // Refresh notifications when modal closes to show updated read status
+          fetchNotifications();
+        }}
+      />
     </>
   );
 }

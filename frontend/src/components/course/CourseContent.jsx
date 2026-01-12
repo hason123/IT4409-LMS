@@ -6,10 +6,13 @@ import { getChaptersByCourseId, deleteChapter, getChapterItems, updateChapterIte
 import { Spin, Alert, Dropdown, Modal, message } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
-export default function CourseContent() {
+export default function CourseContent({ enrollmentStatus = null }) {
   const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
+  // Check if student is approved
+  const isStudentApproved = user?.role === "STUDENT" && enrollmentStatus === "APPROVED";
+  const isStudentNotApproved = user?.role === "STUDENT" && enrollmentStatus !== "APPROVED";
   const [deleteChapterId, setDeleteChapterId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -273,8 +276,14 @@ export default function CourseContent() {
                       {chapterItems[chapter.id].map((item, itemIndex) => (
                         <div
                           key={item.id}
-                          className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer group"
+                          className={`p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-between transition-colors group ${
+                            isStudentNotApproved ? "" : "hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+                          }`}
                           onClick={() => {
+                            if (isStudentNotApproved) {
+                              message.warning("Vui lòng chờ giáo viên duyệt đơn đăng ký để truy cập nội dung khóa học.");
+                              return;
+                            }
                             if (item.type === "LESSON") {
                               handleEditLecture(item.item?.id);
                             } else if (item.type === "QUIZ") {
