@@ -146,7 +146,10 @@ public class CourseServiceImpl implements CourseService {
         );
         Page<CourseResponse> courseResponsePage = enrollmentPage.map(enrollment -> {
             Course course = enrollment.getCourse();
-            return convertEntityToDto(course);
+            CourseResponse courseResponse = convertEntityToDto(course);
+            // Add progress from enrollment
+            courseResponse.setProgress(enrollment.getProgress() != null ? enrollment.getProgress() : 0);
+            return courseResponse;
         });
         return new PageResponse<>(
                 courseResponsePage.getNumber() + 1,
@@ -166,7 +169,10 @@ public class CourseServiceImpl implements CourseService {
         );
         Page<CourseResponse> courseResponsePage = enrollmentPage.map(enrollment -> {
             Course course = enrollment.getCourse();
-            return convertEntityToDto(course);
+            CourseResponse courseResponse = convertEntityToDto(course);
+            // Add progress from enrollment
+            courseResponse.setProgress(enrollment.getProgress() != null ? enrollment.getProgress() : 0);
+            return courseResponse;
         });
         return new PageResponse<>(
                 courseResponsePage.getNumber() + 1,

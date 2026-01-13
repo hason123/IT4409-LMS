@@ -26,4 +26,5 @@ public class CourseResponse {
     @Enumerated(EnumType.STRING)
     private CourseStatus status;
     private Long totalEnrollments;
+    private Integer progress; // Learning progress percentage (0-100), only populated in student context
 }

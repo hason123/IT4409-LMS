@@ -191,7 +191,7 @@ export default function CourseDetailPage() {
               <div className="container mx-auto sm:px-6 lg:px-8 py-8">
                 {/* Back Button */}
                 <button
-                  onClick={() => navigate(isTeacherOrAdmin ? "/teacher/courses" : "/courses")}
+                  onClick={() => navigate(-1)}
                   className="flex items-center gap-2 mb-3 text-primary hover:text-primary/80 transition-colors"
                 >
                   <ArrowLeftIcon className="w-5 h-5" />

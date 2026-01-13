@@ -18,11 +18,18 @@ export default function CourseCard({
   code,
   studentsCount,
   schedule,
+  progress = 0, // Student progress percentage (0-100)
   onManage,
   onEdit,
   onPreview,
 }) {
   const navigate = useNavigate();
+
+  const getProgressColor = (progress) => {
+    if (progress === 100) return "#22c55e";
+    if (progress >= 50) return "#137fec";
+    return "#9ca3af";
+  };
 
   if (type === "teacher") {
     return (
@@ -162,6 +169,24 @@ export default function CourseCard({
               </span>
             ) : null}
           </div>
+          
+          {/* Progress Bar */}
+          {progress > 0 && (
+            <div className="mt-3 flex items-center gap-2">
+              <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${progress}%`,
+                    backgroundColor: getProgressColor(progress),
+                  }}
+                ></div>
+              </div>
+              <span className="text-xs font-medium text-[#111418] dark:text-white min-w-fit">
+                {progress}%
+              </span>
+            </div>
+          )}
         </div>
         <button
           onClick={() => navigate(`/courses/${id}`)}

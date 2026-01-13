@@ -85,6 +85,7 @@ export default function MyCourses() {
                 image={course.imageUrl}
                 rating={course.rating || 0}
                 reviews={course.reviewCounts?.toString() || "0"}
+                progress={course.progress || 0}
               />
             ))}
           </div>
