@@ -141,7 +141,7 @@ export default function LoginForm() {
           <hr className="flex-grow border-t border-[#dbe0e6] dark:border-gray-700" />
         </div>
 
-        <div className="w-full text-center">
+        <div className="w-full flex items-center justify-center">
           <GoogleLogin
               onSuccess={handleGoogleLogin}
               onError={handleGoogleError}
