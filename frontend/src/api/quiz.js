@@ -24,7 +24,7 @@ export async function createQuiz(quizData) {
 
 export async function createQuizInChapter(chapterId, quizData) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:8080/api/v1/lms/chapters/${chapterId}/quizzes`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/chapters/${chapterId}/quizzes`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -101,7 +101,7 @@ export async function deleteQuiz(id) {
 
 export async function startQuizAttempt(quizId, chapterItemId) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:8080/api/v1/lms/chapterItem/${chapterItemId}/quiz/${quizId}/start`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/chapterItem/${chapterItemId}/quiz/${quizId}/start`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -119,7 +119,7 @@ export async function startQuizAttempt(quizId, chapterItemId) {
 
 export async function getCurrentAttempt(chapterItemId) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:8080/api/v1/lms/chapterItem/${chapterItemId}/quiz/current`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/chapterItem/${chapterItemId}/quiz/current`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -140,7 +140,7 @@ export async function getCurrentAttempt(chapterItemId) {
 export async function submitAnswer(attemptId, questionId, answerData) {
   const token = localStorage.getItem("accessToken");
   // answerData: { selectedAnswerIds: [], textAnswer: "" }
-  const response = await fetch(`http://localhost:8080/api/v1/lms/quiz-attempts/${attemptId}/question/${questionId}/answer`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/quiz-attempts/${attemptId}/question/${questionId}/answer`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -159,7 +159,7 @@ export async function submitAnswer(attemptId, questionId, answerData) {
 
 export async function submitQuiz(attemptId) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:8080/api/v1/lms/quiz-attempts/${attemptId}/submit`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/quiz-attempts/${attemptId}/submit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -177,7 +177,7 @@ export async function submitQuiz(attemptId) {
 
 export async function getAttemptDetail(attemptId) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:8080/api/v1/lms/quiz-attempts/${attemptId}`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/quiz-attempts/${attemptId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -195,7 +195,7 @@ export async function getAttemptDetail(attemptId) {
 
 export async function getStudentAttemptsHistory(chapterItemId) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:8080/api/v1/lms/chapterItem/${chapterItemId}/my-attempts`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/chapterItem/${chapterItemId}/my-attempts`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

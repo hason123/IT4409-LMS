@@ -137,7 +137,7 @@ export async function updateChapterItemOrder(chapterId, orderedItemIds) {
 
 export async function deleteChapterItem(itemId) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:8080/api/v1/lms/chaptersItems/${itemId}`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/chaptersItems/${itemId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
