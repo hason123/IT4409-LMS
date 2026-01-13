@@ -52,6 +52,9 @@ export function AuthProvider({ children }) {
     clearUser();
     // Reset language to Vietnamese
     i18n.changeLanguage('vi');
+    // Reset dark mode to light mode (default)
+    localStorage.setItem("theme", "light");
+    document.documentElement.classList.remove("dark");
   };
 
   // Hàm login - fetch full user data after login

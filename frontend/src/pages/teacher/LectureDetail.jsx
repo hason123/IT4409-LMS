@@ -14,8 +14,9 @@ import {
   ClipboardDocumentListIcon,
   CheckCircleIcon,
   ArrowLeftIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
-import { Form, Input, Button, Spin, Alert, message } from "antd";
+import { Form, Input, Button, Spin, Alert, message, Modal } from "antd";
 import { getCourseById } from "../../api/course";
 import { getLessonById, createLessonInChapter, updateLesson, deleteLesson } from "../../api/lesson";
 import { createResource, uploadVideoResource, uploadSlideResource, getResourcesByLessonId } from "../../api/resource";
@@ -301,22 +302,27 @@ export default function LectureDetail() {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa bài giảng này?")) {
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      await deleteLesson(lectureId);
-      message.success("Xóa bài giảng thành công");
-      navigate(`/teacher/courses/${courseId}`);
-    } catch (err) {
-      message.error(err.message || "Không thể xóa bài giảng");
-      console.error(err);
-    } finally {
-      setSubmitting(false);
-    }
-  }
+    Modal.confirm({
+      title: "Xác nhận xóa bài giảng",
+      content: "Bạn có chắc chắn muốn xóa bài giảng này? Hành động này không thể hoàn tác.",
+      okText: "Xóa",
+      cancelText: "Hủy bỏ",
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          setSubmitting(true);
+          await deleteLesson(lectureId);
+          message.success("Xóa bài giảng thành công");
+          navigate(`/teacher/courses/${courseId}`);
+        } catch (err) {
+          message.error(err.message || "Không thể xóa bài giảng");
+          console.error(err);
+        } finally {
+          setSubmitting(false);
+        }
+      },
+    });
+  };
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -344,7 +350,7 @@ export default function LectureDetail() {
       <TeacherHeader />
       <div className="flex">
         <TeacherSidebar />
-        <main className={`flex-1 bg-slate-50 dark:bg-slate-900 pt-16 flex flex-col h-screen pb-[4.5rem] transition-all duration-300 ${
+        <main className={`flex-1 bg-slate-50 dark:bg-slate-900 pt-16 flex flex-col h-screen ${!isViewMode && "pb-[4.5rem]"} transition-all duration-300 ${
           sidebarCollapsed ? "pl-20" : "pl-64"
         }`}>
           <div className="flex-1 overflow-y-auto p-6 md:px-12 md:py-8">
@@ -385,21 +391,23 @@ export default function LectureDetail() {
                 {(isEditMode || isViewMode) && (
                   <div className="flex items-center gap-3">
                     {isViewMode && (
-                      <button 
+                      <Button
+                        type="primary"
                         onClick={() => setIsViewMode(false)}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold"
+                        className="px-6 py-2.5 h-10 rounded-lg font-bold flex items-center gap-2"
+                        icon={<PencilIcon className="h-4 w-4" />}
                       >
                         Chỉnh sửa
-                      </button>
+                      </Button>
                     )}
-                    <button 
+                    {/* <button 
                       onClick={handleDelete}
                       disabled={submitting}
                       className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-semibold disabled:opacity-50"
                     >
                       <TrashIcon className="h-[18px] w-[18px]" />
                       Xóa bài giảng
-                    </button>
+                    </button> */}
                   </div>
                 )}
               </div>
@@ -471,7 +479,7 @@ export default function LectureDetail() {
                       onChange={setContent}
                       modules={modules}
                       formats={formats}
-                      className="h-[300px] mb-12 [&_.ql-container]:bg-white [&_.ql-container]:dark:bg-gray-800"
+                      className="h-[400px] mb-12 [&_.ql-container]:bg-white [&_.ql-container]:dark:bg-gray-800"
                       readOnly={isViewMode}
                     />
                   </Form.Item>
@@ -695,18 +703,15 @@ export default function LectureDetail() {
             </>
             )}
             {/* Sticky Footer Action Bar */}
+            {!isViewMode && (
             <div className={`fixed bottom-0 left-0 right-0 lg:ml-64 border-t border-[#e5e7eb] dark:border-gray-800 bg-white dark:bg-card-dark p-4 px-6 md:px-12 flex justify-between items-center z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] ${isViewMode ? 'hidden' : ''}`}>
               <div className="hidden sm:flex flex-col">
-                {isEditMode && (
-                  <>
                     <span className="text-xs text-gray-500">
                       Lần lưu cuối: {lesson?.updatedAt ? new Date(lesson.updatedAt).toLocaleTimeString('vi-VN') : 'Chưa lưu'}
                     </span>
                     <span className="text-xs font-medium text-green-600 dark:text-green-400 flex items-center gap-1">
                       <CheckCircleIcon className="h-3 w-3" /> Đã đồng bộ
                     </span>
-                  </>
-                )}
               </div>
               <div className="flex gap-3 w-full sm:w-auto justify-end">
                 <button
@@ -734,7 +739,7 @@ export default function LectureDetail() {
                   )}
                 </button>
               </div>
-            </div>
+            </div>)}
           </div>
         </main>
       </div>

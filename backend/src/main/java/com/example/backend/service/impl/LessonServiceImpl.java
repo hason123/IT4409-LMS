@@ -33,6 +33,8 @@ public class LessonServiceImpl implements LessonService {
         Lesson lesson = new Lesson();
         lesson.setTitle(request.getTitle());
         lesson.setContent(request.getContent());
+        lesson.setVideoUrl(request.getVideoUrl());
+        lesson.setNotes(request.getNotes());
         lessonRepository.save(lesson);
         return convertEntityToDTO(lesson);
     }
@@ -45,6 +47,12 @@ public class LessonServiceImpl implements LessonService {
         }
         if(request.getContent() != null){
             lesson.setContent(request.getContent());
+        }
+        if(request.getVideoUrl() != null){
+            lesson.setVideoUrl(request.getVideoUrl());
+        }
+        if(request.getNotes() != null){
+            lesson.setNotes(request.getNotes());
         }
         return convertEntityToDTO(lessonRepository.save(lesson));
     }
@@ -68,6 +76,8 @@ public class LessonServiceImpl implements LessonService {
         response.setId(lesson.getId());
         response.setTitle(lesson.getTitle());
         response.setContent(lesson.getContent());
+        response.setVideoUrl(lesson.getVideoUrl());
+        response.setNotes(lesson.getNotes());
         if (lesson.getResources() != null && !lesson.getResources().isEmpty()) {
             List<ResourceResponse> resourceResponses = lesson.getResources()
                     .stream()

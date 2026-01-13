@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
-import ModalNotification from "../common/ModalNotification";
 import { EyeIcon, LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
 import { login, googleLogin } from "../../api/auth";
 import { GoogleLogin } from "@react-oauth/google";

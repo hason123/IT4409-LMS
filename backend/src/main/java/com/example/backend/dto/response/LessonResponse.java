@@ -12,5 +12,7 @@ public class LessonResponse {
     private Integer id;
     private String title;
     private String content;
+    private String videoUrl;
+    private String notes;
     private List<ResourceResponse> resources;
 }

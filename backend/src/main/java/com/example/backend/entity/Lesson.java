@@ -22,6 +22,10 @@ public class Lesson extends BaseEntity{
     private String title;
     @Column(name = "content", columnDefinition = "MEDIUMTEXT")
     private String content;
+    @Column(name = "video_url")
+    private String videoUrl;
+    @Column(name = "notes", columnDefinition = "MEDIUMTEXT")
+    private String notes;
     @OneToMany(mappedBy = "lesson")
     private List<Resource> resources;
     @OneToMany(mappedBy = "lesson")
