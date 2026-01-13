@@ -141,13 +141,17 @@ export default function LoginForm() {
         </div>
 
         <div className="w-full flex justify-center google-login-button">
-          <GoogleLogin
-            onSuccess={handleGoogleLogin}
-            onError={handleGoogleError}
-            locale="vi_VN"
-            theme="outline"
-            size="large"
-          />
+          {/* Thêm thẻ div bọc ngoài với class w-fit */}
+          <div className="w-fit">
+            <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={handleGoogleError}
+                locale="vi_VN"
+                theme="outline"
+                size="large"
+                // width="300" // Hoặc bạn có thể set width cứng nếu muốn nó to bằng input trên
+            />
+          </div>
         </div>
 
         <p className="text-center text-sm text-[#617589] dark:text-gray-400">
