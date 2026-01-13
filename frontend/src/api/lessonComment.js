@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:8080/api/v1/lms";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+
+const API_URL = `${BACKEND_URL}/api/v1/lms`;
 
 export async function getCommentsByLesson(lectureId, pageNumber = 1, pageSize = 20) {
   const token = localStorage.getItem("accessToken");

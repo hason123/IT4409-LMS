@@ -1,5 +1,7 @@
-const API_URL = "http://localhost:8080/api/v1/lms";
+//const API_URL = "http://localhost:8080/api/v1/lms";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
 
+const API_URL = `${BACKEND_URL}/api/v1/lms`;
 /**
  * Get teacher's enrollment statistics
  */

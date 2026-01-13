@@ -1,4 +1,7 @@
-const API_URL = "http://localhost:8080/api/v1/lms/chapters";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+
+const API_URL = `${BACKEND_URL}/api/v1/lms/chapters`;
 
 export async function getChaptersByCourseId(courseId) {
   const token = localStorage.getItem("accessToken");
@@ -134,7 +137,7 @@ export async function updateChapterItemOrder(chapterId, orderedItemIds) {
 
 export async function deleteChapterItem(itemId) {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:8080/api/v1/lms/chaptersItems/${itemId}`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/lms/chaptersItems/${itemId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
