@@ -36,7 +36,7 @@ public class QuizAttempt extends BaseEntity {
     private Integer attemptNumber;
     @Enumerated(EnumType.STRING)
     private AttemptStatus status;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 

@@ -28,7 +28,7 @@ public class QuizAttemptAnswer extends BaseEntity {
     @JoinColumn(name = "attempt_id")
     private QuizAttempt attempt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "question_id")
     private QuizQuestion question;
 
@@ -36,7 +36,7 @@ public class QuizAttemptAnswer extends BaseEntity {
 //    @JoinColumn(name = "selected_answer_id")
 //    private QuizAnswer selectedAnswer;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "quiz_attempt_selected_answers",
             joinColumns = @JoinColumn(name = "attempt_answer_id"),

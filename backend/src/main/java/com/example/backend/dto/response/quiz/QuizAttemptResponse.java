@@ -22,4 +22,5 @@ public class QuizAttemptResponse {
     private Integer incorrectAnswers;
     private Integer unansweredQuestions;
     private Integer chapterItemId;
+    private Long remainingTimeSeconds;
 }

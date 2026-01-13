@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -465,6 +466,30 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         return LocalDateTime.now().isAfter(expirationTime);
     }
 
+    private Long calculateRemainingTimeSeconds(QuizAttempt attempt) {
+        // If no time limit, return null
+        if (attempt.getQuiz().getTimeLimitMinutes() == null || attempt.getQuiz().getTimeLimitMinutes() <= 0) {
+            return null;
+        }
+        
+        // If attempt has been completed or expired, remaining time is 0
+        if (attempt.getCompletedTime() != null || attempt.getStatus() == AttemptStatus.EXPIRED) {
+            return 0L;
+        }
+        
+        // Calculate elapsed time in seconds
+        long elapsedSeconds = ChronoUnit.SECONDS.between(attempt.getStartTime(), LocalDateTime.now());
+        
+        // Calculate total time limit in seconds
+        long totalSeconds = (long) attempt.getQuiz().getTimeLimitMinutes() * 60;
+        
+        // Calculate remaining time
+        long remainingSeconds = totalSeconds - elapsedSeconds;
+        
+        // Return 0 if time has already expired
+        return Math.max(0L, remainingSeconds);
+    }
+
     private void expireAttempt(QuizAttempt attempt) {
         updateAttemptStatistics(attempt);
         attempt.setCompletedTime(LocalDateTime.now());
@@ -613,6 +638,9 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         response.setCorrectAnswers(attempt.getCorrectAnswers());
         response.setIncorrectAnswers(attempt.getIncorrectAnswers());
         response.setUnansweredQuestions(attempt.getUnansweredQuestions());
+        
+        // Calculate remaining time (in seconds)
+        response.setRemainingTimeSeconds(calculateRemainingTimeSeconds(attempt));
 
         // QUAN TRỌNG: Kiểm tra quyền để ẩn/hiện đáp án
         boolean showCorrectAnswer = shouldShowCorrectAnswers(attempt);
@@ -710,6 +738,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .correctAnswers(attempt.getCorrectAnswers())
                 .incorrectAnswers(attempt.getIncorrectAnswers())
                 .unansweredQuestions(attempt.getUnansweredQuestions())
+                .remainingTimeSeconds(calculateRemainingTimeSeconds(attempt))
                 .build();
     }
 }

@@ -88,12 +88,14 @@ export default function QuizAttempt() {
                 });
                 setAnswers(initialAnswers);
             }
-          }
-      }
 
-      // Timer Setup
-      if (quiz?.timeLimitMinutes) {
-          setTimeLeft(quiz.timeLimitMinutes * 60); 
+            // Timer Setup - use remaining time from attempt if available, else use quiz time limit
+            if (attemptData?.remainingTimeSeconds !== null && attemptData?.remainingTimeSeconds !== undefined) {
+                setTimeLeft(attemptData.remainingTimeSeconds);
+            } else if (quiz?.timeLimitMinutes) {
+                setTimeLeft(quiz.timeLimitMinutes * 60); 
+            }
+          }
       }
 
     } catch (err) {
