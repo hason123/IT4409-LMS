@@ -53,6 +53,10 @@ export async function deleteUser(id) {
   if (!response.ok) {
     throw new Error('Failed to delete user');
   }
+  // Handle 204 No Content response
+  if (response.status === 204) {
+    return {};
+  }
   return await response.json();
 }
 
@@ -86,6 +90,21 @@ export async function changePassword(passwordData) {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || 'Không thể đổi mật khẩu');
+  }
+
+  return await response.json();
+}
+
+export async function createUser(userData) {
+  const response = await fetch(`${API_URL}/users`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(userData)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Không thể tạo người dùng');
   }
 
   return await response.json();

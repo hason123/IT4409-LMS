@@ -22,9 +22,12 @@ import com.example.backend.service.OtpService;
 import com.example.backend.service.UserService;
 import com.example.backend.specification.UserSpecification;
 import com.example.backend.utils.FileUploadUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -33,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Random;
+
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -40,13 +45,18 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryService cloudinaryService;
     private final OtpService otpService;
+    private final JavaMailSender mailSender;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, CloudinaryService cloudinaryService, OtpService otpService) {
+    @Value("${spring.mail.username}")
+    private String fromGmail;
+
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, CloudinaryService cloudinaryService, OtpService otpService, JavaMailSender mailSender) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.cloudinaryService = cloudinaryService;
         this.otpService = otpService;
+        this.mailSender = mailSender;
     }
 
     @Override
@@ -133,7 +143,7 @@ public class UserServiceImpl implements UserService {
     public UserInfoResponse updateUser(Integer id, RegisterRequest request) {
         User updatedUser = userRepository.findById(id).orElse(null);
 
-        if(!isCurrentUser(id) ){
+        if(!isCurrentUser(id) && !getCurrentUser().getRole().getRoleName().equals(RoleType.ADMIN) ){
             throw new UnauthorizedException("You have no permission");
         }
         if(updatedUser == null){
@@ -292,13 +302,20 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("Mã số này đã được sử dụng");
         } else user.setStudentNumber(request.getStudentNumber());
 
+        // Generate random password
+        String generatedPassword = generateRandomPassword();
+        
         user.setRole(roleRepository.findByRoleName(RoleType.valueOf(request.getRoleName())));
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(generatedPassword));
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
         user.setFullName(request.getFullName());
         user.setVerified(true);
         userRepository.save(user);
+        
+        // Send password to email
+        sendPasswordEmail(user.getGmail(), generatedPassword);
+        
         return convertUserInfoToDTO(user);
     }
 
@@ -345,6 +362,43 @@ public class UserServiceImpl implements UserService {
         otpService.sendOtpEmail(user.getGmail(), otp.getCode());
     }
 
+    /**
+     * Generate a random password with 12 characters
+     * Contains uppercase, lowercase, digits, and special characters
+     */
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        StringBuilder password = new StringBuilder();
+        Random random = new Random();
+        
+        for (int i = 0; i < 12; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        
+        return password.toString();
+    }
+
+    /**
+     * Send password to user email
+     */
+    private void sendPasswordEmail(String toGmail, String password) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromGmail);
+            message.setTo(toGmail);
+            message.setSubject("Thông tin tài khoản của bạn");
+            message.setText("Chào bạn,\n\n" +
+                    "Tài khoản của bạn đã được tạo thành công.\n" +
+                    "Mật khẩu tạm thời của bạn là: " + password + "\n\n" +
+                    "Vui lòng đăng nhập và đổi mật khẩu khi lần đầu sử dụng.\n\n" +
+                    "Trân trọng,\n" +
+                    "Hệ thống LMS");
+            mailSender.send(message);
+        } catch (Exception e) {
+            // Log error but don't fail the user creation if email sending fails
+            System.err.println("Failed to send password email to " + toGmail + ": " + e.getMessage());
+        }
+    }
 
     @Override
     public UserInfoResponse convertUserInfoToDTO(User user){

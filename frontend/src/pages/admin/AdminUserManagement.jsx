@@ -3,7 +3,7 @@ import { Select, message, Popconfirm } from "antd";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import AdminSidebar from "../../components/layout/AdminSidebar";
 import AdminUserModal from "./AdminUserModal";
-import { getAllUsers, deleteUser, updateUser } from "../../api/user";
+import { getAllUsers, deleteUser, updateUser, createUser } from "../../api/user";
 import {
   MagnifyingGlassIcon,
   PlusCircleIcon,
@@ -87,23 +87,39 @@ export default function AdminUserManagement() {
     setModalOpen(true);
   };
 
+  const handleOpenCreateModal = () => {
+    setSelectedUser(null);
+    setModalMode("create");
+    setModalOpen(true);
+  };
+
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedUser(null);
   };
 
-  const handleSaveUserChanges = async (updatedData) => {
+  const handleSaveUserChanges = async (userId, updatedData) => {
     try {
-      await updateUser(updatedData.id, {
-        fullName: updatedData.fullName,
-        gmail: updatedData.gmail,
-        role: updatedData.role,
-      });
-      message.success("Cập nhật người dùng thành công");
+      if (modalMode === "create") {
+        // For creating new user, call createUser API
+        await createUser(updatedData);
+        // message.success("Tạo người dùng thành công");
+      } else {
+        // For editing user, call updateUser API
+        await updateUser(userId, {
+          fullName: updatedData.fullName,
+          gmail: updatedData.gmail,
+          role: updatedData.role,
+          studentNumber: updatedData.studentNumber,
+          phoneNumber: updatedData.phoneNumber,
+          address: updatedData.address,
+        });
+        // message.success("Cập nhật người dùng thành công");
+      }
       fetchUsers();
       handleCloseModal();
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("Error saving user:", error);
       throw error;
     }
   };
@@ -210,7 +226,9 @@ export default function AdminUserManagement() {
                 Quản lý tất cả người dùng trong hệ thống
               </p>
             </div>
-            <button className="flex items-center justify-center gap-2 px-4 h-10 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+            <button 
+              onClick={handleOpenCreateModal}
+              className="flex items-center justify-center gap-2 px-4 h-10 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
               <PlusCircleIcon className="h-5 w-5" />
               <span>Tạo người dùng mới</span>
             </button>
@@ -220,7 +238,7 @@ export default function AdminUserManagement() {
           <div className="mb-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {/* Search Bar */}
-              <div className="md:col-span-2">
+              <div className="xl:col-span-2">
                 <label className="flex h-10 w-full flex-col">
                   <div className="flex h-full w-full flex-1 items-stretch rounded-lg">
                     <div className="flex items-center justify-center rounded-l-lg border-y border-l border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 pl-3 pr-3 text-gray-500 dark:text-gray-400">
