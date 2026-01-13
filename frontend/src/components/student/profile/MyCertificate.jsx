@@ -1,7 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 export default function MyCertificate() {
+  const { t } = useTranslation();
   const certificates = [
     {
       id: 1,
@@ -28,10 +30,10 @@ export default function MyCertificate() {
       <div className="flex flex-wrap justify-between items-center gap-4 pb-6 border-b border-black/10 dark:border-white/10">
         <div className="flex min-w-72 flex-col gap-2">
           <p className="text-3xl font-bold tracking-tight text-[#111418] dark:text-white">
-            Chứng chỉ của tôi
+            {t("profile.chungChiCuaToi")}
           </p>
           <p className="text-[#617589] dark:text-gray-400 text-base font-normal leading-normal">
-            Xem tất cả các chứng chỉ bạn đã đạt được.
+            {t("profile.xemTatCaChungChi")}
           </p>
         </div>
       </div>
@@ -46,15 +48,15 @@ export default function MyCertificate() {
                 {cert.title}
               </h3>
               <p className="text-sm font-normal text-[#617589] dark:text-gray-400">
-                Khóa học: {cert.course}
+                {t("profile.khoaHoc")}: {cert.course}
               </p>
               <p className="text-sm font-normal text-[#617589] dark:text-gray-400">
-                Ngày cấp: {cert.date}
+                {t("profile.ngayCap")}: {cert.date}
               </p>
             </div>
             <div className="flex gap-2 justify-start md:justify-end">
               <button className="flex items-center justify-center h-9 px-4 rounded-lg bg-primary text-white text-sm font-bold leading-normal tracking-[-0.015em] hover:bg-primary/90 transition-colors gap-2">
-                Tải xuống
+                {t("profile.taiXuong")}
                 <ArrowDownTrayIcon className="h-4 w-4" />
               </button>
             </div>

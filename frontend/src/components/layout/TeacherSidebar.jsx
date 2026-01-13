@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import SidebarLink from "./SidebarLink";
 import {
   Squares2X2Icon,
@@ -11,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function TeacherSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const currentPath = location.pathname;
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -36,49 +38,49 @@ export default function TeacherSidebar() {
       <nav className="flex-1 px-4 py-6 space-y-2">
         <SidebarLink
           icon={<Squares2X2Icon className="h-6 w-6" />}
-          label="Tổng quan"
+          label={t("teacher.tongQuan")}
           active={currentPath === "/teacher/dashboard"}
           to="/teacher/dashboard"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           icon={<AcademicCapIcon className="h-6 w-6" />}
-          label="Quản lý khóa học"
+          label={t("teacher.quanLyKhoaHoc")}
           active={currentPath.startsWith("/teacher/courses")}
           to="/teacher/courses"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           icon={<UserGroupIcon className="h-6 w-6" />}
-          label="Quản lý học viên"
+          label={t("teacher.quanLyHocVien")}
           active={currentPath === "/teacher/students"}
           to="/teacher/students"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           icon={<ChartBarIcon className="h-6 w-6" />}
-          label="Báo cáo/Thống kê"
+          label={t("teacher.baoCoThongKe")}
           active={currentPath === "/teacher/report"}
           to="/teacher/report"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           icon={<BellIcon className="h-6 w-6" />}
-          label="Thông báo"
+          label={t("common.thongBao")}
           active={currentPath === "/notifications"}
           to="/notifications"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           icon={<UserGroupIcon className="h-6 w-6" />}
-          label="Hồ sơ cá nhân"
+          label={t("teacher.hoSo")}
           active={currentPath === "/teacher/profile"}
           to="/teacher/profile"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           icon={<Cog6ToothIcon className="h-6 w-6" />}
-          label="Cài đặt hệ thống"
+          label={t("teacher.caiDatHeThong")}
           active={currentPath === "/teacher/settings"}
           to="/teacher/settings"
           isCollapsed={isCollapsed}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Spin, Empty } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -6,6 +7,7 @@ import CourseCard from "../../course/CourseCard";
 import { getApprovedCourses } from "../../../api/course";
 
 export default function MyCourses() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export default function MyCourses() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <Spin size="large" tip="Đang tải khóa học..." />
+        <Spin size="large" tip={t("profile.dangTaiKhoaHoc")} />
       </div>
     );
   }
@@ -43,7 +45,7 @@ export default function MyCourses() {
   if (error) {
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-        <p className="text-red-800 dark:text-red-200">Lỗi: {error}</p>
+        <p className="text-red-800 dark:text-red-200">{t("profile.loi")}: {error}</p>
       </div>
     );
   }
@@ -53,22 +55,22 @@ export default function MyCourses() {
       <div className="flex flex-wrap justify-between items-center gap-4 pb-6 border-b border-black/10 dark:border-white/10">
         <div className="flex min-w-72 flex-col gap-2">
           <p className="text-3xl font-bold tracking-tight text-[#111418] dark:text-white">
-            Khóa học của tôi
+            {t("profile.khoaHocCuaToi")}
           </p>
           <p className="text-[#617589] dark:text-gray-400 text-base font-normal leading-normal">
-            Tiếp tục học các khóa học bạn đã đăng ký.
+            {t("profile.tiepTucHoc")}
           </p>
         </div>
       </div>
       <div>
         {courses.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-96 gap-4">
-            <Empty description="Bạn chưa đăng ký khóa học nào" />
+            <Empty description={t("profile.chuaDangKy")} />
             <button
               className="group flex min-w-[84px] max-w-[480px] w-fit cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold gap-2"
               onClick={() => navigate("/courses")}
             >
-              <span>Khám phá các khóa học</span>
+              <span>{t("profile.khamPhaCacKhoaHoc")}</span>
               <ArrowRightIcon className="h-4 w-4 transform transition-transform duration-200 group-hover:translate-x-2" />
             </button>
           </div>

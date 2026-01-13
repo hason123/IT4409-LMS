@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import TeacherSidebar from "../../components/layout/TeacherSidebar";
 import AccountSettings from "../../components/student/profile/AccountSettings";
 
 export default function TeacherSettingsPage() {
+  const { t } = useTranslation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
@@ -31,10 +33,10 @@ export default function TeacherSettingsPage() {
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full mx-auto">
             <div className="mb-8">
               <h1 className="text-2xl md:text-3xl text-[#111418] dark:text-white font-bold leading-tight tracking-[-0.015em]">
-                Cài đặt
+                {t("settings.caiDatHeThong")}
               </h1>
               <p className="text-slate-600 dark:text-slate-400">
-                Tùy chỉnh giao diện và cài đặt hệ thống.
+                {t("settings.quanLyCaiDat")}
               </p>
             </div>
 

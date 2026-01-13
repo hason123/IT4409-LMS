@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import TeacherHeader from "../../components/layout/TeacherHeader";
 import AdminSidebar from "../../components/layout/AdminSidebar";
 import MyInformation from "../../components/student/profile/MyInformation";
@@ -6,6 +7,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getUserById } from "../../api/user";
 
 export default function AdminProfilePage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,10 +60,10 @@ export default function AdminProfilePage() {
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full mx-auto">
             <div className="mb-8">
               <h1 className="text-2xl md:text-3xl text-[#111418] dark:text-white font-bold leading-tight tracking-[-0.015em]">
-                Hồ sơ cá nhân
+                {t("profile.hoSoCaNhan")}
               </h1>
               <p className="text-slate-600 dark:text-slate-400">
-                Quản lý thông tin cá nhân của bạn.
+                {t("profile.quanLyThongTinCaNhan")}
               </p>
             </div>
 

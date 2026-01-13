@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import useUserStore from "../../store/useUserStore";
 import Avatar from "../common/Avatar";
@@ -16,6 +17,7 @@ import {
 } from "../../api/notification";
 
 export default function TeacherHeader({ toggleSidebar }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { logout, isLoggedIn } = useAuth();
   const user = useUserStore((state) => state.user);
@@ -156,7 +158,7 @@ export default function TeacherHeader({ toggleSidebar }) {
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
               className="w-full rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 py-2 pl-10 pr-4 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:border-primary focus:ring-primary focus:outline-none"
-              placeholder="Tìm kiếm khóa học, học viên..."
+              placeholder={t("header.timKiem")}
               type="search"
             />
           </div>
@@ -184,13 +186,13 @@ export default function TeacherHeader({ toggleSidebar }) {
               <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-700 animate-fade-in-scale">
                 <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Thông báo {unreadCount > 0 && `(${unreadCount})`}
+                    {t("common.thongBao")} {unreadCount > 0 && `(${unreadCount})`}
                   </h3>
                 </div>
                 <div className="max-h-96 overflow-y-auto">
                   {isLoadingNotifications ? (
                     <div className="px-4 py-3 text-center text-sm text-gray-500">
-                      Đang tải...
+                      {t("notifications.dangTaiThongBao")}
                     </div>
                   ) : notifications.length > 0 ? (
                     notifications.map((notification) => (
@@ -223,7 +225,7 @@ export default function TeacherHeader({ toggleSidebar }) {
                   ))
                   ) : (
                     <div className="px-4 py-3 text-center text-sm text-gray-500">
-                      Không có thông báo
+                      {t("notifications.khongCoThongBao")}
                     </div>
                   )}
                 </div>
@@ -232,7 +234,7 @@ export default function TeacherHeader({ toggleSidebar }) {
                     to="/notifications"
                     className="block px-4 py-2 text-xs font-medium text-center text-primary hover:text-primary/80"
                   >
-                    Xem tất cả thông báo
+                    {t("notifications.xemTatCa")}
                   </Link>
                 </div>
               </div>
@@ -270,7 +272,7 @@ export default function TeacherHeader({ toggleSidebar }) {
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setIsDropdownOpen(false)}
                 >
-                  Hồ sơ
+                  {t("common.hoSo")}
                 </Link>
                 <Link
                   to={
@@ -281,7 +283,7 @@ export default function TeacherHeader({ toggleSidebar }) {
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setIsDropdownOpen(false)}
                 >
-                  Cài đặt
+                  {t("common.caiDat")}
                 </Link>
                 <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
                 <button
@@ -291,7 +293,7 @@ export default function TeacherHeader({ toggleSidebar }) {
                   }}
                   className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  Đăng xuất
+                  {t("common.dangXuat")}
                 </button>
               </div>
             )}

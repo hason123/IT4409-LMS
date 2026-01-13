@@ -102,11 +102,11 @@ export default function NotificationsPage() {
   const unreadCount = notifications?.filter((n) => !n.isRead).length;
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
+    <div className={`${isTeacherOrAdmin && "min-h-screen"} bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white`}>
       {isTeacherOrAdmin && <TeacherHeader />}
       <div className="flex">
         {isTeacherOrAdmin && <TeacherSidebar />}
-        {!isTeacherOrAdmin && <Header />}
+        {/* {!isTeacherOrAdmin && <Header />} */}
         <main className={`flex-1 w-full ${isTeacherOrAdmin ? "mt-16 ml-20 lg:ml-64" : ""}`}>
           <div className="px-4 sm:px-6 lg:px-8 py-8">
             <div className="max-w-7xl mx-auto">

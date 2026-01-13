@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/layout/Header";
 import MyCertificate from "../../components/student/profile/MyCertificate";
@@ -22,6 +23,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -87,17 +89,17 @@ export default function ProfilePage() {
   };
 
   const tabs = [
-    { id: "profile", label: "Thông tin cá nhân", icon: UserIcon },
-    { id: "courses", label: "Khóa học của tôi", icon: BookOpenIcon },
-    // { id: "certificate", label: "Chứng chỉ của tôi", icon: AcademicCapIcon },
-    { id: "notifications", label: "Thông báo", icon: BellIcon },
+    { id: "profile", label: t("profile.thongTinCaNhan"), icon: UserIcon },
+    { id: "courses", label: t("profile.khoaHocCuaToi"), icon: BookOpenIcon },
+    // { id: "certificate", label: t("profile.chungChiCuaToi"), icon: AcademicCapIcon },
+    { id: "notifications", label: t("profile.thongBao"), icon: BellIcon },
     // {
     //   id: "transactions",
-    //   label: "Lịch sử giao dịch",
+    //   label: t("profile.lichSuGiaoDich"),
     //   icon: ReceiptPercentIcon,
     // },
-    { id: "password", label: "Đổi mật khẩu", icon: LockClosedIcon },
-    { id: "settings", label: "Cài đặt hệ thống", icon: Cog6ToothIcon },
+    { id: "password", label: t("profile.doiMatKhau"), icon: LockClosedIcon },
+    { id: "settings", label: t("common.caiDat"), icon: Cog6ToothIcon },
   ];
   const renderContent = () => {
     switch (activeTab) {
@@ -112,7 +114,7 @@ export default function ProfilePage() {
       case "transactions":
         return (
           <div className="text-center py-10 text-gray-500">
-            Nội dung Lịch sử giao dịch đang được cập nhật...
+            {t("profile.noiDungDangCapNhat")}
           </div>
         );
       case "settings":

@@ -3,6 +3,7 @@ import Avatar from "../common/Avatar";
 import ConfirmModal from "../common/ConfirmModal";
 import NotificationDetailModal from "../common/NotificationDetailModal";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import useUserStore from "../../store/useUserStore";
 import {
@@ -36,6 +37,7 @@ const formatNotificationTime = (timestamp) => {
 };
 
 export default function Header({ menuItems }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, logout } = useAuth();
@@ -54,10 +56,10 @@ export default function Header({ menuItems }) {
   const notificationRef = useRef(null);
 
   const defaultMenuItems = [
-    { label: "Khóa học", path: "/courses", icon: BookOpenIcon },
-    { label: "Giới thiệu", path: "/home", icon: HomeIcon },
+    { label: t("header.khóaHọc"), path: "/courses", icon: BookOpenIcon },
+    { label: t("header.gioiThieu"), path: "/home", icon: HomeIcon },
     // { label: "Liên hệ", path: "#" },
-    { label: "Trang cá nhân", path: "/student/profile", icon: UserCircleIcon },
+    { label: t("header.trangCaNhan"), path: "/student/profile", icon: UserCircleIcon },
   ];
 
   const itemsToRender = menuItems || defaultMenuItems;
@@ -315,7 +317,7 @@ export default function Header({ menuItems }) {
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        Hồ sơ
+                        {t("common.hoSo")}
                       </Link>
                       <Link
                         to="/student/profile/settings"
@@ -323,7 +325,7 @@ export default function Header({ menuItems }) {
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        Cài đặt
+                        {t("common.caiDat")}
                       </Link>
                       <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
                       <button
@@ -333,7 +335,7 @@ export default function Header({ menuItems }) {
                         }}
                         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
-                        Đăng xuất
+                        {t("common.dangXuat")}
                       </button>
                     </div>
                   )}
@@ -345,13 +347,13 @@ export default function Header({ menuItems }) {
                   to="/login"
                   className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-slate-100 dark:bg-slate-800 text-[#111418] dark:text-white text-sm font-bold transition-colors duration-150 hover:bg-slate-200 dark:hover:bg-slate-700"
                 >
-                  Đăng nhập
+                  {t("common.dangnhap")}
                 </Link>
                 <Link
                   to="/register"
                   className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold transition-colors duration-150 hover:bg-primary/90"
                 >
-                  Đăng ký
+                  {t("common.dangky")}
                 </Link>
               </div>
             )}

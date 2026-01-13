@@ -58,7 +58,7 @@ function RootRedirect() {
   return <Navigate to="/home" replace />;
 }
 
-export default function App() {
+function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <AuthProvider>
@@ -512,3 +512,5 @@ export default function App() {
     </GoogleOAuthProvider>
   );
 }
+
+export default App;

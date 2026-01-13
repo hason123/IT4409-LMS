@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { message, Form, Input, Button, Space } from "antd";
 import { changePassword } from "../../../api/user";
 
 export default function ChangePassword() {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -14,10 +16,10 @@ export default function ChangePassword() {
         newPassword: values.newPassword,
         confirmNewPassword: values.confirmNewPassword,
       });
-      message.success("Đổi mật khẩu thành công!");
+      message.success(t("profile.doiMatKhauThanhCong"));
       form.resetFields();
     } catch (err) {
-      message.error(err.message || "Đổi mật khẩu thất bại. Vui lòng thử lại.");
+      message.error(err.message || t("profile.doiMatKhauThatBai"));
     } finally {
       setLoading(false);
     }
@@ -32,10 +34,10 @@ export default function ChangePassword() {
       <div className="flex flex-wrap justify-between items-start gap-4 pb-6 border-b border-black/10 dark:border-white/10">
         <div className="flex min-w-72 flex-col gap-2">
           <p className="text-3xl font-bold tracking-tight text-[#111418] dark:text-white">
-            Đổi mật khẩu
+            {t("profile.doiMatKhau")}
           </p>
           <p className="text-[#617589] dark:text-gray-400 text-base font-normal leading-normal">
-            Quản lý mật khẩu của bạn để bảo mật tài khoản.
+            {t("profile.quanLyMatKhau")}
           </p>
         </div>
       </div>
@@ -49,19 +51,19 @@ export default function ChangePassword() {
         <Form.Item
           label={
             <p className="text-[#111418] dark:text-white text-sm font-medium">
-              Mật khẩu hiện tại
+              {t("profile.matKhauHienTai")}
             </p>
           }
           name="currentPassword"
           rules={[
             {
               required: true,
-              message: "Vui lòng nhập mật khẩu hiện tại",
+              message: t("profile.vuiLongNhapMatKhauHienTai"),
             },
           ]}
         >
           <Input.Password
-            placeholder="Nhập mật khẩu hiện tại"
+            placeholder={t("profile.nhapMatKhauHienTai")}
             className="rounded-lg h-10"
           />
         </Form.Item>
@@ -69,23 +71,23 @@ export default function ChangePassword() {
         <Form.Item
           label={
             <p className="text-[#111418] dark:text-white text-sm font-medium">
-              Mật khẩu mới
+              {t("profile.matKhauMoi")}
             </p>
           }
           name="newPassword"
           rules={[
             {
               required: true,
-              message: "Vui lòng nhập mật khẩu mới",
+              message: t("profile.vuiLongNhapMatKhauMoi"),
             },
             {
               min: 6,
-              message: "Mật khẩu mới phải có ít nhất 6 ký tự",
+              message: t("profile.matKhauMoiToi6KyTu"),
             },
           ]}
         >
           <Input.Password
-            placeholder="Nhập mật khẩu mới"
+            placeholder={t("profile.nhapMatKhauMoi")}
             className="rounded-lg h-10"
           />
         </Form.Item>
@@ -93,7 +95,7 @@ export default function ChangePassword() {
         <Form.Item
           label={
             <p className="text-[#111418] dark:text-white text-sm font-medium">
-              Xác nhận mật khẩu mới
+              {t("profile.xacNhanMatKhauMoi")}
             </p>
           }
           name="confirmNewPassword"
@@ -101,7 +103,7 @@ export default function ChangePassword() {
           rules={[
             {
               required: true,
-              message: "Vui lòng xác nhận mật khẩu mới",
+              message: t("profile.vuiLongXacNhanMatKhauMoi"),
             },
             ({ getFieldValue }) => ({
               validator(_, value) {
@@ -109,14 +111,14 @@ export default function ChangePassword() {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error("Mật khẩu xác nhận không khớp")
+                  new Error(t("profile.matKhauKhongKhop"))
                 );
               },
             }),
           ]}
         >
           <Input.Password
-            placeholder="Nhập lại mật khẩu mới"
+            placeholder={t("profile.nhapLaiMatKhauMoi")}
             className="rounded-lg h-10"
           />
         </Form.Item>
@@ -128,7 +130,7 @@ export default function ChangePassword() {
           disabled={loading}
           className="h-10 px-6 rounded-lg font-bold"
         >
-          Hủy
+          {t("profile.huy")}
         </Button>
         <Button
           type="primary"
@@ -138,7 +140,7 @@ export default function ChangePassword() {
           loading={loading}
           className="h-10 px-6 rounded-lg font-bold"
         >
-          {loading ? "Đang lưu..." : "Lưu thay đổi"}
+          {loading ? t("profile.dangLuu") : t("profile.luuThayDoi")}
         </Button>
       </div>
     </>

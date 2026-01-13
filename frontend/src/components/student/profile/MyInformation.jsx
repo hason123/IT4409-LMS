@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { CameraIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { Input, InputNumber, Button, Space, DatePicker, message } from "antd";
 import dayjs from "dayjs";
@@ -11,6 +12,7 @@ export default function MyInformation({
   isLoading: parentLoading,
   onUpdate,
 }) {
+  const { t } = useTranslation();
   const user = useUserStore((state) => state.user);
   const updateUserStoreData = useUserStore((state) => state.updateUser);
   const [isEditing, setIsEditing] = useState(false);
@@ -154,7 +156,7 @@ export default function MyInformation({
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
           <p className="text-[#617589] dark:text-gray-400">
-            Đang tải thông tin...
+            {t("profile.dangTaiThongTin")}
           </p>
         </div>
       </div>
@@ -166,10 +168,10 @@ export default function MyInformation({
       <div className="flex flex-wrap justify-between items-start gap-4 pb-6 border-b border-black/10 dark:border-white/10">
         <div className="flex min-w-72 flex-col gap-2">
           <p className="text-3xl font-bold tracking-tight text-[#111418] dark:text-white">
-            Thông tin cá nhân
+            {t("profile.thongTinCaNhan")}
           </p>
           <p className="text-[#617589] dark:text-gray-400 text-base font-normal leading-normal">
-            Cập nhật thông tin cá nhân của bạn tại đây.
+            {t("profile.capNhatThongTin")}
           </p>
         </div>
         {!isEditing && (
@@ -179,7 +181,7 @@ export default function MyInformation({
             onClick={() => setIsEditing(true)}
             className="h-10"
           >
-            Chỉnh sửa
+            {t("profile.chinhSua")}
           </Button>
         )}
       </div>
@@ -239,14 +241,14 @@ export default function MyInformation({
           <div className="flex-grow w-full">
             <label className="flex flex-col min-w-40">
               <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-                Họ và tên
+                {t("profile.hoVaTen")}
               </p>
               <Input
                 name="fullName"
                 value={formData.fullName}
                 onChange={(e) => handleAntdChange("fullName", e.target.value)}
                 disabled={!isEditing}
-                placeholder="Nhập họ và tên của bạn"
+                placeholder={t("profile.nhapHoVaTen")}
                 size="large"
               />
             </label>
@@ -255,35 +257,35 @@ export default function MyInformation({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <label className="flex flex-col min-w-40">
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-              Email
+              {t("profile.email")}
             </p>
             <Input
               name="gmail"
               value={formData.gmail}
               onChange={(e) => handleAntdChange("gmail", e.target.value)}
               disabled={!isEditing}
-              placeholder="Nhập email của bạn"
+              placeholder={t("profile.nhapEmail")}
               type="email"
               size="large"
             />
           </label>
           <label className="flex flex-col min-w-40">
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-              Số điện thoại
+              {t("profile.soDienThoai")}
             </p>
             <Input
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={(e) => handleAntdChange("phoneNumber", e.target.value)}
               disabled={!isEditing}
-              placeholder="Nhập số điện thoại của bạn"
+              placeholder={t("profile.nhapSoDienThoai")}
               type="tel"
               size="large"
             />
           </label>
           <label className="flex flex-col min-w-40">
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-              Ngày sinh
+              {t("profile.ngaySinh")}
             </p>
             <DatePicker
               value={formData.birthday ? dayjs(formData.birthday) : null}
@@ -291,20 +293,20 @@ export default function MyInformation({
               disabled={!isEditing}
               format="DD/MM/YYYY"
               className="w-full"
-              placeholder="Chọn ngày sinh của bạn"
+              placeholder={t("profile.chonNgaySinh")}
               size="large"
             />
           </label>
           <label className="flex flex-col min-w-40">
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-              Địa chỉ
+              {t("profile.diaChi")}
             </p>
             <Input
               name="address"
               value={formData.address}
               onChange={(e) => handleAntdChange("address", e.target.value)}
               disabled={!isEditing}
-              placeholder="Nhập địa chỉ của bạn"
+              placeholder={t("profile.nhapDiaChi")}
               size="large"
             />
           </label>
@@ -314,25 +316,25 @@ export default function MyInformation({
         {user?.role === "TEACHER" && (
         <div className="mt-6 pt-6 border-t border-black/10 dark:border-white/10">
           <h3 className="text-lg font-semibold text-[#111418] dark:text-white mb-4">
-            Thông tin giáo viên
+            {t("profile.thongTinGiaoVien")}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <label className="flex flex-col min-w-40">
               <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-                Nơi công tác
+                {t("profile.noiCongTac")}
               </p>
               <Input
                 name="workPlace"
                 value={formData.workPlace}
                 onChange={(e) => handleAntdChange("workPlace", e.target.value)}
                 disabled={!isEditing}
-                placeholder="Ví dụ: Trường Đại học ABC"
+                placeholder={t("profile.viDuTruong")}
                 size="large"
               />
             </label>
             <label className="flex flex-col min-w-40">
               <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-                Số năm kinh nghiệm
+                {t("profile.soNamKinhNghiem")}
               </p>
               <InputNumber
                 name="yearsOfExperience"
@@ -340,28 +342,28 @@ export default function MyInformation({
                 onChange={(value) => handleAntdChange("yearsOfExperience", value || "")}
                 disabled={!isEditing}
                 min={0}
-                placeholder="Ví dụ: 5"
+                placeholder={t("profile.viDuNam")}
                 className="w-full"
                 size="large"
               />
             </label>
             <label className="flex flex-col min-w-40">
               <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-                Lĩnh vực chuyên môn
+                {t("profile.linhVucChuyenMon")}
               </p>
               <Input
                 name="fieldOfExpertise"
                 value={formData.fieldOfExpertise}
                 onChange={(e) => handleAntdChange("fieldOfExpertise", e.target.value)}
                 disabled={!isEditing}
-                placeholder="Ví dụ: Lập trình Web, Toán học"
+                placeholder={t("profile.viDuChuyenMon")}
                 size="large"
               />
             </label>
           </div>
           <label className="flex flex-col min-w-40 mt-6">
             <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal pb-2">
-              Giới thiệu về bản thân
+              {t("profile.gioiThieuVeBanThan")}
             </p>
             <Input.TextArea
               name="bio"
@@ -369,7 +371,7 @@ export default function MyInformation({
               onChange={(e) => handleAntdChange("bio", e.target.value)}
               disabled={!isEditing}
               rows={4}
-              placeholder="Chia sẻ thêm về bản thân, kinh nghiệm và những điều bạn đam mê..."
+              placeholder={t("profile.chiaSe")}
               size="large"
             />
           </label>
@@ -383,14 +385,14 @@ export default function MyInformation({
               onClick={handleCancel}
               disabled={loading}
             >
-              Hủy
+              {t("profile.huy")}
             </Button>
             <Button 
               type="primary"
               onClick={handleSave}
               loading={loading}
             >
-              {loading ? "Đang lưu..." : "Lưu thay đổi"}
+              {loading ? t("profile.dangLuu") : t("profile.luuThayDoi")}
             </Button>
           </Space>
         </div>

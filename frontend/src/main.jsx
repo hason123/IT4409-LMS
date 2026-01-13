@@ -4,7 +4,8 @@ import { BrowserRouter } from 'react-router-dom'
 import { ConfigProvider } from "antd";
 import 'antd/dist/reset.css';
 
-import App from './App'
+import './i18n/config'
+import App from './App';
 import './index.css'
 
 createRoot(document.getElementById('root')).render(
