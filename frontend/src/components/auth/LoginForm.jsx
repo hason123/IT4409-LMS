@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import ModalNotification from "../common/ModalNotification";
 import { EyeIcon, LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
@@ -7,6 +8,7 @@ import { login, googleLogin } from "../../api/auth";
 import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginForm() {
+  const { t } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,8 +32,8 @@ export default function LoginForm() {
       navigate("/"); // chuyển hướng về Home
     } catch (err) {
       // setError(err.message || 'Đăng nhập thất bại');
-      setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
-      setLoading(false);
+        setError(t('auth.dangNhapThatBai'));
+        setLoading(false);
       setShowModal(true);
     }
   };
@@ -47,14 +49,14 @@ export default function LoginForm() {
       setLoading(false);
       navigate("/"); // chuyển hướng về Home
     } catch (err) {
-      setError("Đăng nhập bằng Google thất bại. Vui lòng thử lại.");
+      setError(t('auth.googleLoginThatBai'));
       setLoading(false);
       setShowModal(true);
     }
   };
 
   const handleGoogleError = () => {
-    setError("Đã xảy ra lỗi với Google Login. Vui lòng thử lại.");
+    setError(t('auth.googleErrorXayRa'));
     setShowModal(true);
   };
 
@@ -67,7 +69,7 @@ export default function LoginForm() {
       >
         <div className="flex flex-col w-full">
           <p className="text-[#111418] dark:text-gray-200 text-sm font-medium pb-2">
-            Email or Username
+            {t('auth.emailHoacTenDangNhap')}
           </p>
           <div className="input-group w-full">
             <div className="icon-area border-r border-[#dbe0e6] dark:border-gray-600">
@@ -75,7 +77,7 @@ export default function LoginForm() {
             </div>
             <input
               className="form-input flex w-full min-w-0 flex-1"
-              placeholder="Enter your email or username"
+              placeholder={t('auth.nhapEmailHoacTenDangNhap')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -86,13 +88,13 @@ export default function LoginForm() {
         <div className="flex flex-col w-full">
           <div className="flex justify-between items-center pb-2">
             <p className="text-[#111418] dark:text-gray-200 text-sm font-medium">
-              Password
+              {t('auth.matKhau')}
             </p>
             <a
               className="text-primary text-sm font-medium hover:underline"
               href="#"
             >
-              Forgot password?
+              {t('auth.quenMatKhau')}
             </a>
           </div>
           <div className="input-group w-full">
@@ -102,7 +104,7 @@ export default function LoginForm() {
             <input
               type={showPassword ? "text" : "password"}
               className="form-input flex w-full min-w-0 flex-1"
-              placeholder="Enter your password"
+              placeholder={t('auth.nhapMatKhau')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -129,13 +131,13 @@ export default function LoginForm() {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          {loading ? t('auth.dangDangNhap') : t('auth.dangNhap')}
         </button>
 
         <div className="flex items-center gap-4">
           <hr className="flex-grow border-t border-[#dbe0e6] dark:border-gray-700" />
           <span className="text-[#617589] dark:text-gray-400 text-sm">
-            Or continue with
+            {t('auth.dangNhapVoi')}
           </span>
           <hr className="flex-grow border-t border-[#dbe0e6] dark:border-gray-700" />
         </div>
@@ -151,13 +153,13 @@ export default function LoginForm() {
         </div>
 
         <p className="text-center text-sm text-[#617589] dark:text-gray-400">
-          By signing in, you agree to our{" "}
+          {t('auth.thoaThuan')}{" "}
           <a className="font-medium text-primary hover:underline" href="#">
-            Terms of Service
+            {t('auth.đieuKhoanDichVu')}
           </a>{" "}
-          and{" "}
+          {t('auth.va')}{" "}
           <a className="font-medium text-primary hover:underline" href="#">
-            Privacy Policy
+            {t('auth.chinhSachBaoMat')}
           </a>
           .
         </p>

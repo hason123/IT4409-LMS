@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import useUserStore from "../store/useUserStore";
 import { getUserById } from "../api/user";
 
@@ -6,6 +7,7 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { i18n } = useTranslation();
   const {
     user,
     accessToken,
@@ -48,6 +50,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
     clearUser();
+    // Reset language to Vietnamese
+    i18n.changeLanguage('vi');
   };
 
   // Hàm login - fetch full user data after login
